@@ -1,0 +1,374 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0f6cbd;
+  --color-primary-dark: #0a4f8a;
+  --color-bg-primary: #0f0f0f;
+  --color-bg-secondary: #1a1a1a;
+  --color-bg-tertiary: #252525;
+  --color-bg-elevated: #2a2a2a;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #888888;
+  --color-border: #2a2a2a;
+}
+
+[data-theme="light"] {
+  --color-bg-primary: #f5f5f5;
+  --color-bg-secondary: #ffffff;
+  --color-bg-tertiary: #e8e8e8;
+  --color-bg-elevated: #dddddd;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #666666;
+  --color-border: #dddddd;
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --border-color: #dddddd;
+}
+
+body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: 'Segoe UI Variable', 'Segoe UI', Tahoma, sans-serif;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --border-color: var(--color-border);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input, textarea, [contenteditable] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+#root {
+  height: 100vh;
+  width: 100vw;
+}
+
+.drag {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* Accessibility: Focus-visible ring for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoom-in {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease;
+}
+
+.animate-zoom-in {
+  animation: zoom-in 0.3s ease;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.2s ease;
+}
+
+input[type="range"] {
+  accent-color: var(--color-primary);
+  height: 4px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--color-primary);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--color-primary);
+  cursor: pointer;
+}
+
+/* EQ Sliders - Vertical orientation using CSS standard */
+input[type="range"].eq-slider {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 120px;
+  background: transparent !important;
+  outline: none;
+  margin: 0 auto;
+  padding: 0;
+  cursor: pointer;
+  flex: 1;
+}
+
+/* Track styling */
+input[type="range"].eq-slider::-webkit-slider-runnable-track {
+  width: 4px;
+  height: 100%;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  border: none;
+}
+
+input[type="range"].eq-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 2px solid white;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  margin-left: -7px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Firefox */
+input[type="range"].eq-slider::-moz-range-track {
+  width: 4px;
+  height: 100%;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  border: none;
+}
+
+input[type="range"].eq-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 2px solid white;
+  cursor: pointer;
+}
+
+input[type="range"].eq-slider:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Loading skeleton animation */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+/* Lyrics active cue glow animation */
+@keyframes lyrics-glow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(59, 130, 246, 0.1); }
+  50% { box-shadow: 0 0 16px 4px rgba(59, 130, 246, 0.25); }
+}
+
+.lyrics-active-glow {
+  animation: lyrics-glow 2s ease-in-out infinite;
+}
+
+.skeleton {
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.skeleton-text {
+  height: 14px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.skeleton-thumb {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+/* Smooth page transitions */
+.page-enter {
+  animation: fade-in 0.3s ease, slide-up 0.3s ease;
+}
+
+/* Improved EQ slider container */
+.eq-slider-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.eq-slider-container .eq-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+/* ============================
+   Mobile Responsive Overrides
+   ============================ */
+
+/* Prevent 300ms tap delay & improve touch feedback */
+html {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Small phones: < 480px */
+@media (max-width: 480px) {
+  #root {
+    font-size: 13px;
+  }
+  /* Player bar compact mode */
+  .player-bar {
+    padding: 6px 8px !important;
+    height: 80px !important;
+  }
+  .player-bar button,
+  .player-bar [role="button"] {
+    min-width: 36px;
+    min-height: 36px;
+  }
+  /* Reduce sidebar width on mobile */
+  [class*="flex-col border-r"] {
+    max-width: 200px !important;
+  }
+  /* Full-width modals on mobile */
+  [class*="modal"],
+  [role="dialog"] {
+    max-width: 95vw !important;
+    margin: 0 auto !important;
+  }
+  /* Make inputs touch-friendly */
+  input, select, button {
+    min-height: 36px;
+  }
+  /* Smaller album art in player bar */
+  .player-bar img,
+  .player-bar [class*="w-14"] {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  /* Compact main container padding */
+  main {
+    padding: 0 8px !important;
+  }
+  /* Hide volume slider text on smallest screens */
+  .player-bar [class*="volume"],
+  .player-bar [class*="w-1/4"]:last-child {
+    max-width: 120px !important;
+  }
+}
+
+/* Tablets: 481px - 768px */
+@media (min-width: 481px) and (max-width: 768px) {
+  #root {
+    font-size: 14px;
+  }
+  [class*="bottom-bar"] {
+    padding: 8px 12px !important;
+  }
+  [class*="sidebar"] {
+    max-width: 240px !important;
+  }
+}
+
+/* Landscape phones */
+@media (max-height: 480px) and (orientation: landscape) {
+  /* Collapse sidebar in landscape */
+  [class*="sidebar"] {
+    display: none !important;
+  }
+  /* Compact header */
+  [class*="header"], [class*="titlebar"] {
+    height: 36px !important;
+  }
+  /* Smaller bottom bar */
+  [class*="bottom-bar"] {
+    height: 48px !important;
+    padding: 4px 8px !important;
+  }
+}
+
+/* High DPI / Retina */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Sharper text rendering */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

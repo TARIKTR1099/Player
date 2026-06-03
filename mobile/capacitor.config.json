@@ -1,0 +1,58 @@
+{
+  "appId": "com.player.media",
+  "appName": "Player",
+  "bundledWebRuntime": false,
+  "webDir": "../dist-web",
+  "npmClient": "npm",
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "capacitor"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1000,
+      "backgroundColor": "#1a1a1a",
+      "androidScaleType": "CENTER_CROP",
+      "iosSpinnerStyle": "small",
+      "showSpinner": true,
+      "spinnerColor": "#3b82f6"
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#1a1a1a",
+      "overlaysWebView": false
+    },
+    "Preferences": {
+      "group": "Player"
+    },
+    "CapacitorFileSystem": {
+      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
+    }
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "useEdgeToEdge": true,
+    "backgroundColor": "#1a1a1a",
+    "includePlugins": [
+      "@capacitor/filesystem",
+      "@capacitor/preferences",
+      "@capacitor/status-bar",
+      "@capacitor/splash-screen",
+      "@capacitor/share"
+    ]
+  },
+  "ios": {
+    "contentInset": "always",
+    "preferredContentMode": "mobile",
+    "backgroundColor": "#1a1a1a",
+    "minVersion": "15.0",
+    "includePlugins": [
+      "@capacitor/filesystem",
+      "@capacitor/preferences",
+      "@capacitor/status-bar",
+      "@capacitor/splash-screen",
+      "@capacitor/share"
+    ]
+  }
+}

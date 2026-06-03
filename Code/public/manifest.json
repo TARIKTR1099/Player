@@ -1,0 +1,31 @@
+{
+  "name": "Player — Müzik & Medya Oynatıcı",
+  "short_name": "Player",
+  "description": "Modern, cross-platform media player with AI features, visualizations, and plugin support",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#0f6cbd",
+  "orientation": "portrait-primary",
+  "categories": ["music", "entertainment", "audio"],
+  "lang": "tr",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../src/assets/icon.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "scope": "./",
+  "display_override": ["window-controls-overlay", "standalone"]
+}

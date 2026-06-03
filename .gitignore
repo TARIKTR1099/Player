@@ -1,0 +1,41 @@
+# Node
+node_modules/
+Code/node_modules/
+
+# Build outputs
+dist/
+dist-web/
+build/
+
+# Separate projects
+admin/
+
+# IDE & OS
+.vscode/
+.ai-agents/
+*.log
+.DS_Store
+Thumbs.db
+
+# Large binaries (download/install separately)
+yt-dlp-bin/
+
+# Reference apps (research only — don't push)
+References/
+
+# TarnakCode (local project management)
+.TarnakCode/
+
+# User guides (local docs)
+UserGuides/
+Others/
+Downloads/
+
+# Electron cache
+electron-builder/
+
+# Environment secrets
+.env
+
+# Artifacts
+$null

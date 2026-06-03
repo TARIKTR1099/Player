@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Player</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <header id="title-bar">
+      <div class="title-brand">
+        <button id="home-tab-btn" class="title-tab active" data-tab="home" title="Oynatıcı">
+          <i class="fas fa-play"></i>
+        </button>
+        <button id="library-tab-btn" class="title-tab" data-tab="library" title="Kütüphane">
+          <i class="fas fa-list"></i>
+        </button>
+        <div class="brand-copy">
+          <span class="brand-name">Player</span>
+          <span class="brand-subtitle">Modern masaüstü medya oynatıcı</span>
+        </div>
+      </div>
+
+      <div class="title-actions">
+        <button id="compact-mode-btn" class="window-btn" title="Kompakt görünüm">
+          <i class="fas fa-compress"></i>
+        </button>
+        <button id="normal-mode-btn" class="window-btn" title="Normal görünüm">
+          <i class="fas fa-expand"></i>
+        </button>
+        <button id="settings-btn" class="window-btn" title="Ayarlar">
+          <i class="fas fa-gear"></i>
+        </button>
+        <button id="minimize-btn" class="window-btn" title="Küçült">
+          <i class="fas fa-minus"></i>
+        </button>
+        <button id="close-btn" class="window-btn danger" title="Kapat">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="tab-home" class="tab-content active">
+        <div id="player-shell" class="player-shell">
+          <div id="seek-feedback" class="seek-feedback hidden">+5 sn</div>
+          <div id="player-toast" class="player-toast hidden"></div>
+
+          <div class="player-head">
+            <label class="select-pill">
+              <span id="player-list-label">Liste</span>
+              <select id="player-list-select"></select>
+            </label>
+
+            <div class="player-head-right">
+              <button id="shuffle-btn" class="icon-pill" title="Karıştır">
+                <i class="fas fa-shuffle"></i>
+              </button>
+              <button id="repeat-btn" class="icon-pill" title="Tekrar">
+                <i class="fas fa-repeat"></i>
+              </button>
+              <label class="speed-pill" for="speed-select">
+                <span id="speed-label">Hız</span>
+                <input id="speed-select" type="text" list="speed-presets" inputmode="decimal" value="1" autocomplete="off">
+              </label>
+            </div>
+          </div>
+
+          <div id="media-stage" class="media-stage">
+            <div class="player-hero">
+              <div class="media-visual-shell">
+                <video id="audio-player" class="media-player hidden" preload="metadata" playsinline></video>
+                <div id="cover-display" class="cover-display">
+                  <i class="fas fa-music"></i>
+                </div>
+              </div>
+
+              <div class="media-copy">
+                <div class="info-block">
+                  <h1 id="current-song-name">Bir medya seç</h1>
+                  <p id="current-song-artist">Kaynak ekleyip oynatmaya başlayabilirsin.</p>
+                  <div class="info-subline">
+                    <span id="current-source-label">Hazır</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="progress-group">
+              <div class="progress-topline">
+                <span id="current-time">0:00</span>
+                <span id="marker-summary">İşaret yok</span>
+                <span id="total-time">0:00</span>
+              </div>
+
+              <div class="progress-shell">
+                <div id="progress-bar-wrapper" class="progress-bar-wrapper">
+                  <div id="range-highlight" class="range-highlight"></div>
+                  <div id="progress-bar" class="progress-bar"></div>
+                  <div id="progress-thumb" class="progress-thumb"></div>
+                  <div id="marker-a" class="loop-marker loop-marker-a hidden"></div>
+                  <div id="marker-b" class="loop-marker loop-marker-b hidden"></div>
+                  <input type="range" id="progress-slider" min="0" max="100" value="0">
+                </div>
+              </div>
+            </div>
+
+            <div class="transport-row">
+              <div class="primary-controls">
+                <button id="prev-btn" class="transport-btn" title="Önceki">
+                  <i class="fas fa-backward-step"></i>
+                </button>
+                <button id="play-btn" class="transport-btn main" title="Oynat veya duraklat">
+                  <i class="fas fa-play"></i>
+                </button>
+                <button id="next-btn" class="transport-btn" title="Sonraki">
+                  <i class="fas fa-forward-step"></i>
+                </button>
+              </div>
+
+              <div id="transport-meta" class="transport-meta">
+                <div class="compact-extra-controls">
+                  <button id="compact-shuffle-btn" class="icon-pill" title="Karıştır">
+                    <i class="fas fa-shuffle"></i>
+                  </button>
+                  <button id="compact-repeat-btn" class="icon-pill" title="Tekrar">
+                    <i class="fas fa-repeat"></i>
+                  </button>
+                  <label class="speed-pill compact-speed-pill" for="compact-speed-select">
+                    <span id="compact-speed-label">Hız</span>
+                    <input id="compact-speed-select" type="text" list="speed-presets" inputmode="decimal" value="1" autocomplete="off">
+                  </label>
+                </div>
+
+                <div class="secondary-controls">
+                  <button id="cut-start-btn" class="icon-pill marker-icon" title="Başlangıç işareti">
+                    <i class="fas fa-circle-dot"></i>
+                  </button>
+                  <button id="cut-end-btn" class="icon-pill marker-icon" title="Bitiş işareti">
+                    <i class="fas fa-flag-checkered"></i>
+                  </button>
+                  <button id="clear-loop-btn" class="icon-pill" title="İşaretleri temizle">
+                    <i class="fas fa-scissors"></i>
+                  </button>
+                  <button id="open-vlc-btn" class="icon-pill text-pill vlc-pill" title="Gömülü VLC ile aç">
+                    <i class="fas fa-clapperboard"></i>
+                    <span>VLC</span>
+                  </button>
+                  <button id="favorite-btn" class="icon-pill" title="Favori">
+                    <i class="far fa-heart"></i>
+                  </button>
+                </div>
+
+                <div class="volume-wrap">
+                  <button id="volume-icon" class="icon-pill" title="Sessiz">
+                    <i class="fas fa-volume-high"></i>
+                  </button>
+                  <input type="range" id="volume-slider" min="0" max="100" value="100">
+                </div>
+              </div>
+
+              <button id="compact-more-btn" class="icon-pill compact-more-btn" title="Daha fazla">
+                <i class="fas fa-ellipsis"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-library" class="tab-content">
+        <div class="library-layout">
+          <aside class="sidebar">
+            <section class="sidebar-section">
+              <div class="section-head">
+                <div>
+                  <span class="eyebrow" id="sources-eyebrow">Kaynaklar</span>
+                  <h2 id="sources-title">Kütüphane</h2>
+                </div>
+                <button id="open-add-source-btn" class="round-btn" title="Kaynak ekle">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+              <div id="source-list" class="source-list"></div>
+            </section>
+
+            <section class="sidebar-section">
+              <div class="section-head">
+                <div>
+                  <span class="eyebrow" id="playlists-eyebrow">Listeler</span>
+                  <h2 id="playlists-title">Seç ve düzenle</h2>
+                </div>
+                <button id="create-playlist-btn" class="round-btn" title="Liste oluştur">
+                  <i class="fas fa-list"></i>
+                </button>
+              </div>
+              <div id="playlist-list" class="playlist-list"></div>
+            </section>
+          </aside>
+
+          <section class="library-main">
+            <div class="library-topbar">
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="library-search" placeholder="Parça, sanatçı veya yol ara">
+              </div>
+
+              <div class="toolbar-group">
+                <label class="toolbar-select">
+                  <span id="sort-label">Sırala</span>
+                  <select id="sort-select">
+                    <option value="custom">Özel sıra</option>
+                    <option value="name">Ada göre</option>
+                    <option value="artist">Yapana göre</option>
+                    <option value="duration">Süreye göre</option>
+                    <option value="date">Tarihe göre</option>
+                    <option value="source">Kaynağa göre</option>
+                    <option value="type">Türe göre</option>
+                  </select>
+                </label>
+
+                <div class="segmented">
+                  <button id="sort-order-asc" class="seg-btn active" data-direction="asc" title="Artan">
+                    <i class="fas fa-arrow-up-short-wide"></i>
+                  </button>
+                  <button id="sort-order-desc" class="seg-btn" data-direction="desc" title="Azalan">
+                    <i class="fas fa-arrow-down-wide-short"></i>
+                  </button>
+                </div>
+
+                <div class="segmented">
+                  <button id="view-list-btn" class="seg-btn active" data-view="list" title="Liste görünümü">
+                    <i class="fas fa-list"></i>
+                  </button>
+                  <button id="view-grid-btn" class="seg-btn" data-view="grid" title="Kart görünümü">
+                    <i class="fas fa-table-cells-large"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="online-panel">
+              <div class="online-panel-head">
+                <div>
+                  <span class="eyebrow" id="online-eyebrow">Çevrim içi arama</span>
+                  <h3 id="online-title">Web ve bağlantı sonuçları</h3>
+                </div>
+                <span id="online-search-status" class="online-status">Hazır</span>
+              </div>
+
+              <div class="online-search-row">
+                <div class="search-box online-search-box">
+                  <i class="fas fa-globe"></i>
+                  <input type="text" id="online-search-input" placeholder="Şarkı, sanatçı veya bağlantı ara">
+                </div>
+                <button id="online-search-btn" class="primary-btn">
+                  <i class="fas fa-magnifying-glass"></i>
+                  <span id="online-search-btn-label">Ara</span>
+                </button>
+              </div>
+
+              <div id="online-results" class="online-results"></div>
+            </div>
+
+            <div class="library-header">
+              <div>
+                <span class="eyebrow" id="current-list-eyebrow">Açık liste</span>
+                <h2 id="current-list-title">Hepsi</h2>
+              </div>
+              <div class="list-actions">
+                <button id="rename-playlist-btn" class="ghost-btn">Ad değiştir</button>
+                <button id="delete-playlist-btn" class="ghost-btn danger-text">Listeyi sil</button>
+              </div>
+            </div>
+
+            <div id="selection-toolbar" class="selection-toolbar hidden">
+              <span id="selection-count">0 parça seçili</span>
+              <button id="select-visible-btn" class="ghost-btn">Görünenleri seç</button>
+              <select id="bulk-playlist-select" class="text-input"></select>
+              <button id="bulk-add-playlist-btn" class="ghost-btn">Listeye ekle</button>
+              <button id="bulk-remove-btn" class="ghost-btn danger-text">Seçileni kaldır</button>
+              <button id="clear-selection-btn" class="ghost-btn">Temizle</button>
+            </div>
+
+            <div id="empty-state" class="empty-state hidden">
+              <i class="fas fa-folder-open"></i>
+              <h3>Kütüphane boş</h3>
+              <p>Dosya, klasör, URL, konum veya web kaynağı ekleyerek başlayabilirsin.</p>
+            </div>
+
+            <div id="library-list" class="music-list-container list-view"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div id="settings-panel" class="overlay-panel hidden">
+      <div class="modal-card settings-card">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow" id="settings-eyebrow">Ayarlar</span>
+            <h2 id="settings-title">Player ayarları</h2>
+          </div>
+          <button id="close-settings" class="round-btn">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="settings-scroll">
+          <div class="settings-grid">
+            <div class="setting-group">
+              <span class="setting-label" id="theme-label">Tema</span>
+              <div class="segmented">
+                <button class="seg-btn theme-btn active" data-theme="dark">Koyu</button>
+                <button class="seg-btn theme-btn" data-theme="light">Açık</button>
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <span class="setting-label" id="language-label">Dil</span>
+              <div class="segmented">
+                <button id="language-tr-btn" class="seg-btn language-btn" data-language="tr">Türkçe</button>
+                <button id="language-en-btn" class="seg-btn language-btn" data-language="en">English</button>
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <span class="setting-label" id="startup-label">Açılışta çalışsın</span>
+              <label class="switch">
+                <input type="checkbox" id="startup-toggle">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-group">
+              <span class="setting-label" id="items-per-page-label">Sayfa başına parça</span>
+              <input type="number" id="items-per-page" class="text-input" min="6" max="200" value="30">
+            </div>
+
+            <div class="setting-group">
+              <span class="setting-label" id="audio-profile-label">Ses profili</span>
+              <select id="audio-profile-select" class="text-input">
+                <option value="default">VarsayÄ±lan</option>
+                <option value="soundplus">Sound+</option>
+                <option value="custom">Ã–zel</option>
+              </select>
+            </div>
+
+            <div class="setting-group">
+              <span class="setting-label" id="save-default-audio-label">Mevcut gÃ¼Ã§lendirmeyi varsayÄ±lan yap</span>
+              <button id="save-default-audio-btn" class="ghost-btn wide-btn">VarsayÄ±lan olarak kaydet</button>
+            </div>
+
+            <div class="setting-group">
+              <span class="setting-label" id="effect-clarity-label">Netlik</span>
+              <input type="range" id="effect-clarity" min="0" max="100" value="0">
+            </div>
+
+            <div class="setting-group">
+              <span class="setting-label" id="effect-ambience-label">Ortam</span>
+              <input type="range" id="effect-ambience" min="0" max="100" value="0">
+            </div>
+
+            <div class="setting-group">
+              <span class="setting-label" id="effect-surround-label">Çevresel ses</span>
+              <input type="range" id="effect-surround" min="0" max="100" value="0">
+            </div>
+
+            <div class="setting-group">
+              <span class="setting-label" id="effect-dynamic-label">Dinamik güçlendirme</span>
+              <input type="range" id="effect-dynamic" min="0" max="100" value="0">
+            </div>
+
+            <div class="setting-group span-2">
+              <span class="setting-label" id="effect-bass-label">Bass güçlendirme</span>
+              <input type="range" id="effect-bass" min="0" max="100" value="0">
+            </div>
+
+            <div class="setting-group span-2">
+              <span class="setting-label" id="restart-audio-label">Ses sürücüsünü yeniden başlat</span>
+              <button id="restart-audio-btn" class="ghost-btn wide-btn">Yeniden başlat</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="source-modal" class="overlay-panel hidden">
+      <div class="modal-card source-card-modal">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow" id="source-modal-eyebrow">Yeni kaynak</span>
+            <h2 id="source-modal-title">Neyi eklemek istiyorsun?</h2>
+          </div>
+          <button id="close-source-modal" class="round-btn">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="source-choice-grid">
+          <button class="source-choice active" data-source-type="files">
+            <i class="fas fa-file-audio"></i>
+            <span>Dosya(lar)</span>
+          </button>
+          <button class="source-choice" data-source-type="folder">
+            <i class="fas fa-folder-tree"></i>
+            <span>Klasör</span>
+          </button>
+          <button class="source-choice" data-source-type="url">
+            <i class="fas fa-link"></i>
+            <span>URL</span>
+          </button>
+          <button class="source-choice" data-source-type="location">
+            <i class="fas fa-location-dot"></i>
+            <span>Konum</span>
+          </button>
+          <button class="source-choice" data-source-type="web">
+            <i class="fas fa-globe"></i>
+            <span>Web'den ekle</span>
+          </button>
+        </div>
+
+        <div id="source-form-content" class="source-form-content"></div>
+      </div>
+    </div>
+
+    <div id="playlist-modal" class="overlay-panel hidden">
+      <div class="modal-card compact-card">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow" id="playlist-modal-eyebrow">Liste</span>
+            <h2 id="playlist-modal-title">Yeni liste oluştur</h2>
+          </div>
+          <button id="close-playlist-modal" class="round-btn">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="field-stack">
+          <label class="field-label" for="playlist-name-input" id="playlist-name-label">Liste adı</label>
+          <input id="playlist-name-input" class="text-input" type="text" placeholder="Örn. Akşam listesi">
+        </div>
+
+        <div class="modal-actions">
+          <button id="save-playlist-btn" class="primary-btn">Kaydet</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="track-modal" class="overlay-panel hidden">
+      <div class="modal-card">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow" id="track-modal-eyebrow">Parça düzenle</span>
+            <h2 id="track-modal-title">Parça bilgileri</h2>
+          </div>
+          <button id="close-track-modal" class="round-btn">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="settings-grid track-grid">
+          <div class="setting-group span-2">
+            <label class="field-label" for="track-name-input" id="track-name-label">Görünecek ad</label>
+            <input id="track-name-input" class="text-input" type="text">
+          </div>
+
+          <div class="setting-group">
+            <label class="field-label" for="track-start-input" id="track-start-label">Başlangıç</label>
+            <input id="track-start-input" class="text-input" type="text" placeholder="0:00">
+          </div>
+
+          <div class="setting-group">
+            <label class="field-label" for="track-end-input" id="track-end-label">Bitiş</label>
+            <input id="track-end-input" class="text-input" type="text" placeholder="Boşsa sona kadar">
+          </div>
+
+          <div class="setting-group span-2">
+            <label class="field-label" for="track-playlist-select" id="track-playlist-label">Listeye ekle</label>
+            <select id="track-playlist-select" class="text-input"></select>
+          </div>
+        </div>
+
+        <div class="modal-actions split">
+          <button id="remove-track-btn" class="ghost-btn danger-text">Kütüphaneden kaldır</button>
+          <button id="save-track-btn" class="primary-btn">Parçayı kaydet</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="context-menu" class="context-menu hidden"></div>
+  </div>
+  <datalist id="speed-presets">
+    <option value="0.5"></option>
+    <option value="0.75"></option>
+    <option value="1"></option>
+    <option value="1.25"></option>
+    <option value="1.5"></option>
+    <option value="1.75"></option>
+    <option value="2"></option>
+  </datalist>
+  <script src="renderer.js"></script>
+</body>
+</html>

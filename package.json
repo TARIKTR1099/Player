@@ -1,0 +1,364 @@
+{
+  "name": "player",
+  "version": "1.0.0",
+  "description": "Player — Cross-platform media player with AI & plugins",
+  "author": {
+    "name": "TARIK ELER",
+    "email": "tarikeler@example.com"
+  },
+  "license": "MIT",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "start:dev": "concurrently \"vite\" \"sleep 2 && electron .\"",
+    "build": "npm run build-web && electron-builder --win nsis",
+    "build:win:portable": "npm run build-web && electron-builder --win portable",
+    "build:win:zip": "npm run build-web && electron-builder --win zip",
+    "build:mac": "npm run build-web && electron-builder --mac",
+    "build:mac:arm": "npm run build-web && electron-builder --mac --arm64",
+    "build:mac:zip": "npm run build-web && electron-builder --mac zip",
+    "build:linux": "npm run build-web && electron-builder --linux",
+    "build:linux:appimage": "npm run build-web && electron-builder --linux AppImage",
+    "build:linux:deb": "npm run build-web && electron-builder --linux deb",
+    "build:linux:rpm": "npm run build-web && electron-builder --linux rpm",
+    "build:all:desktop": "npm run build-web && electron-builder --win --mac --linux",
+    "build:all": "npm run build-web && electron-builder -wml",
+    "release": "npm run build-web && electron-builder --win --mac --linux --publish always",
+    "build-web": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "pack": "electron-builder --dir",
+    "mobile:init": "cd mobile && npm install",
+    "mobile:android": "cd mobile && npx cap sync android && npx cap open android",
+    "mobile:ios": "cd mobile && npx cap sync ios && npx cap open ios"
+  },
+  "build": {
+    "appId": "com.player.media",
+    "productName": "Player",
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "copyright": "Copyright © 2026 TARIK ELER",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "dist-web/**/*",
+      "!build/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "assets",
+        "to": "assets",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "yt-dlp-bin",
+        "to": "yt-dlp-bin",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "asarUnpack": [
+      "node_modules/sql.js/**",
+      "node_modules/yt-dlp-bin/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "publisherName": [
+        "TARIK ELER"
+      ],
+      "fileAssociations": [
+        {
+          "ext": "mp3",
+          "name": "MP3 Audio",
+          "description": "MP3 Ses Dosyası"
+        },
+        {
+          "ext": "wav",
+          "name": "WAV Audio",
+          "description": "WAV Ses Dosyası"
+        },
+        {
+          "ext": "flac",
+          "name": "FLAC Audio",
+          "description": "FLAC Ses Dosyası"
+        },
+        {
+          "ext": "aac",
+          "name": "AAC Audio",
+          "description": "AAC Ses Dosyası"
+        },
+        {
+          "ext": "ogg",
+          "name": "OGG Audio",
+          "description": "OGG Ses Dosyası"
+        },
+        {
+          "ext": "m4a",
+          "name": "M4A Audio",
+          "description": "M4A Ses Dosyası"
+        },
+        {
+          "ext": "wma",
+          "name": "WMA Audio",
+          "description": "WMA Ses Dosyası"
+        },
+        {
+          "ext": "mp4",
+          "name": "MP4 Video",
+          "description": "MP4 Video Dosyası"
+        },
+        {
+          "ext": "mkv",
+          "name": "MKV Video",
+          "description": "MKV Video Dosyası"
+        },
+        {
+          "ext": "avi",
+          "name": "AVI Video",
+          "description": "AVI Video Dosyası"
+        },
+        {
+          "ext": "webm",
+          "name": "WebM Video",
+          "description": "WebM Video Dosyası"
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "perMachine": false,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Player",
+      "uninstallDisplayName": "Player",
+      "runAfterFinish": true,
+      "include": "build/installer.nsh"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.music",
+      "icon": "assets/icon.icns",
+      "darkModeSupport": true,
+      "artifactName": "${productName}-${version}-mac-${arch}.${ext}",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "extendInfo": {
+        "NSPrefersDisplaySafeAreaCompatibility": true,
+        "NSHighResolutionCapable": true
+      },
+      "minimumSystemVersion": "10.15",
+      "fileAssociations": [
+        {
+          "ext": "mp3",
+          "name": "MP3 Audio"
+        },
+        {
+          "ext": "wav",
+          "name": "WAV Audio"
+        },
+        {
+          "ext": "flac",
+          "name": "FLAC Audio"
+        },
+        {
+          "ext": "mp4",
+          "name": "MP4 Video"
+        },
+        {
+          "ext": "mkv",
+          "name": "MKV Video"
+        }
+      ]
+    },
+    "dmg": {
+      "icon": "assets/icon.icns",
+      "iconSize": 128,
+      "contents": [
+        {
+          "x": 130,
+          "y": 220,
+          "type": "file"
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 400
+      },
+      "title": "Player ${version}"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "rpm",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "AudioVideo",
+      "icon": "assets/icon.png",
+      "artifactName": "${productName}-${version}-linux-${arch}.${ext}",
+      "synopsis": "Cross-platform media player with AI & plugins",
+      "description": "Modern media player with EQ, visualizer, plugin system, AI integration, and subtitle timeline.",
+      "desktop": {
+        "Name": "Player",
+        "StartupWMClass": "player",
+        "MimeType": "audio/mpeg;audio/flac;audio/wav;video/mp4;video/x-matroska;",
+        "Categories": "AudioVideo;Audio;Video;Player;"
+      },
+      "fileAssociations": [
+        {
+          "ext": "mp3",
+          "name": "MP3 Audio"
+        },
+        {
+          "ext": "flac",
+          "name": "FLAC Audio"
+        },
+        {
+          "ext": "wav",
+          "name": "WAV Audio"
+        },
+        {
+          "ext": "mp4",
+          "name": "MP4 Video"
+        },
+        {
+          "ext": "mkv",
+          "name": "MKV Video"
+        }
+      ]
+    },
+    "deb": {
+      "depends": [
+        "libgconf-2-4",
+        "libatomic1"
+      ],
+      "recommends": [
+        "ffmpeg",
+        "yt-dlp"
+      ]
+    },
+    "rpm": {
+      "depends": [
+        "GConf2",
+        "libatomic"
+      ]
+    },
+    "appImage": {
+      "license": "LICENSE.txt",
+      "synopsis": "Player Media Player",
+      "category": "AudioVideo"
+    },
+    "afterSign": "build/notarize.js",
+    "npmRebuild": true,
+    "removePackageScripts": false
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.17",
+    "chokidar": "^3.6.0",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.4.2",
+    "framer-motion": "^12.38.0",
+    "howler": "^2.2.4",
+    "lucide-react": "^1.14.0",
+    "lyrics-finder": "^21.7.0",
+    "music-metadata": "^7.14.0",
+    "musicbrainz-api": "^1.2.1",
+    "node-id3": "^0.2.9",
+    "pg": "^8.21.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "sql.js": "^1.14.1",
+    "tailwind-merge": "^3.5.0",
+    "three": "^0.184.0",
+    "wavesurfer.js": "^7.12.7",
+    "zustand": "^5.0.13"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@vitejs/plugin-react": "^6.0.1",
+    "autoprefixer": "^10.5.0",
+    "concurrently": "^9.1.0",
+    "electron": "^28.3.3",
+    "electron-builder": "^24.9.1",
+    "jsdom": "^29.1.1",
+    "png2icons": "^2.0.1",
+    "postcss": "^8.5.14",
+    "tailwindcss": "^4.2.4",
+    "vite": "^8.0.11",
+    "vitest": "^4.1.7"
+  }
+}
