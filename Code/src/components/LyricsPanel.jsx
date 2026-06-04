@@ -147,9 +147,10 @@ const SubtitleTimeline = ({ track, progress, audioRef }) => {
               </div>
             )}
             {cues.map((cue, idx) => {
-              const isActive = idx === activeCueIndex;
-              const isPast = cue.end < progress;
-              const isFuture = cue.start > progress;
+                  const isActive = idx === activeCueIndex;
+                  const adjustedProgress = progress + (subtitleOffset / 1000);
+                  const isPast = cue.end < adjustedProgress;
+                  const isFuture = cue.start > adjustedProgress;
               return (
                 <div
                   key={cue.id || idx}

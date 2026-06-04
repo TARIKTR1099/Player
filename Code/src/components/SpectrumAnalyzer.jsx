@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 
-const SpectrumAnalyzer = ({ analyserRef, accentColor }) => {
+const SpectrumAnalyzer = ({ analyserRef }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -10,6 +10,8 @@ const SpectrumAnalyzer = ({ analyserRef, accentColor }) => {
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
     let animId;
+
+    const prevBars = new Float32Array(80).fill(0);
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -23,6 +25,24 @@ const SpectrumAnalyzer = ({ analyserRef, accentColor }) => {
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
+    const COLORS = [
+      { r: 0, g: 255, b: 255 },    // cyan
+      { r: 0, g: 140, b: 255 },    // blue
+      { r: 100, g: 60, b: 220 },   // purple
+      { r: 220, g: 40, b: 200 },   // magenta
+    ];
+
+    const getBarColor = (t) => {
+      const idx = t * (COLORS.length - 1);
+      const lo = Math.floor(idx);
+      const hi = Math.min(lo + 1, COLORS.length - 1);
+      const frac = idx - lo;
+      const r = Math.round(COLORS[lo].r + (COLORS[hi].r - COLORS[lo].r) * frac);
+      const g = Math.round(COLORS[lo].g + (COLORS[hi].g - COLORS[lo].g) * frac);
+      const b = Math.round(COLORS[lo].b + (COLORS[hi].b - COLORS[lo].b) * frac);
+      return { r, g, b };
+    };
+
     const draw = () => {
       animId = requestAnimationFrame(draw);
       analyser.getByteFrequencyData(dataArray);
@@ -31,26 +51,42 @@ const SpectrumAnalyzer = ({ analyserRef, accentColor }) => {
       const h = canvas.height / dpr;
       ctx.clearRect(0, 0, w, h);
 
-      const barCount = Math.min(64, bufferLength);
+      const barCount = 64;
+      const gap = 2;
+      const barWidth = Math.max(2, (w - (barCount - 1) * gap) / barCount);
       const step = bufferLength / barCount;
-      const barWidth = (w - (barCount - 1) * 2) / barCount;
-      const c = accentColor || '#0f6cbd';
-      const gradient = ctx.createLinearGradient(0, h, 0, 0);
-      gradient.addColorStop(0, c + 'b3');
-      gradient.addColorStop(0.5, c + 'e6');
-      gradient.addColorStop(1, c);
 
       for (let i = 0; i < barCount; i++) {
         const idx = Math.floor(i * step);
-        const value = dataArray[idx] / 255;
-        const barHeight = Math.max(2, value * h * 0.9);
-        const x = i * (barWidth + 2);
+        const raw = dataArray[idx] / 255;
+        const target = Math.max(0.015, raw);
+        prevBars[i] += (target - prevBars[i]) * 0.3;
+        const value = prevBars[i];
+
+        const barHeight = Math.max(2, value * h * 0.92);
+        const x = i * (barWidth + gap);
         const y = h - barHeight;
+        const t = i / barCount;
+
+        const c = getBarColor(t);
+        const gradient = ctx.createLinearGradient(x, h, x, y);
+        gradient.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.35)`);
+        gradient.addColorStop(0.5, `rgba(${c.r}, ${c.g}, ${c.b}, 0.7)`);
+        gradient.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 1)`);
 
         ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.roundRect(x, y, barWidth, barHeight, [2, 2, 0, 0]);
+        ctx.roundRect(x, y, barWidth, barHeight, [3, 3, 0, 0]);
         ctx.fill();
+
+        if (value > 0.08) {
+          const glowColor = `rgba(${c.r}, ${c.g}, ${c.b}, ${value * 0.35})`;
+          ctx.shadowColor = glowColor;
+          ctx.shadowBlur = 8;
+          ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${value * 0.5})`;
+          ctx.fillRect(x, y - 2, barWidth, 2);
+          ctx.shadowBlur = 0;
+        }
       }
     };
     draw();
@@ -70,4 +106,4 @@ const SpectrumAnalyzer = ({ analyserRef, accentColor }) => {
   );
 };
 
-export default SpectrumAnalyzer;
+export default React.memo(SpectrumAnalyzer);

@@ -68,13 +68,13 @@ const Waveform = ({ audioRef }) => {
     try {
       wavesurferRef.current = WaveSurfer.create({
         container: containerRef.current,
-        waveColor: 'rgba(15, 108, 189, 0.3)',
-        progressColor: 'rgb(15, 108, 189)',
-        cursorColor: 'rgba(255, 255, 255, 0.3)',
+        waveColor: 'rgba(0, 200, 255, 0.25)',
+        progressColor: 'rgba(0, 180, 255, 0.9)',
+        cursorColor: 'rgba(255, 255, 255, 0.4)',
         barWidth: 3,
         barGap: 1,
         barRadius: 2,
-        height: 150,
+        height: 120,
         normalize: true,
         backend: 'MediaElement',
         media: audio,
@@ -148,7 +148,43 @@ const Waveform = ({ audioRef }) => {
         </div>
       </div>
       <div className="flex-1 relative">
-        <div ref={containerRef} className="absolute inset-0 cursor-pointer" />
+        <div
+          ref={containerRef}
+          className="absolute inset-0 cursor-pointer"
+          style={{
+            filter: 'drop-shadow(0 4px 12px rgba(0, 180, 255, 0.15))',
+          }}
+        />
+        <div
+          className="absolute left-0 right-0 pointer-events-none"
+          style={{
+            bottom: '-30px',
+            height: '30px',
+            transform: 'scaleY(-1)',
+            opacity: 0.12,
+            maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)',
+            filter: 'blur(1px)',
+          }}
+        >
+          <div ref={(el) => {
+            if (!el) return;
+            const src = containerRef.current?.querySelector('canvas');
+            if (!src) return;
+            let clone = el.querySelector('canvas');
+            if (!clone) {
+              clone = document.createElement('canvas');
+              el.appendChild(clone);
+            }
+            clone.width = src.width;
+            clone.height = Math.min(src.height, 30 * (window.devicePixelRatio || 1));
+            clone.style.width = '100%';
+            clone.style.height = '30px';
+            const ctx = clone.getContext('2d');
+            ctx.clearRect(0, 0, clone.width, clone.height);
+            ctx.drawImage(src, 0, 0, src.width, src.height, 0, 0, clone.width, clone.height);
+          }} />
+        </div>
         {trimStart != null && (
           <div className="absolute top-0 bottom-0 w-0.5 bg-green-400 z-10 pointer-events-none" style={{ left: pct(trimStart) }} />
         )}

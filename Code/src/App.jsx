@@ -846,11 +846,28 @@ const App = () => {
         )}
         {/* Visualizer on top */}
         {(showVisualizer || showWaveform || visualizerMode === 'waveform') && (
-          <div className="absolute bottom-8 left-0 right-0 flex items-end justify-center" style={{height:'180px', pointerEvents: (showWaveform || visualizerMode === 'waveform') ? 'auto' : 'none'}}>
+          <div
+            className="absolute bottom-8 left-0 right-0 flex items-end justify-center"
+            style={{
+              height: '180px',
+              pointerEvents: (showWaveform || visualizerMode === 'waveform') ? 'auto' : 'none',
+              opacity: currentTrack ? visualizerOpacity : 0.4,
+              transition: 'opacity 0.4s ease-in-out',
+            }}
+          >
             <Suspense fallback={null}>
-              {(showWaveform || visualizerMode === 'waveform') && <Waveform audioRef={audioRef} />}
-              {showVisualizer && visualizerMode === '3dsphere' && <Visualizer3DSphere analyserRef={analyserRef} />}
-              {showVisualizer && visualizerMode === 'spectrum' && <SpectrumAnalyzer analyserRef={analyserRef} />}
+              {currentTrack ? (
+                <>
+                  {(showWaveform || visualizerMode === 'waveform') && <Waveform audioRef={audioRef} />}
+                  {showVisualizer && visualizerMode === '3dsphere' && <Visualizer3DSphere analyserRef={analyserRef} />}
+                  {showVisualizer && visualizerMode === 'spectrum' && <SpectrumAnalyzer analyserRef={analyserRef} />}
+                </>
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-white/30">
+                  <Activity size={28} className="opacity-40" />
+                  <span className="text-xs font-semibold tracking-wide">Ses çalmıyor</span>
+                </div>
+              )}
             </Suspense>
           </div>
         )}
@@ -1481,12 +1498,28 @@ const App = () => {
          />
           
           {/* Global Visualizer/Waveform Overlay — renders above PlayerBar on ALL tabs */}
-          {(showVisualizer || showWaveform) && currentTrack && (
-            <div className="absolute bottom-28 left-0 right-0 flex items-end justify-center z-10 pointer-events-none" style={{height:'160px', opacity: visualizerOpacity}}>
-              <div className="pointer-events-auto">
+          {(showVisualizer || showWaveform) && (
+            <div
+              className="absolute bottom-28 left-0 right-0 flex items-end justify-center z-10 pointer-events-none"
+              style={{
+                height: '160px',
+                opacity: currentTrack ? visualizerOpacity : 0.4,
+                transition: 'opacity 0.4s ease-in-out',
+              }}
+            >
+              <div className="pointer-events-auto w-full h-full flex items-center justify-center">
                 <Suspense fallback={null}>
-                  {showWaveform && <Waveform audioRef={audioRef} />}
-                  {showVisualizer && visualizerMode === 'spectrum' && <SpectrumAnalyzer analyserRef={analyserRef} />}
+                  {currentTrack ? (
+                    <>
+                      {showWaveform && <Waveform audioRef={audioRef} />}
+                      {showVisualizer && visualizerMode === 'spectrum' && <SpectrumAnalyzer analyserRef={analyserRef} />}
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 text-white/30 pointer-events-none">
+                      <Activity size={28} className="opacity-40" />
+                      <span className="text-xs font-semibold tracking-wide">Ses çalmıyor</span>
+                    </div>
+                  )}
                 </Suspense>
               </div>
             </div>

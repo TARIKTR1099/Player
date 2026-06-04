@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store';
-import { Settings as SettingsIcon, Volume2, ListMusic, Download, Sliders, Info, RefreshCw, Wrench, FolderOpen, Tag, Brain, Plus, Trash2, Edit3, Save, X, Database, Copy, Check, Eye, EyeOff, User, Key, Link as LinkIcon, Puzzle, Palette, Eye as EyeIcon, Maximize, Keyboard, ChevronLeft, HardDrive, RotateCcw, Activity, Terminal, Speaker } from 'lucide-react';
+import { Settings as SettingsIcon, Volume2, ListMusic, Download, Upload, Sliders, Info, RefreshCw, Wrench, FolderOpen, Tag, Brain, Plus, Trash2, Edit3, Save, X, Database, Copy, Check, Eye, EyeOff, User, Key, Link as LinkIcon, Puzzle, Palette, Eye as EyeIcon, Maximize, Keyboard, ChevronLeft, HardDrive, RotateCcw, Activity, Terminal, Speaker, AlertTriangle } from 'lucide-react';
 import PluginSettings from './PluginSettings';
 
 const openLink = (url) => {
@@ -1756,6 +1756,76 @@ const AdvancedSettings = () => {
           {allResetMsg && (
             <span className="text-xs animate-pulse" style={{color:'#4ade80'}}>{allResetMsg}</span>
           )}
+        </div>
+      </SettingGroup>
+
+      <SettingGroup title="Ayarları Dışa/İçe Aktar" description="Tüm uygulama ayarlarını JSON dosyası olarak kaydedin veya geri yükleyin">
+        <div className="flex items-center gap-3 flex-wrap">
+          <button onClick={() => {
+            try {
+              const state = useStore.getState();
+              const exportData = {
+                version: '1.0.0',
+                date: new Date().toISOString(),
+                settings: {
+                  volume: state.volume, theme: state.theme, language: state.language,
+                  equalizerBands: state.equalizerBands, audioEffects: state.audioEffects,
+                  effectsBypass: state.effectsBypass, shuffleMode: state.shuffleMode,
+                  repeatMode: state.repeatMode, crossfadeDuration: state.crossfadeDuration,
+                  playbackRate: state.playbackRate, showVisualizer: state.showVisualizer,
+                  showWaveform: state.showWaveform, showLyrics: state.showLyrics,
+                  sleepTimer: state.sleepTimer, volumeBoost: state.volumeBoost,
+                  layoutMode: state.layoutMode, selectedCategory: state.selectedCategory,
+                  sortBy: state.sortBy, sortDir: state.sortDir,
+                }
+              };
+              const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `player-settings-${new Date().toISOString().slice(0,10)}.json`;
+              a.click();
+              URL.revokeObjectURL(url);
+            } catch (e) { alert('Dışa aktarma hatası: ' + e.message); }
+          }} className="px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition hover:opacity-80"
+            style={{backgroundColor:'rgba(255,255,255,0.1)', color:'var(--text-primary)'}}>
+            <Download size={14} /> Ayarları Dışa Aktar
+          </button>
+          <label className="px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition hover:opacity-80 cursor-pointer"
+            style={{backgroundColor:'rgba(255,255,255,0.1)', color:'var(--text-primary)'}}>
+            <Upload size={14} /> Ayarları İçe Aktar
+            <input type="file" accept=".json" className="hidden" onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = (ev) => {
+                try {
+                  const data = JSON.parse(ev.target.result);
+                  if (!data.settings) { alert('Geçersiz ayar dosyası'); return; }
+                  useStore.setState(data.settings);
+                  alert('Ayarlar başarıyla içe aktarıldı!');
+                } catch (err) { alert('Okuma hatası: ' + err.message); }
+              };
+              reader.readAsText(file);
+            }} />
+          </label>
+          <button onClick={() => {
+            if (!confirm('Tüm ayarlar fabrika varsayılanlarına döndürülecek. Emin misiniz?')) return;
+            localStorage.removeItem('player-v4-storage');
+            useStore.setState({
+              volume: 80, theme: 'dark', language: 'tr', shuffleMode: false, repeatMode: 'off',
+              crossfadeDuration: 0, playbackRate: 1, showVisualizer: false, showWaveform: false,
+              showLyrics: false, sleepTimer: null, volumeBoost: 1.0, layoutMode: 'normal',
+              effectsBypass: true, sortBy: 'title', sortDir: 'asc',
+              equalizerBands: [0,0,0,0,0,0,0,0,0,0],
+              audioEffects: { clarity:0, ambiance:0, surround:0, dynamicPower:0, bassBoost:0, compressor:0, delay:0, expander:0 },
+            });
+            alert('Ayarlar sıfırlandı! Sayfa yenilenecek.');
+            window.location.reload();
+          }} className="px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition hover:opacity-80"
+            style={{backgroundColor:'#dc2626', color:'white'}}>
+            <RotateCcw size={14} /> Tüm Ayarları Sıfırla
+          </button>
         </div>
       </SettingGroup>
 
