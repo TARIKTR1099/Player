@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback, useMemo, Suspense } from 'react';
+﻿import React, { useEffect, useRef, useState, useCallback, useMemo, Suspense } from 'react';
 import { useStore } from './store';
 import { useAudioPlayer } from './hooks/useAudioPlayer';
 import { Play, Pause, SkipBack, SkipForward, Search, Settings, Download, ListMusic, Minus, X, Menu, Volume2, Maximize2, MonitorPlay, MoreHorizontal, Sliders, Activity, Shuffle, Repeat, Music, Trash2, Edit3, Scissors, Radio, Eye, RotateCcw, RotateCw, Grid, List, LayoutList, Tag, Check, ArrowUp, ArrowDown, Film, FileAudio, Info, FolderOpen, Plus, Square, Video, Copy, Crop, Subtitles, Minimize2, GripVertical, Moon } from 'lucide-react';
@@ -8,6 +8,7 @@ import TitleBar from './components/TitleBar';
 import Sidebar from './components/Sidebar';
 import PlayerBar from './components/PlayerBar';
 import { GridTrack, ListTrack, CompactTrack, ContextMenu } from './components/TrackComponents';
+import { cn } from './lib/utils';
 import { fetchSyncedLyrics, parseLRC } from './services/lrclib';
 const Downloader = React.lazy(() => import('./components/Downloader'));
 const EqualizerModal = React.lazy(() => import('./components/EqualizerModal'));
@@ -60,6 +61,7 @@ const App = () => {
     queue: queueTracks, addToQueue, playNext, removeFromQueue, clearQueue, reorderQueue,
     importM3U, exportPlaylistAsM3U, exportLibraryBackup, importLibraryBackup,
     sleepTimer, sleepTimerEnd, setSleepTimer, volumeBoost, setVolumeBoost,
+    crossfadeDuration, setCrossfadeDuration,
     syncedLyricsCues, syncedLyricsLoading, setSyncedLyrics, setSyncedLyricsLoading, clearSyncedLyrics, lastLyricsQuery, setLastLyricsQuery
   } = useStore();
   
@@ -772,7 +774,7 @@ const App = () => {
                 <div className="text-sm font-bold truncate max-w-[200px]">{currentTrack?.title || 'Hazır'}</div>
                 <div className="text-[10px] opacity-60 truncate max-w-[200px]">{currentTrack?.artist || ''}</div>
               </div>
-              <div className="flex items-center justify-center space-x-6 mt-1">
+              <div className="flex items-center justify-center gap-6 mt-1">
                 <SkipBack size={20} className="hover:text-primary cursor-pointer transition" onClick={previousTrack} />
                 <button onClick={togglePlay} className="p-3 rounded-full hover:scale-110 transition shadow-lg" style={{backgroundColor:'var(--color-primary)'}}>
                   {isPlaying ? <Pause fill="white" size={20} /> : <Play fill="white" size={20} />}
@@ -950,7 +952,7 @@ const App = () => {
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden">
           <div className="flex-1 flex flex-col min-w-0">
-              <main className="flex-1 overflow-y-auto relative custom-scrollbar">
+              <main className={cn("flex-1 overflow-y-auto relative custom-scrollbar", "tab-animate")}>
                  {activeTab === 'home' && (
                     <>
                        {currentTrack ? (
@@ -980,7 +982,7 @@ const App = () => {
                                <img src={currentTrack.picture} className="w-28 h-28 rounded-xl shadow-2xl flex-shrink-0 object-cover border border-white/10" />
                              )}
                                <div className="min-w-0 flex-1">
-                                 <div className="flex items-center space-x-2 mb-1">
+                                 <div className="flex items-center gap-2 mb-1">
                                    {currentTrack.isVideo && (
                                      <>
                                        <Film size={14} style={{color:'var(--color-primary)'}} />
@@ -1000,7 +1002,7 @@ const App = () => {
                            <Activity size={56} className="mx-auto mb-3 opacity-20" />
                            <h2 className="text-xl font-bold mb-1">Müzik Çalmaya Hazır</h2>
                            <p style={{color:'var(--text-secondary)'}} className="mb-4 text-sm">Kütüphaneden bir müzik seçin veya YouTube'dan indirin</p>
-                           <div className="flex justify-center space-x-3">
+                           <div className="flex justify-center gap-3">
                              <button
                                onClick={async () => {
                                  try {
@@ -1013,7 +1015,7 @@ const App = () => {
                                    }
                                  } catch (e) { console.error('Open file failed:', e); }
                                }}
-                               className="px-6 py-2.5 rounded-xl font-bold flex items-center space-x-2 hover:scale-105 transition shadow-lg text-white"
+                               className="px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:scale-105 transition shadow-lg text-white"
                                style={{backgroundColor:'var(--color-primary)'}}
                              >
                                <FileAudio size={16} />
@@ -1021,7 +1023,7 @@ const App = () => {
                              </button>
                              <button
                                onClick={() => setActiveTab('library')}
-                               className="px-5 py-2.5 rounded-xl font-bold flex items-center space-x-2 transition"
+                               className="px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition"
                                style={{backgroundColor:'var(--color-bg-tertiary)'}}
                              >
                                <ListMusic size={16} />
@@ -1046,7 +1048,7 @@ const App = () => {
                     <div className="flex gap-4 animate-fade-in">
                     {/* Playlist Sidebar */}
                     {showPlaylistSidebar && (
-                    <div className="w-52 shrink-0 flex flex-col gap-2">
+                    <div className="flex flex-col w-52 shrink-0 flex flex-col gap-2">
                       <div className="flex items-center justify-between px-2 py-1.5">
                          <span className="text-xs font-bold uppercase tracking-wider" style={{color:'var(--text-secondary)'}}>Çalma Listeleri</span>
                          <div className="flex items-center gap-1">
@@ -1064,7 +1066,7 @@ const App = () => {
                            </button>
                          </div>
                        </div>
-                      <div className="space-y-0.5 overflow-y-auto max-h-[50vh] custom-scrollbar">
+                      <div className="flex flex-col gap-0.5 overflow-y-auto max-h-[50vh] custom-scrollbar">
                         <div
                           onClick={() => setActivePlaylist('all')}
                           className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-xs transition ${
@@ -1111,7 +1113,7 @@ const App = () => {
                     </div>
                     )}
                     {/* Main Content */}
-                    <div className="flex-1 min-w-0 space-y-3">
+                    <div className="flex-1 flex flex-col min-w-0 gap-3">
                     {/* Expand playlist sidebar button when collapsed */}
                     {!showPlaylistSidebar && (
                       <button onClick={() => setShowPlaylistSidebar(true)} className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-bold transition hover:bg-white/10" style={{color:'var(--text-secondary)'}}>
@@ -1305,7 +1307,7 @@ const App = () => {
                         </div>
                       )}
                       {libraryViewMode === 'compact' && (
-                        <div className="space-y-1">
+                        <div className="flex flex-col gap-1">
                           {displayTracks.map((track, idx) => (
                             <CompactTrack key={track.id} track={track} index={idx} selected={selectedTrackIds.includes(track.id)} onPlay={(e) => handleTrackClick(e, track, idx)} onCtx={(e) => handleCtxMenu(e, track)} formatTime={formatTime} />
                           ))}
@@ -1326,11 +1328,11 @@ const App = () => {
                       {selectedTrackIds.length > 0 && (
                         <div className="sticky bottom-0 z-30 -mx-6 px-6 py-3 border-t flex items-center justify-between text-sm animate-slide-up" style={{backgroundColor:'var(--color-bg-secondary)', borderColor:'var(--border-color)'}}>
                           <span style={{color:'var(--text-secondary)'}}>{selectedTrackIds.length} müzik seçildi</span>
-                          <div className="flex items-center space-x-2">
-                            <button onClick={playSelectedTracks} className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-bold transition hover:scale-105 text-white" style={{backgroundColor:'var(--color-primary)'}}>
+                          <div className="flex items-center gap-2">
+                            <button onClick={playSelectedTracks} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition hover:scale-105 text-white" style={{backgroundColor:'var(--color-primary)'}}>
                               <Play size={14} fill="white" /> <span>Oynat</span>
                             </button>
-                            <button onClick={queueSelectedTracks} className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-bold transition hover:bg-white/10" style={{backgroundColor:'var(--color-bg-tertiary)', color:'var(--text-primary)'}}>
+                            <button onClick={queueSelectedTracks} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition hover:bg-white/10" style={{backgroundColor:'var(--color-bg-tertiary)', color:'var(--text-primary)'}}>
                               <ListMusic size={14} /> <span>Sıraya Ekle</span>
                             </button>
                             <button onClick={async () => {
@@ -1345,10 +1347,10 @@ const App = () => {
                                   for (const t of selectedTracks) await addToPlaylist(pl.id, t.id);
                                 }
                               }
-                            }} className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-bold transition hover:bg-white/10" style={{backgroundColor:'var(--color-bg-tertiary)', color:'var(--text-primary)'}}>
+                            }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition hover:bg-white/10" style={{backgroundColor:'var(--color-bg-tertiary)', color:'var(--text-primary)'}}>
                               <Plus size={14} /> <span>Listeye Kaydet</span>
                             </button>
-                            <button onClick={deleteSelectedTracks} className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-bold transition hover:bg-red-500/20" style={{backgroundColor:'rgba(239,68,68,0.1)', color:'rgb(239,68,68)'}}>
+                            <button onClick={deleteSelectedTracks} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition hover:bg-red-500/20" style={{backgroundColor:'rgba(239,68,68,0.1)', color:'rgb(239,68,68)'}}>
                               <Trash2 size={14} /> <span>Sil</span>
                             </button>
                             <button onClick={clearSelection} className="px-3 py-1.5 rounded-lg font-bold transition hover:bg-white/10" style={{color:'var(--text-secondary)'}}>
@@ -1374,7 +1376,7 @@ const App = () => {
                         )}
                       </div>
                     </div>
-                    <div className="space-y-0.5 p-2">
+                    <div className="flex flex-col gap-0.5 p-2">
                       {currentTrack && (
                         <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs" style={{backgroundColor:'var(--color-primary)', color:'white'}} role="status" aria-label="Şu an çalıyor">
                           <div className="shrink-0 w-3 h-3 flex items-center justify-center">
@@ -1474,6 +1476,8 @@ const App = () => {
            setSleepTimer={setSleepTimer}
            volumeBoost={volumeBoost}
            setVolumeBoost={setVolumeBoost}
+           crossfadeDuration={crossfadeDuration}
+           setCrossfadeDuration={setCrossfadeDuration}
          />
           
           {/* Global Visualizer/Waveform Overlay — renders above PlayerBar on ALL tabs */}

@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, MoreHorizontal, Sliders, Activity, Eye, Radio, Subtitles, Maximize2, Minimize2, Copy, Video, RotateCcw, RotateCw, FolderOpen, Moon } from 'lucide-react';
+﻿import React, { useState, useRef, useEffect } from 'react';
+import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, MoreHorizontal, Sliders, Activity, Eye, Radio, Subtitles, Maximize2, Minimize2, Copy, Video, RotateCcw, RotateCw, FolderOpen, Moon, ArrowRightLeft } from 'lucide-react';
+import { cn } from '../lib/utils';
 
 const formatTime = (s) => {
   if (!s || isNaN(s)) return "0:00";
@@ -9,7 +10,7 @@ const formatTime = (s) => {
 };
 
 const MenuItem = ({ icon, label, onClick, role = 'menuitem' }) => (
-  <div onClick={onClick} className="flex items-center space-x-3 px-4 py-2.5 cursor-pointer transition hover:bg-white/5" style={{color:'var(--text-primary)'}} role={role} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}>
+  <div onClick={onClick} className="flex items-center gap-3 px-4 py-2.5 cursor-pointer transition hover:bg-white/5 text-text-primary" role={role} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}>
     {icon} <span>{label}</span>
   </div>
 );
@@ -25,7 +26,8 @@ const PlayerBar = ({
   isSeeking, setIsSeeking, layoutMode, setLayoutMode,
   setShowEqualizer, setShowEffects, setShowPlaybackRate,
   handleSeek, setMediaFullscreen, handleOpenFile,
-  sleepTimer, setSleepTimer, volumeBoost, setVolumeBoost
+  sleepTimer, setSleepTimer, volumeBoost, setVolumeBoost,
+  crossfadeDuration, setCrossfadeDuration
 }) => {
   const [showVolumePop, setShowVolumePop] = useState(false);
   const seekRef = useRef(null);
@@ -92,61 +94,61 @@ const PlayerBar = ({
       </div>
 
       <div className="flex items-center justify-between mt-2">
-        <div className="flex items-center space-x-4 w-1/4 min-w-0">
+        <div className="flex items-center gap-4 w-1/4 min-w-0">
            <div className="w-14 h-14 rounded-xl shadow-2xl flex-shrink-0 overflow-hidden border" style={{backgroundColor:'var(--color-bg-tertiary)', borderColor:'var(--border-color)'}}>
               {currentTrack?.picture && <img src={currentTrack.picture} className="w-full h-full object-cover" />}
            </div>
            <div className="truncate min-w-0">
              <div className="font-black truncate text-sm leading-tight" title={currentTrack?.title}>{currentTrack?.title || 'Hazır'}</div>
-             <div className="text-xs truncate mt-0.5" style={{color:'var(--text-secondary)'}} title={currentTrack?.artist}>{currentTrack?.artist || ''}</div>
+             <div className="text-xs truncate mt-0.5 text-muted-foreground" title={currentTrack?.artist}>{currentTrack?.artist || ''}</div>
              {currentTrack?.bpm > 0 && <div className="text-[9px] opacity-40">{currentTrack.bpm} BPM</div>}
            </div>
          </div>
 
           <div className="flex flex-col items-center w-2/4">
             <div className="flex items-center gap-3 md:gap-4 mb-1" role="toolbar" aria-label="Oynatma kontrolleri">
-               <button onClick={() => setShuffleMode(!shuffleMode)} className="p-1.5 md:p-2 rounded-lg transition" style={shuffleMode ? {color:'var(--color-primary)'} : {color:'var(--text-secondary)'}} aria-label={shuffleMode ? 'Karışık çalmayı kapat' : 'Karışık çal'} aria-pressed={shuffleMode}><Shuffle size={14} /></button>
-               <SkipBack size={18} className="md:w-[20px] md:h-[20px] cursor-pointer transition" style={{color:'var(--text-secondary)'}} onClick={previousTrack} role="button" tabIndex={0} aria-label="Önceki şarkı" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); previousTrack(); } }} />
-               <button onClick={togglePlay} className="p-3 md:p-4 rounded-full hover:scale-110 active:scale-95 transition-all shadow-lg text-white" style={{backgroundColor:'var(--color-primary)'}} aria-label={isPlaying ? 'Duraklat' : 'Oynat'}>
+               <button onClick={() => setShuffleMode(!shuffleMode)} className={cn("p-1.5 md:p-2 rounded-lg transition press-scale", shuffleMode ? "text-primary" : "text-muted-foreground")} aria-label={shuffleMode ? 'Karışık çalmayı kapat' : 'Karışık çal'} aria-pressed={shuffleMode}><Shuffle size={14} /></button>
+               <SkipBack size={18} className="md:w-[20px] md:h-[20px] cursor-pointer transition text-muted-foreground press-scale" onClick={previousTrack} role="button" tabIndex={0} aria-label="Önceki şarkı" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); previousTrack(); } }} />
+               <button onClick={togglePlay} className="p-3 md:p-4 rounded-full hover:scale-110 active:scale-95 transition-all shadow-lg text-white bg-primary press-scale" aria-label={isPlaying ? 'Duraklat' : 'Oynat'}>
                  {isPlaying ? <Pause fill="white" size={18} /> : <Play fill="white" size={18} />}
                </button>
-               <SkipForward size={18} className="md:w-[20px] md:h-[20px] cursor-pointer transition" style={{color:'var(--text-secondary)'}} onClick={nextTrack} role="button" tabIndex={0} aria-label="Sonraki şarkı" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nextTrack(); } }} />
+               <SkipForward size={18} className="md:w-[20px] md:h-[20px] cursor-pointer transition text-muted-foreground press-scale" onClick={nextTrack} role="button" tabIndex={0} aria-label="Sonraki şarkı" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nextTrack(); } }} />
                  <button onClick={() => {
                    setRepeatMode(repeatMode === 'off' ? 'track' : 'off');
-                 }} className="p-1.5 md:p-2 rounded-lg transition relative" style={repeatMode !== 'off' ? {color:'var(--color-primary)'} : {color:'var(--text-secondary)'}} aria-label={repeatMode === 'off' ? 'Tekrarla' : 'Tekrarlamayı kapat'} aria-pressed={repeatMode !== 'off'}>
+                 }} className={cn("p-1.5 md:p-2 rounded-lg transition press-scale relative", repeatMode !== 'off' ? "text-primary" : "text-muted-foreground")} aria-label={repeatMode === 'off' ? 'Tekrarla' : 'Tekrarlamayı kapat'} aria-pressed={repeatMode !== 'off'}>
                    <Repeat size={14} />
                  </button>
             </div>
-            <div className="text-[10px] font-bold tabular-nums" style={{color:'var(--text-secondary)'}}>
+            <div className="text-[10px] font-bold tabular-nums text-muted-foreground">
                {formatTime(progress)} / {formatTime(duration)}
             </div>
          </div>
 
-         <div className="flex items-center justify-end w-1/4 space-x-1.5 md:space-x-3" role="toolbar" aria-label="Ek kontroller">
-           <button onClick={() => setMediaFullscreen(true)} className="p-1.5 md:p-2 rounded-lg transition hover:bg-white/10" title="Tam Ekran (medyayı büyüt)" style={{color:'var(--text-secondary)', filter: 'drop-shadow(0 0 1px rgba(255,255,255,0.3))'}} aria-label="Tam ekran"><Maximize2 size={18} /></button>
-           <button onClick={() => setLayoutMode(layoutMode === 'mini' ? 'normal' : 'mini')} className="p-1.5 md:p-2 rounded-lg transition hover:bg-white/10" title={layoutMode === 'mini' ? 'Normal Görünüm' : 'Mini Oynatıcı'} style={{color:'var(--text-secondary)'}} aria-label={layoutMode === 'mini' ? 'Normal görünüm' : 'Mini oynatıcı'}>
+         <div className="flex items-center justify-end w-1/4 gap-1.5 md:gap-3" role="toolbar" aria-label="Ek kontroller">
+           <button onClick={() => setMediaFullscreen(true)} className="p-1.5 md:p-2 rounded-lg transition hover:bg-white/10 text-muted-foreground" title="Tam Ekran (medyayı büyüt)" style={{filter: 'drop-shadow(0 0 1px rgba(255,255,255,0.3))'}} aria-label="Tam ekran"><Maximize2 size={18} /></button>
+           <button onClick={() => setLayoutMode(layoutMode === 'mini' ? 'normal' : 'mini')} className="p-1.5 md:p-2 rounded-lg transition hover:bg-white/10 text-muted-foreground" title={layoutMode === 'mini' ? 'Normal Görünüm' : 'Mini Oynatıcı'} aria-label={layoutMode === 'mini' ? 'Normal görünüm' : 'Mini oynatıcı'}>
               {layoutMode === 'mini' ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
            </button>
            <div className="relative flex items-center" ref={volumePopRef}>
-              <Volume2 size={18} className="cursor-pointer" style={{color:'var(--text-secondary)'}} onClick={() => setShowVolumePop(!showVolumePop)} role="button" tabIndex={0} aria-label="Ses seviyesi" aria-expanded={showVolumePop} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowVolumePop(!showVolumePop); } }} />
+              <Volume2 size={18} className="cursor-pointer text-muted-foreground" onClick={() => setShowVolumePop(!showVolumePop)} role="button" tabIndex={0} aria-label="Ses seviyesi" aria-expanded={showVolumePop} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowVolumePop(!showVolumePop); } }} />
              {showVolumePop && (
                <div className="absolute bottom-full right-0 mb-3 p-3 rounded-2xl border shadow-2xl z-50" style={{backgroundColor:'var(--color-bg-secondary)', borderColor:'var(--border-color)', width:'160px'}}>
                  <div className="flex items-center justify-center mb-2">
                    <span className="text-lg font-black tabular-nums" style={{color: volumeBoost > 1.0 ? '#ef4444' : 'var(--color-primary)'}}>{volume}%</span>
-                   {volumeBoost > 1.0 && <span className="text-[10px] ml-1 font-bold" style={{color:'#ef4444'}}>BOOST {Math.round(volumeBoost * 100)}%</span>}
+                   {volumeBoost > 1.0 &&                    <span className="text-[10px] ml-1 font-bold text-destructive">BOOST {Math.round(volumeBoost * 100)}%</span>}
                  </div>
                  <input type="range" min="0" max="100" value={volume} onChange={(e) => setVolume(parseInt(e.target.value))} className="w-full" />
                  <div className="mt-2 flex items-center gap-2">
-                   <span className="text-[10px]" style={{color:'var(--text-secondary)'}}>Güçlendirme</span>
+                   <span className="text-[10px] text-muted-foreground">Güçlendirme</span>
                    <input type="range" min="100" max="200" value={volumeBoost * 100} onChange={(e) => setVolumeBoost(parseInt(e.target.value) / 100)} className="flex-1" />
-                   <span className="text-[10px] font-bold" style={{color: volumeBoost > 1.0 ? '#ef4444' : 'var(--text-secondary)'}}>{Math.round(volumeBoost * 100)}%</span>
+                   <span className={cn("text-[10px] font-bold", volumeBoost > 1.0 ? "text-destructive" : "text-muted-foreground")}>{Math.round(volumeBoost * 100)}%</span>
                  </div>
                </div>
              )}
           </div>
 
            <div className="relative" ref={moreMenuRef}>
-             <MoreHorizontal size={18} className="md:w-[20px] md:h-[20px] cursor-pointer" style={{color:'var(--text-secondary)'}} onClick={() => setShowMoreMenu(!showMoreMenu)} role="button" tabIndex={0} aria-label="Daha fazla seçenek" aria-expanded={showMoreMenu} aria-haspopup="true" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowMoreMenu(!showMoreMenu); } }} />
+             <MoreHorizontal size={18} className="md:w-[20px] md:h-[20px] cursor-pointer text-muted-foreground" onClick={() => setShowMoreMenu(!showMoreMenu)} role="button" tabIndex={0} aria-label="Daha fazla seçenek" aria-expanded={showMoreMenu} aria-haspopup="true" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowMoreMenu(!showMoreMenu); } }} />
              {showMoreMenu && (
                <div className="absolute bottom-full right-0 mb-4 border rounded-2xl py-1 w-52 shadow-2xl z-50 text-xs" style={{backgroundColor:'var(--color-bg-secondary)', borderColor:'var(--border-color)'}} role="menu" aria-label="Daha fazla seçenek menüsü">
                 <MenuItem icon={<Sliders size={13}/>} label="Ekolayzer" onClick={() => { setShowEqualizer(true); setShowMoreMenu(false); }} />
@@ -199,6 +201,16 @@ const PlayerBar = ({
                        if (mins && !isNaN(parseInt(mins))) setSleepTimer(parseInt(mins));
                      }
                      setShowMoreMenu(false);
+                   }} 
+                 />
+                 <MenuItem 
+                   icon={<ArrowRightLeft size={13}/>} 
+                   label={crossfadeDuration > 0 ? `Geçiş: ${crossfadeDuration}s` : 'Geçiş: Kapalı'} 
+                   onClick={() => { 
+                     const cycle = [0, 1, 2, 3, 5, 7, 10];
+                     const idx = cycle.indexOf(crossfadeDuration);
+                     setCrossfadeDuration(cycle[(idx + 1) % cycle.length]);
+                     setShowMoreMenu(false); 
                    }} 
                  />
               </div>

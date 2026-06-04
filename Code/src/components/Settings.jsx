@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store';
 import { Settings as SettingsIcon, Volume2, ListMusic, Download, Sliders, Info, RefreshCw, Wrench, FolderOpen, Tag, Brain, Plus, Trash2, Edit3, Save, X, Database, Copy, Check, Eye, EyeOff, User, Key, Link as LinkIcon, Puzzle, Palette, Eye as EyeIcon, Maximize, Keyboard, ChevronLeft, HardDrive, RotateCcw, Activity, Terminal, Speaker } from 'lucide-react';
 import PluginSettings from './PluginSettings';
@@ -99,12 +99,12 @@ const Settings = () => {
 };
 
 const SettingsNav = ({ items, active, onChange, narrow }) => (
-  <div className="space-y-1">
+  <div className="flex flex-col gap-1">
     {items.map(item => (
       <div
         key={item.id}
         onClick={() => onChange(item.id)}
-        className={`flex items-center ${narrow ? 'justify-center' : 'space-x-3'} p-3 rounded-xl cursor-pointer transition`}
+        className={`flex items-center gap-3 ${narrow ? 'justify-center' : ''} p-3 rounded-xl cursor-pointer transition`}
         style={active === item.id ? {backgroundColor:'var(--color-primary)', color:'white'} : {color:'var(--text-secondary)'}}
       >
         <div className="flex-shrink-0">{item.icon}</div>
@@ -167,7 +167,7 @@ const GeneralSettings = () => {
   };
   
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <h2 className="text-2xl font-bold">Genel Ayarlar</h2>
       
       <SettingGroup title="Başlangıç" description="Uygulama başlatma ayarları">
@@ -302,7 +302,7 @@ const AccountSettings = () => {
       </p>
 
       <SettingGroup title="Google API Kimlik Bilgileri" description="Google Cloud Console'dan alacağınız OAuth 2.0 bilgileri">
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           <div className="flex items-start gap-2 p-2.5 rounded-lg text-xs mb-2" style={{backgroundColor:'rgba(66,133,244,0.1)', color:'#8ab4f8'}}>
             <Key size={14} className="flex-shrink-0 mt-0.5" />
             <div>
@@ -332,7 +332,7 @@ const AccountSettings = () => {
           <div className="flex items-center gap-3">
             <button onClick={handleSaveCredentials} className="px-4 py-1.5 text-sm font-medium rounded-lg text-white transition hover:opacity-90" style={{backgroundColor:'var(--color-primary)'}}>Kaydet</button>
             {credMsg && (
-              <span className="text-xs flex items-center gap-1" style={{color: credMsg.includes('✓') ? '#4ade80' : '#f87171'}}>
+              <span className="flex flex-col text-xs flex items-center gap-1" style={{color: credMsg.includes('✓') ? '#4ade80' : '#f87171'}}>
                 {credMsg.includes('✓') ? <Check size={12} /> : null}
                 {credMsg}
               </span>
@@ -387,7 +387,7 @@ const AccountSettings = () => {
           )}
         </SettingRow>
         {error && (
-          <div className="text-xs mt-2 p-2.5 rounded flex items-start gap-2" style={{backgroundColor:'rgba(255,50,50,0.1)', color:'#ff5050'}}>
+          <div className="flex flex-col text-xs mt-2 p-2.5 rounded flex items-start gap-2" style={{backgroundColor:'rgba(255,50,50,0.1)', color:'#ff5050'}}>
             <X size={12} className="flex-shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
@@ -433,12 +433,12 @@ const AudioSettings = () => {
   }, [isDragging, setVolume]);
   
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <h2 className="text-2xl font-bold">Ses Ayarları</h2>
       
       <SettingGroup title="Ses Servisi" description="Ses çıkışı ve servis yönetimi">
         <SettingRow label="Durum">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <div className={`w-2 h-2 rounded-full ${audioService === 'running' ? 'bg-green-500' : 'bg-yellow-500'}`} />
             <span className="text-sm">
               {audioService === 'running' ? 'Çalışıyor' : 'Yeniden başlatılıyor...'}
@@ -450,7 +450,7 @@ const AudioSettings = () => {
           <button
             onClick={restartAudioService}
             disabled={audioService === 'restarting'}
-            className="px-4 py-2 rounded-lg disabled:opacity-50 transition flex items-center space-x-2 text-white"
+            className="px-4 py-2 rounded-lg disabled:opacity-50 transition flex items-center gap-2 text-white"
             style={{backgroundColor:'var(--color-primary)'}}
           >
             <RefreshCw size={16} className={audioService === 'restarting' ? 'animate-spin' : ''} />
@@ -460,7 +460,7 @@ const AudioSettings = () => {
       </SettingGroup>
       
       <SettingGroup title="Ses Seviyesi" description="Varsayılan ses seviyesi">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-4">
             <div 
               ref={sliderRef}
               className="w-48 h-8 rounded-lg cursor-pointer relative flex items-center px-2"
@@ -563,14 +563,14 @@ const LibrarySettings = () => {
   };
   
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <h2 className="text-2xl font-bold">Kütüphane Ayarları</h2>
       
       <SettingGroup title="Müzik Ekle" description="Kütüphanenize müzik dosyası ekleyin">
         <div className="relative">
           <button
             onClick={() => setShowAddMenu(!showAddMenu)}
-            className="px-6 py-3 rounded-xl text-white font-bold flex items-center space-x-2 hover:scale-105 transition"
+            className="px-6 py-3 rounded-xl text-white font-bold flex items-center gap-2 hover:scale-105 transition"
             style={{backgroundColor:'var(--color-primary)'}}
           >
             <Plus size={18} />
@@ -578,16 +578,16 @@ const LibrarySettings = () => {
           </button>
           {showAddMenu && (
             <div className="absolute top-full left-0 mt-2 border rounded-xl py-1 shadow-2xl z-50 text-sm" style={{backgroundColor:'var(--color-bg-secondary)', borderColor:'var(--border-color)', minWidth:'200px'}}>
-              <div onClick={() => handleAddMusic('file')} className="flex items-center space-x-3 px-4 py-3 cursor-pointer hover:bg-white/5 transition">
+              <div onClick={() => handleAddMusic('file')} className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/5 transition">
                 <span>Dosya</span>
               </div>
-              <div onClick={() => handleAddMusic('folder')} className="flex items-center space-x-3 px-4 py-3 cursor-pointer hover:bg-white/5 transition">
+              <div onClick={() => handleAddMusic('folder')} className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/5 transition">
                 <span>Klasör</span>
               </div>
-              <div onClick={() => handleAddMusic('compressed')} className="flex items-center space-x-3 px-4 py-3 cursor-pointer hover:bg-white/5 transition">
+              <div onClick={() => handleAddMusic('compressed')} className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/5 transition">
                 <span>Sıkıştırılmış Dosya</span>
               </div>
-              <div onClick={() => handleAddMusic('link')} className="flex items-center space-x-3 px-4 py-3 cursor-pointer hover:bg-white/5 transition">
+              <div onClick={() => handleAddMusic('link')} className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/5 transition">
                 <span>Link</span>
               </div>
             </div>
@@ -600,7 +600,7 @@ const LibrarySettings = () => {
           <button
             onClick={handleRepairLibrary}
             disabled={clearing}
-            className="px-4 py-2 rounded-lg transition flex items-center space-x-2 disabled:opacity-50"
+            className="px-4 py-2 rounded-lg transition flex items-center gap-2 disabled:opacity-50"
             style={{backgroundColor:'rgba(255,165,0,0.2)', color:'orange'}}
           >
             <Wrench size={16} className={clearing ? 'animate-spin' : ''} />
@@ -614,7 +614,7 @@ const LibrarySettings = () => {
           <button
             onClick={handleClearLibrary}
             disabled={clearing}
-            className="px-4 py-2 rounded-lg transition flex items-center space-x-2 disabled:opacity-50"
+            className="px-4 py-2 rounded-lg transition flex items-center gap-2 disabled:opacity-50"
             style={{backgroundColor:'rgba(239,68,68,0.2)', color:'red'}}
           >
             <Trash2 size={16} className={clearing ? 'animate-spin' : ''} />
@@ -637,7 +637,7 @@ const LibrarySettings = () => {
                 else if (!result.canceled) alert('Yedekleme başarısız: ' + (result.error || 'Bilinmeyen hata'));
               } catch (e) { alert('Yedekleme hatası: ' + e.message); }
             }}
-            className="px-4 py-2 rounded-lg transition flex items-center space-x-2"
+            className="flex flex-col px-4 py-2 rounded-lg transition flex items-center gap-2"
             style={{backgroundColor:'rgba(59,130,246,0.2)', color:'#60a5fa'}}
           >
             <Download size={16} />
@@ -656,7 +656,7 @@ const LibrarySettings = () => {
                 } else if (!result.canceled) alert('Geri yükleme başarısız: ' + (result.error || 'Bilinmeyen hata'));
               } catch (e) { alert('Geri yükleme hatası: ' + e.message); }
             }}
-            className="px-4 py-2 rounded-lg transition flex items-center space-x-2"
+            className="flex flex-col px-4 py-2 rounded-lg transition flex items-center gap-2"
             style={{backgroundColor:'rgba(34,197,94,0.2)', color:'#4ade80'}}
           >
             <Database size={16} />
@@ -667,11 +667,11 @@ const LibrarySettings = () => {
 
       <SettingGroup title="Müzik Klasörü" description="Müzik dosyalarının saklandığı konum">
         <SettingRow label="Konum">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <span className="text-sm truncate max-w-xs" style={{color:'var(--text-secondary)'}}>{musicFolder || 'Yükleniyor...'}</span>
             <button
               onClick={selectMusicFolder}
-              className="px-4 py-2 hover:bg-white/10 rounded-lg transition flex items-center space-x-2"
+              className="flex flex-col px-4 py-2 hover:bg-white/10 rounded-lg transition flex items-center gap-2"
               style={{backgroundColor:'rgba(255,255,255,0.05)'}}
             >
               <FolderOpen size={16} />
@@ -725,11 +725,11 @@ const CategorySettings = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <h2 className="text-2xl font-bold">Kategoriler</h2>
       
       <SettingGroup title="Yeni Kategori Ekle" description="Müziklerinizi düzenlemek için kategori oluşturun">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <input
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
@@ -741,7 +741,7 @@ const CategorySettings = () => {
           <button
             onClick={handleAdd}
             disabled={!newCategoryName.trim()}
-            className="px-4 py-2 rounded-lg text-white text-sm font-bold flex items-center space-x-2 disabled:opacity-50 transition hover:scale-105"
+            className="px-4 py-2 rounded-lg text-white text-sm font-bold flex items-center gap-2 disabled:opacity-50 transition hover:scale-105"
             style={{backgroundColor:'var(--color-primary)'}}
           >
             <Plus size={16} />
@@ -757,11 +757,11 @@ const CategorySettings = () => {
             <p className="text-sm">Henüz kategori oluşturulmamış</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             {categories.map(cat => (
               <div key={cat.id} className="flex items-center justify-between p-3 rounded-xl transition hover:bg-white/5" style={{backgroundColor:'rgba(255,255,255,0.03)', border:'1px solid var(--border-color)'}}>
                 {editingId === cat.id ? (
-                  <div className="flex items-center space-x-2 flex-1">
+                  <div className="flex items-center gap-2 flex-1">
                     <input
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
@@ -777,12 +777,12 @@ const CategorySettings = () => {
                   </div>
                 ) : (
                   <>
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center gap-3">
                       <Tag size={14} style={{color:'var(--color-primary)'}} />
                       <span className="text-sm font-medium">{cat.name}</span>
                       <span className="text-[10px] px-2 py-0.5 rounded-full" style={{backgroundColor:'rgba(255,255,255,0.1)', color:'var(--text-secondary)'}}>{cat.tracks?.length || 0} müzik</span>
                     </div>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center gap-1">
                       <button onClick={() => { setEditingId(cat.id); setEditName(cat.name); }} className="p-1.5 rounded-lg hover:bg-white/10 transition" style={{color:'var(--text-secondary)'}}><Edit3 size={14} /></button>
                       <button onClick={() => handleDelete(cat)} className="p-1.5 rounded-lg hover:bg-white/10 transition" style={{color:'#ef4444'}}><Trash2 size={14} /></button>
                     </div>
@@ -868,7 +868,7 @@ const PersonalizationSettings = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <h2 className="text-2xl font-bold">Kişiselleştirme</h2>
 
       <SettingGroup title="Vurgu Rengi" description="Arayüzün ana rengini seç">
@@ -882,7 +882,7 @@ const PersonalizationSettings = () => {
             />
           ))}
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <input
             type="color"
             value={localAccent}
@@ -902,7 +902,7 @@ const PersonalizationSettings = () => {
 
       <SettingGroup title="Saydamlık" description="Arka plan saydamlık seviyesi">
         <SettingRow label="Saydamlık Seviyesi">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-4">
             <input
               type="range"
               min="0"
@@ -917,7 +917,7 @@ const PersonalizationSettings = () => {
       </SettingGroup>
 
       <SettingGroup title="Tema" description="Arayüz teması">
-          <div className="flex space-x-2">
+          <div className="flex gap-2">
             <button
               onClick={() => setTheme('dark')}
               className="px-4 py-2 rounded-lg text-sm transition"
@@ -938,7 +938,7 @@ const PersonalizationSettings = () => {
 
       <SettingGroup title="Kenar Çubuğu Davranışı" description="Menü butonuna tıklayınca kenar çubuğunun nasıl davranacağını seçin">
         <SettingRow label="Davranış">
-          <div className="flex space-x-2">
+          <div className="flex gap-2">
             <button
               onClick={() => setSidebarToggleBehavior('fullToggle')}
               className="px-4 py-2 rounded-lg text-sm transition"
@@ -955,7 +955,7 @@ const PersonalizationSettings = () => {
 
       <SettingGroup title="Pencere Boyutu" description="Uygulama penceresinin boyutu">
         <SettingRow label="Genişlik x Yükseklik">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <input 
               type="number" 
               value={windowWidth} 
@@ -978,8 +978,8 @@ const PersonalizationSettings = () => {
       </SettingGroup>
 
       <SettingGroup title="Dil" description="Arayüz dili">
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
               <select 
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
@@ -997,10 +997,10 @@ const PersonalizationSettings = () => {
             <div className="text-[10px] px-2 py-1 rounded-lg" style={{backgroundColor:'rgba(255,165,0,0.1)', color:'orange'}}>
               <strong>Uyarı:</strong> Kullanıcı katkıda bulunan diller tam çeviri içermeyebilir. Eksik metinler İngilizce gösterilir.
             </div>
-            <div className="flex items-center space-x-2 mt-2">
+            <div className="flex items-center gap-2 mt-2">
               <button 
                 onClick={() => { try { window.require('electron').shell.openExternal('https://github.com/TARIKTR1099/player-music/blob/main/locales'); } catch(ex) { window.open('https://github.com/TARIKTR1099/player-music/blob/main/locales', '_blank'); } }}
-                className="px-3 py-2 rounded-lg text-xs flex items-center space-x-2"
+                className="flex flex-col px-3 py-2 rounded-lg text-xs flex items-center gap-2"
                 style={{backgroundColor:'rgba(255,255,255,0.05)', color:'var(--text-secondary)'}}
               >
                 <span>GitHub ile Dil Katkıda Bulun</span>
@@ -1121,19 +1121,19 @@ const ShortcutsSettings = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <h2 className="text-2xl font-bold">Klavye Kısayolları</h2>
 
       <SettingGroup title="Kısayollar" description="Tüm klavye kısayollarını görüntüle ve düzenle">
         <div className="text-xs mb-3 px-2 py-1 rounded-lg" style={{backgroundColor:'rgba(15,108,189,0.1)', color:'var(--color-primary)'}}>
           <strong>İpucu:</strong> Düzenle butonuna tıklayın ve istediğiniz tuşlara basın. Enter ile kaydedin, Esc ile iptal edin. Sol/Sağ Ctrl, Shift, Alt ayrımı yapılır.
         </div>
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           {Object.entries(shortcutLabels).map(([id, label]) => (
             <div key={id} className="flex items-center justify-between p-3 rounded-xl" style={{backgroundColor:'rgba(255,255,255,0.03)'}}>
               <span className="text-sm font-medium">{label}</span>
               {editingId === id ? (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <div
                     ref={inputRef}
                     className="border rounded-lg px-3 py-1 text-sm font-mono min-w-[120px] text-center"
@@ -1146,7 +1146,7 @@ const ShortcutsSettings = () => {
                   <button onClick={() => { setEditingId(null); setCapturedKeys([]); }} className="text-red-500 hover:text-red-400"><X size={14} /></button>
                 </div>
               ) : (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <kbd className="px-2 py-1 rounded-lg text-sm font-mono" style={{backgroundColor:'rgba(255,255,255,0.1)', color:'var(--text-primary)'}}>{formatShortcut(keyboardShortcuts[id] || '')}</kbd>
                   <button onClick={() => startEdit(id)} className="text-blue-500 hover:text-blue-400"><Edit3 size={14} /></button>
                 </div>
@@ -1156,7 +1156,7 @@ const ShortcutsSettings = () => {
         </div>
       </SettingGroup>
 
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center gap-3">
         <button onClick={resetDefaults} className="px-4 py-2 rounded-lg text-sm transition" style={{backgroundColor:'rgba(255,255,255,0.05)', color:'var(--text-secondary)'}}>
           Varsayılana Dön
         </button>
@@ -1248,7 +1248,7 @@ const AISettings = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <h2 className="text-2xl font-bold">AI Yapay Zeka</h2>
       
       <SettingGroup title="AI Sağlayıcı Ayarları" description="AI sağlayıcı bağlantı bilgileri">
@@ -1289,7 +1289,7 @@ const AISettings = () => {
       </SettingGroup>
 
       <SettingGroup title="Başlıklar" description="API istek başlıkları">
-        <div className="space-y-2 mb-3">
+        <div className="flex flex-col gap-2 mb-3">
           {headers.map((h, idx) => (
             <div key={idx} className="flex items-center justify-between p-2 rounded-lg" style={{backgroundColor:'rgba(255,255,255,0.03)'}}>
               <div>
@@ -1300,7 +1300,7 @@ const AISettings = () => {
             </div>
           ))}
         </div>
-        <div className="flex space-x-2">
+        <div className="flex gap-2">
           <input value={newHeaderName} onChange={(e) => setNewHeaderName(e.target.value)} placeholder="başlık-adı"
             className="flex-1 border rounded-lg px-3 py-2 text-xs"
             style={{backgroundColor:'rgba(255,255,255,0.05)', borderColor:'var(--border-color)', color:'var(--text-primary)'}} />
@@ -1311,12 +1311,12 @@ const AISettings = () => {
         </div>
       </SettingGroup>
 
-      <div className="flex items-center space-x-3">
-        <button onClick={handleSaveProvider} className="px-6 py-2 rounded-lg text-white flex items-center space-x-2" style={{backgroundColor:'var(--color-primary)'}}>
+      <div className="flex items-center gap-3">
+        <button onClick={handleSaveProvider} className="flex flex-col px-6 py-2 rounded-lg text-white flex items-center gap-2" style={{backgroundColor:'var(--color-primary)'}}>
           <Save size={16} /> <span>Kaydet</span>
         </button>
         <button onClick={handleTestConnection} disabled={testing || !apiKey.trim()}
-          className="px-6 py-2 rounded-lg text-white flex items-center space-x-2 disabled:opacity-50"
+          className="px-6 py-2 rounded-lg text-white flex items-center gap-2 disabled:opacity-50"
           style={{backgroundColor:'rgba(255,255,255,0.1)'}}>
           <RefreshCw size={16} className={testing ? 'animate-spin' : ''} />
           <span>{testing ? 'Test ediliyor...' : 'Bağlantıyı Test Et'}</span>
@@ -1331,14 +1331,14 @@ const AISettings = () => {
       )}
 
       <SettingGroup title="AI ile Kategorilendirme" description="Parçaları otomatik kategorilere ayır">
-        <div className="flex space-x-2 mb-3">
+        <div className="flex gap-2 mb-3">
           <input value={newCatName} onChange={(e) => setNewCatName(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
             placeholder="Kategori adı..."
             className="flex-1 border rounded-lg px-4 py-2"
             style={{backgroundColor:'rgba(255,255,255,0.05)', borderColor:'var(--border-color)', color:'var(--text-primary)'}} />
           <button onClick={handleAddCategory} className="px-4 py-2 rounded-lg text-white" style={{backgroundColor:'var(--color-primary)'}}>Ekle</button>
         </div>
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           {categories.length === 0 && <div className="text-sm" style={{color:'var(--text-secondary)'}}>Henüz kategori yok</div>}
           {categories.map(cat => (
             <div key={cat.id} className="flex items-center justify-between p-3 rounded-xl" style={{backgroundColor:'rgba(255,255,255,0.03)'}}>
@@ -1349,7 +1349,7 @@ const AISettings = () => {
         </div>
         <div className="mt-4">
           <button onClick={handleAiCategorize} disabled={categorizing || !aiProvider.apiKey.trim()}
-            className="px-4 py-2 rounded-lg text-white disabled:opacity-50 transition flex items-center space-x-2"
+            className="flex flex-col px-4 py-2 rounded-lg text-white disabled:opacity-50 transition flex items-center gap-2"
             style={{backgroundColor:'var(--color-primary)'}}>
             {categorizing ? <RefreshCw size={16} className="animate-spin" /> : <Brain size={16} />}
             <span>{categorizing ? 'Kategorilendiriliyor...' : 'AI ile Kategorilendir'}</span>
@@ -1389,12 +1389,12 @@ const DownloadSettings = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <h2 className="text-2xl font-bold">İndirme Ayarları</h2>
       
       <SettingGroup title="İndirme Klasörü" description="YouTube ve link indirmelerinin kaydedileceği klasör">
         <SettingRow label="Klasör">
-          <div className="flex items-center space-x-2 w-full">
+          <div className="flex items-center gap-2 w-full">
             <input readOnly value={downloadDir || 'Varsayılan (Müzik Klasörü)'}
               className="flex-1 border rounded-lg px-3 py-2 text-xs truncate"
               style={{backgroundColor:'rgba(255,255,255,0.05)', borderColor:'var(--border-color)', color:'var(--text-primary)'}} />
@@ -1445,7 +1445,7 @@ const UpdatesSettings = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <h2 className="text-2xl font-bold">Güncellemeler</h2>
       
       <SettingGroup title="Otomatik Güncelleme" description="Uygulama güncellemelerini yönet">
@@ -1455,11 +1455,11 @@ const UpdatesSettings = () => {
       </SettingGroup>
 
       <SettingGroup title="Manuel Kontrol" description="Güncellemeleri manuel olarak kontrol et">
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           <button 
             onClick={handleCheckUpdates} 
             disabled={checking}
-            className="px-4 py-2 rounded-lg text-white transition flex items-center space-x-2 disabled:opacity-50"
+            className="px-4 py-2 rounded-lg text-white transition flex items-center gap-2 disabled:opacity-50"
             style={{backgroundColor:'var(--color-primary)'}}
           >
             {checking ? <RefreshCw size={16} className="animate-spin" /> : <RefreshCw size={16} />}
@@ -1515,12 +1515,12 @@ const TempMusicSettings = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <h2 className="text-2xl font-bold">Geçici Müzikler</h2>
 
       <SettingGroup title="Anında Dinle" description="YouTube aramasından 'Anında Dinle' ile oynatılan müzikler geçici olarak indirilir. Bunlar kütüphaneye eklenmez, belirli süre sonra otomatik silinir.">
-        <div className="p-4 rounded-xl space-y-3" style={{backgroundColor:'var(--color-bg-secondary)'}}>
-          <div className="flex items-center space-x-2 text-sm">
+        <div className="flex flex-col p-4 rounded-xl gap-3" style={{backgroundColor:'var(--color-bg-secondary)'}}>
+          <div className="flex items-center gap-2 text-sm">
             <HardDrive size={16} style={{color:'var(--color-primary)'}} />
             <span>Geçici müzikler 24 saat sonra otomatik temizlenir.</span>
           </div>
@@ -1546,16 +1546,16 @@ const TempMusicSettings = () => {
 };
 
 const AboutSettings = () => (
-  <div className="space-y-8">
+  <div className="flex flex-col gap-8">
     <h2 className="text-2xl font-bold">Hakkında</h2>
     <SettingGroup title="Player Music" description="Modern müzik çalar uygulaması">
-      <div className="text-sm space-y-2" style={{color:'var(--text-secondary)'}}>
+      <div className="flex flex-col text-sm gap-2" style={{color:'var(--text-secondary)'}}>
         <p>Sürüm: 1.0.0</p>
         <p>Geliştirici: TARIKELER</p>
       </div>
     </SettingGroup>
     <SettingGroup title="Geliştirici" description="Bağlantılar ve iletişim">
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         {[
           { 
             name: 'GitHub', 
@@ -1571,7 +1571,7 @@ const AboutSettings = () => (
           <div key={idx} 
                onClick={() => openLink(link.url)}
                className="flex items-center justify-between p-3 rounded-xl cursor-pointer hover:bg-white/5 transition">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <span className="text-lg">{link.icon}</span>
               <span className="text-sm font-bold">{link.name}</span>
             </div>
@@ -1669,7 +1669,7 @@ const AdvancedSettings = () => {
   };
   
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <h2 className="text-2xl font-bold">Gelişmiş Ayarlar</h2>
 
       <SettingGroup title="Ses İşleme Kontrolü" description="Tüm ses efektlerini tamamen devre dışı bırak / etkinleştir">
@@ -1697,7 +1697,7 @@ const AdvancedSettings = () => {
 
       <SettingGroup title="Geliştirici Günlükleri" description="Uygulama içi geliştirici konsolunu ve dosya loglarını yönetin">
         <div className="flex items-center justify-between p-4 rounded-xl" style={{backgroundColor:'rgba(255,255,255,0.03)'}}>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <Terminal size={18} style={{color:'var(--color-primary)'}} />
             <div>
               <div className="text-sm font-bold">Geliştirici Günlüklerini Aç</div>
@@ -1712,7 +1712,7 @@ const AdvancedSettings = () => {
         <div className="mt-3 p-3 rounded-xl" style={{backgroundColor:'rgba(255,255,255,0.03)'}}>
           <div className="text-xs mb-2" style={{color:'var(--text-secondary)'}}>
             <span className="font-bold">Log Dosyası Konumu:</span>
-            <div className="mt-1 flex items-center gap-2">
+            <div className="flex flex-col mt-1 flex items-center gap-2">
               <code className="text-[10px] break-all" style={{color:'var(--color-primary)', opacity:0.8}}>
                 {logFilePath || 'Yükleniyor...'}
               </code>
@@ -1799,12 +1799,12 @@ const AdvancedSettings = () => {
 };
 
 const SettingGroup = ({ title, description, children }) => (
-  <div className="space-y-4">
+  <div className="flex flex-col gap-4">
     <div>
       <h3 className="text-lg font-bold">{title}</h3>
       <p className="text-sm" style={{color:'var(--text-secondary)'}}>{description}</p>
     </div>
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       {children}
     </div>
   </div>

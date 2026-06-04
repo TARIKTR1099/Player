@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Menu, Minus, Square, Copy, X } from 'lucide-react';
+import { cn } from '../lib/utils';
 import { isElectron, isMacOS } from '../platform';
 
 function TitleBar({ sidebarMode, setSidebarMode, sidebarToggleBehavior }) {
@@ -20,8 +21,8 @@ function TitleBar({ sidebarMode, setSidebarMode, sidebarToggleBehavior }) {
   }, []);
 
   return (
-    <div className={`h-10 flex justify-between items-center px-4 select-none ${isMacOS() ? 'pl-20' : ''}`} style={{backgroundColor:'var(--color-bg-tertiary)', WebkitAppRegion:'drag'}}>
-      <div className="flex items-center space-x-4" style={{color:'var(--text-secondary)'}}>
+    <div className={cn("h-10 flex justify-between items-center px-4 select-none", isMacOS() && 'pl-20')} style={{backgroundColor:'var(--color-bg-tertiary)', WebkitAppRegion:'drag'}}>
+      <div className="flex items-center gap-4 text-muted-foreground">
         <Menu size={18} className="cursor-pointer hover:text-primary transition" style={{WebkitAppRegion:'no-drag'}} onClick={() => {
           if (sidebarToggleBehavior === 'fullToggle') {
             setSidebarMode(sidebarMode === 'collapsed' ? 'full' : 'collapsed');
@@ -34,7 +35,7 @@ function TitleBar({ sidebarMode, setSidebarMode, sidebarToggleBehavior }) {
         </div>
       </div>
       {isElectron() && !isMacOS() && (
-        <div className="flex items-center space-x-1 h-full pr-1" style={{WebkitAppRegion:'no-drag'}}>
+        <div className="flex items-center gap-1 h-full pr-1" style={{WebkitAppRegion:'no-drag'}}>
           <button
             onClick={() => window.require('electron').ipcRenderer.invoke('window-minimize')}
             className="hover:bg-white/15 text-white/70 hover:text-white w-10 h-9 flex items-center justify-center rounded-lg transition-all active:scale-95"

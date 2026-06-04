@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+﻿import React, { useRef, useEffect, useState } from 'react';
 import { useStore } from '../store';
 import { Terminal, X, Copy, Trash2, ChevronDown, ChevronUp, FolderOpen } from 'lucide-react';
 
@@ -69,7 +69,7 @@ const DevConsole = () => {
         style={{ borderBottom: collapsed ? 'none' : '1px solid rgba(255,255,255,0.06)' }}
         onClick={() => setCollapsed(!collapsed)}
       >
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <Terminal size={13} style={{ color: 'var(--color-primary)' }} />
           <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-primary)' }}>
             Geliştirici Günlükleri
@@ -81,7 +81,7 @@ const DevConsole = () => {
             {logs.length}
           </span>
         </div>
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center gap-1">
           {logFilePath && (
             <button
               onClick={(e) => {
@@ -139,7 +139,7 @@ const DevConsole = () => {
             </div>
           ) : (
             logs.map((log) => (
-              <div key={log.id} className="flex items-start space-x-2 py-[2px] text-[10px] leading-relaxed">
+              <div key={log.id} className="flex items-start gap-2 py-[2px] text-[10px] leading-relaxed">
                 <span style={{ color: 'rgba(255,255,255,0.25)', flexShrink: 0 }}>
                   {new Date(log.timestamp).toLocaleTimeString('tr-TR')}
                 </span>

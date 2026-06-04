@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { X, Save, Trash2, RotateCcw, Music, Power, Check } from 'lucide-react';
+import { cn } from '../lib/utils';
 import { useStore } from '../store';
 
 const EQ_BANDS = ['31Hz', '62Hz', '125Hz', '250Hz', '500Hz', '1kHz', '2kHz', '4kHz', '8kHz', '16kHz'];
@@ -78,36 +79,33 @@ const EqualizerModal = ({ onClose }) => {
         {/* Header */}
         {/* Toast notification */}
         {showToast && (
-          <div className="fixed top-4 right-4 z-[100] px-4 py-2.5 rounded-xl text-sm font-bold shadow-2xl transition-all duration-300 animate-slide-up flex items-center space-x-2"
+          <div className="fixed top-4 right-4 z-[100] px-4 py-2.5 rounded-xl text-sm font-bold shadow-2xl transition-all duration-300 animate-slide-up flex items-center gap-2"
             style={{backgroundColor:'rgba(15,108,189,0.9)', color:'white'}}>
             <Check size={16} />
             <span>{toast}</span>
           </div>
         )}
         <div className="flex items-center justify-between p-5 border-b" style={{borderColor:'var(--color-border)'}}>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-4">
             <h3 className="text-xl font-bold">Ekolayzer</h3>
             {currentTrack && (
               <button
                 onClick={() => setPerTrackMode(!perTrackMode)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5`}
-                style={perTrackMode ? {backgroundColor:'var(--color-primary)', color:'white'} : {backgroundColor:'rgba(255,255,255,0.05)'}}
+                className={cn("px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5", perTrackMode ? 'bg-primary text-white' : 'bg-white/5')}
               >
                 <Music size={12} />
                 <span>{perTrackMode ? 'Bu Parçaya Özel' : 'Genel'}</span>
               </button>
             )}
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <button onClick={toggleBypass}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5"
-              style={effectsBypass ? {backgroundColor:'rgba(255,255,255,0.05)', color:'var(--color-text-secondary)'} : {backgroundColor:'rgba(15,108,189,0.2)', color:'var(--color-primary)'}}>
+              className={cn("px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5", effectsBypass ? 'bg-white/5 text-muted-foreground' : 'bg-primary/20 text-primary')}>
               <Power size={12} />
               <span>{effectsBypass ? 'Kapalı' : 'Aktif'}</span>
             </button>
             <button onClick={handleReset}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5"
-              style={{backgroundColor:'rgba(15,108,189,0.15)', color:'var(--color-primary)'}}>
+              className="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-primary/15 text-primary">
               <RotateCcw size={12} />
               <span>Varsayılana Çevir</span>
             </button>
@@ -116,15 +114,11 @@ const EqualizerModal = ({ onClose }) => {
         </div>
         
         {/* Tabs */}
-        <div className="flex border-b" style={{borderColor:'var(--color-border)'}}>
+        <div className="flex border-b border-border">
           {['eq', 'effects', 'presets'].map(tab => (
             <button key={tab}
               onClick={() => setActiveTab(tab)}
-              className="px-5 py-3 text-sm font-bold transition border-b-2"
-              style={{
-                color: activeTab === tab ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                borderColor: activeTab === tab ? 'var(--color-primary)' : 'transparent'
-              }}
+              className={cn("px-5 py-3 text-sm font-bold transition border-b-2", activeTab === tab ? 'text-primary border-primary' : 'text-muted-foreground border-transparent')}
             >
               {tab === 'eq' && 'EQ'}
               {tab === 'effects' && 'Ses Efektleri'}
@@ -172,15 +166,7 @@ const EqualizerModal = ({ onClose }) => {
                 {Object.keys(allPresets).map(name => (
                   <button key={name}
                     onClick={() => applyPreset(name)}
-                    className="px-3 py-1.5 rounded-r-lg text-xs font-bold transition"
-                    style={{
-                      background: selectedPreset === name
-                        ? 'linear-gradient(to right, rgba(15,108,189,0.18), rgba(15,108,189,0.04))'
-                        : 'rgba(255,255,255,0.05)',
-                      color: selectedPreset === name ? 'var(--color-primary)' : 'var(--color-text-primary)',
-                      borderLeft: selectedPreset === name ? '4px solid var(--color-primary)' : '4px solid transparent',
-                      paddingLeft: selectedPreset === name ? '10px' : '12px',
-                    }}
+                    className={cn("px-3 py-1.5 rounded-r-lg text-xs font-bold transition border-l-4", selectedPreset === name ? 'bg-primary/18 text-primary border-primary pl-2.5' : 'bg-white/5 text-text-primary border-transparent pl-3')}
                   >
                     {name}
                   </button>
@@ -190,8 +176,7 @@ const EqualizerModal = ({ onClose }) => {
               {/* Per-track apply */}
               {currentTrack && (
                 <button onClick={handleApplyToTrack}
-                  className="w-full py-2 rounded-lg text-sm font-bold transition flex items-center justify-center space-x-2"
-                  style={{backgroundColor:'rgba(15,108,189,0.1)', color:'var(--color-primary)'}}>
+                  className="flex flex-col w-full py-2 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 bg-primary/10 text-primary">
                   <Music size={14} />
                   <span>Bu EQ Ayarlarını "{currentTrack.title}" Parçasına Kaydet</span>
                 </button>
@@ -200,7 +185,7 @@ const EqualizerModal = ({ onClose }) => {
           )}
           
           {activeTab === 'effects' && (
-            <div className="space-y-5">
+            <div className="flex flex-col gap-5">
               {Object.entries(EQUALIZER_SETTINGS).map(([key, setting]) => (
                 <div key={key} className="p-4 rounded-xl" style={{backgroundColor:'rgba(255,255,255,0.03)'}}>
                   <div className="flex justify-between items-center mb-2">
@@ -230,8 +215,7 @@ const EqualizerModal = ({ onClose }) => {
                       useStore.getState().setAudioEffect(key, audioEffects[key]);
                     });
                   }}
-                  className="w-full py-2 rounded-lg text-sm font-bold transition flex items-center justify-center space-x-2"
-                  style={{backgroundColor:'rgba(15,108,189,0.1)', color:'var(--color-primary)'}}
+                  className="flex flex-col w-full py-2 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 bg-primary/10 text-primary"
                 >
                   <Music size={14} />
                   <span>Bu Efektleri Parçaya Kaydet</span>
@@ -241,9 +225,9 @@ const EqualizerModal = ({ onClose }) => {
           )}
           
           {activeTab === 'presets' && (
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               {/* Save new preset */}
-              <div className="flex space-x-2">
+              <div className="flex gap-2">
                 <input
                   value={newPresetName}
                   onChange={(e) => setNewPresetName(e.target.value)}
@@ -253,8 +237,7 @@ const EqualizerModal = ({ onClose }) => {
                   style={{backgroundColor:'rgba(255,255,255,0.05)', borderColor:'var(--color-border)', color:'var(--color-text-primary)'}}
                 />
                 <button onClick={handleSavePreset} disabled={!newPresetName.trim()}
-                  className="px-4 py-2 rounded-lg text-sm font-bold text-white disabled:opacity-50 flex items-center space-x-2"
-                  style={{backgroundColor:'var(--color-primary)'}}>
+                  className="flex flex-col px-4 py-2 rounded-lg text-sm font-bold text-white disabled:opacity-50 flex items-center gap-2 bg-primary">
                   <Save size={14} />
                   <span>Kaydet</span>
                 </button>
@@ -262,17 +245,12 @@ const EqualizerModal = ({ onClose }) => {
               
               {/* Built-in presets */}
               <div>
-                <div className="text-xs font-bold mb-2" style={{color:'var(--color-text-secondary)'}}>Hazır Presetler</div>
+                <div className="text-xs font-bold mb-2 text-muted-foreground">Hazır Presetler</div>
                 <div className="grid grid-cols-2 gap-2">
                   {Object.keys(eqPresets).map(name => (
                     <button key={name}
                       onClick={() => applyPreset(name)}
-                      className="p-3 rounded-xl text-left transition text-sm font-bold"
-                      style={{
-                        backgroundColor: selectedPreset === name ? 'rgba(15,108,189,0.15)' : 'rgba(255,255,255,0.03)',
-                        color: selectedPreset === name ? 'var(--color-primary)' : 'var(--color-text-primary)',
-                        border: selectedPreset === name ? '1px solid var(--color-primary)' : '1px solid transparent'
-                      }}
+                      className={cn("p-3 rounded-xl text-left transition text-sm font-bold", selectedPreset === name ? 'bg-primary/15 text-primary border border-primary' : 'bg-white/3 border border-transparent')}
                     >
                       {name}
                     </button>
@@ -283,8 +261,8 @@ const EqualizerModal = ({ onClose }) => {
               {/* Custom presets */}
               {Object.keys(customPresets).length > 0 && (
                 <div>
-                  <div className="text-xs font-bold mb-2" style={{color:'var(--color-text-secondary)'}}>Özel Presetlerin</div>
-                  <div className="space-y-1">
+                  <div className="text-xs font-bold mb-2 text-muted-foreground">Özel Presetlerin</div>
+                  <div className="flex flex-col gap-1">
                     {Object.entries(customPresets).map(([name, bands]) => (
                       <div key={name} className="flex items-center justify-between p-3 rounded-xl" style={{backgroundColor:'rgba(255,255,255,0.03)'}}>
                         <button onClick={() => applyPreset(name)} className="text-sm font-bold flex-1 text-left">

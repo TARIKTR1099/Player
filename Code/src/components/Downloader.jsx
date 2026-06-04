@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Download, Play, Loader, X, Music, CheckCircle, Clock, CheckSquare, Square, ListMusic, Sliders } from 'lucide-react';
 import { useStore } from '../store';
 
@@ -198,9 +198,9 @@ const Downloader = () => {
   const failedDownloads = Object.entries(downloads).filter(([, dl]) => dl.status === 'error');
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-5">
       {/* Search Bar */}
-      <div className="flex space-x-2">
+      <div className="flex gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={18} style={{color:'var(--text-secondary)'}} />
           <input 
@@ -213,15 +213,15 @@ const Downloader = () => {
           />
         </div>
         <button onClick={handleSearch} disabled={loading}
-          className="px-6 rounded-xl font-bold transition disabled:opacity-50 text-white flex items-center space-x-2"
+          className="flex flex-col px-6 rounded-xl font-bold transition disabled:opacity-50 text-white flex items-center gap-2"
           style={{backgroundColor:'var(--color-primary)'}}>
           {loading ? <Loader className="animate-spin" size={18} /> : <span>Ara</span>}
         </button>
       </div>
 
       {/* Quality & Format Selector */}
-      <div className="flex items-center space-x-4 flex-wrap gap-2">
-        <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-4 flex-wrap gap-2">
+        <div className="flex items-center gap-2">
           <Sliders size={14} style={{color:'var(--text-secondary)'}} />
           <select value={downloadFormat} onChange={(e) => setDownloadFormat(e.target.value)}
             className="text-xs px-2 py-1.5 rounded-lg focus:outline-none"
@@ -264,12 +264,12 @@ const Downloader = () => {
 
       {/* Active Downloads */}
       {activeDownloads.length > 0 && (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <h3 className="text-sm font-bold" style={{color:'var(--text-secondary)'}}>İndiriliyor ({activeDownloads.length})</h3>
           {activeDownloads.map(([id, dl]) => (
             <div key={id} className="p-4 rounded-xl" style={{backgroundColor:'var(--color-bg-secondary)'}}>
               <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center space-x-2 flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                   <Clock size={14} className="text-primary flex-shrink-0" />
                   <span className="text-sm font-bold truncate">{dl.title}</span>
                 </div>
@@ -295,11 +295,11 @@ const Downloader = () => {
 
       {/* Completed Downloads */}
       {completedDownloads.length > 0 && (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <h3 className="text-sm font-bold" style={{color:'var(--text-secondary)'}}>Tamamlananlar ({completedDownloads.length})</h3>
           {completedDownloads.map(([id, dl]) => (
             <div key={id} className="flex items-center justify-between px-4 py-2 rounded-xl" style={{backgroundColor:'var(--color-bg-secondary)'}}>
-              <div className="flex items-center space-x-2 flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
                 <CheckCircle size={14} className="text-green-500 flex-shrink-0" />
                 <span className="text-xs truncate">{dl.title}</span>
               </div>
@@ -311,11 +311,11 @@ const Downloader = () => {
 
       {/* Failed Downloads */}
       {failedDownloads.length > 0 && (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <h3 className="text-sm font-bold" style={{color:'var(--text-secondary)'}}>Başarısız</h3>
           {failedDownloads.map(([id, dl]) => (
             <div key={id} className="flex items-center justify-between px-4 py-2 rounded-xl" style={{backgroundColor:'rgba(239,68,68,0.1)'}}>
-              <div className="flex items-center space-x-2 flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
                 <X size={14} className="text-red-500 flex-shrink-0" />
                 <span className="text-xs truncate">{dl.title}</span>
               </div>
@@ -329,11 +329,11 @@ const Downloader = () => {
       {results.length > 0 && (
         <>
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <h3 className="text-sm font-bold" style={{color:'var(--text-secondary)'}}>
                 {isPlaylist ? 'Playlist' : 'Sonuçlar'} ({results.length})
               </h3>
-              <button onClick={toggleSelectAll} className="text-xs px-2 py-1 rounded-lg transition hover:bg-white/10 flex items-center space-x-1"
+              <button onClick={toggleSelectAll} className="flex flex-col text-xs px-2 py-1 rounded-lg transition hover:bg-white/10 flex items-center gap-1"
                 style={{color:'var(--text-secondary)'}}>
                 {selectedIds.size === results.filter(t => !t._downloaded).length && results.length > 0 ? <CheckSquare size={12} /> : <Square size={12} />}
                 <span>Tümünü Seç</span>
@@ -341,16 +341,16 @@ const Downloader = () => {
             </div>
             {selectedIds.size > 0 && (
               <button onClick={handleBatchDownload}
-                className="px-4 py-1.5 rounded-xl text-xs font-bold text-white transition flex items-center space-x-1"
+                className="flex flex-col px-4 py-1.5 rounded-xl text-xs font-bold text-white transition flex items-center gap-1"
                 style={{backgroundColor:'var(--color-primary)'}}>
                 <Download size={12} />
                 <span>{selectedIds.size} İndir</span>
               </button>
             )}
           </div>
-          <div className="space-y-1">
+          <div className="flex flex-col gap-1">
             {results.map((track, idx) => (
-              <div key={track.id} className="flex items-center space-x-2 px-3 py-2 rounded-xl transition hover:bg-white/[0.03] group"
+              <div key={track.id} className="flex items-center gap-2 px-3 py-2 rounded-xl transition hover:bg-white/[0.03] group"
                 style={{backgroundColor:'rgba(255,255,255,0.02)'}}>
                 <button onClick={() => toggleSelect(track.id)}
                   className="p-1 rounded hover:bg-white/10 flex-shrink-0"
@@ -372,7 +372,7 @@ const Downloader = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-1 flex-shrink-0">
+                <div className="flex items-center gap-1 flex-shrink-0">
                   <button onClick={() => handleInstantPlay(track)}
                     className="p-1.5 rounded-lg transition hover:bg-white/10"
                     style={{color:'var(--text-secondary)'}}

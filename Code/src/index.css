@@ -1,33 +1,73 @@
 @import "tailwindcss";
 
 @theme {
+  /* Primary */
   --color-primary: #0f6cbd;
   --color-primary-dark: #0a4f8a;
+  --color-primary-foreground: #ffffff;
+  /* Semantic backgrounds (shadcn mapping) */
+  --color-background: #0f0f0f;
+  --color-card: #1a1a1a;
+  --color-card-foreground: #ffffff;
+  --color-muted: #252525;
+  --color-muted-foreground: #888888;
+  --color-accent: #2a2a2a;
+  --color-accent-foreground: #ffffff;
+  --color-popover: #1a1a1a;
+  --color-popover-foreground: #ffffff;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  /* Borders & inputs */
+  --color-border: #2a2a2a;
+  --color-input: #2a2a2a;
+  --color-ring: #0f6cbd;
+  /* Sidebar */
+  --color-sidebar: #0f0f0f;
+  --color-sidebar-foreground: #ffffff;
+  --color-sidebar-border: #2a2a2a;
+  /* Legacy aliases (backward compat) */
   --color-bg-primary: #0f0f0f;
   --color-bg-secondary: #1a1a1a;
   --color-bg-tertiary: #252525;
   --color-bg-elevated: #2a2a2a;
   --color-text-primary: #ffffff;
   --color-text-secondary: #888888;
-  --color-border: #2a2a2a;
 }
 
 [data-theme="light"] {
+  /* shadcn semantic tokens */
+  --color-background: #f5f5f5;
+  --color-card: #ffffff;
+  --color-card-foreground: #1a1a1a;
+  --color-muted: #e8e8e8;
+  --color-muted-foreground: #666666;
+  --color-accent: #dddddd;
+  --color-accent-foreground: #1a1a1a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1a1a1a;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #dddddd;
+  --color-input: #dddddd;
+  --color-ring: #0f6cbd;
+  --color-sidebar: #f5f5f5;
+  --color-sidebar-foreground: #1a1a1a;
+  --color-sidebar-border: #dddddd;
+  /* Legacy aliases */
   --color-bg-primary: #f5f5f5;
   --color-bg-secondary: #ffffff;
   --color-bg-tertiary: #e8e8e8;
   --color-bg-elevated: #dddddd;
   --color-text-primary: #1a1a1a;
   --color-text-secondary: #666666;
-  --color-border: #dddddd;
   --text-primary: #1a1a1a;
   --text-secondary: #666666;
   --border-color: #dddddd;
 }
 
 body {
-  background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
   font-family: 'Segoe UI Variable', 'Segoe UI', Tahoma, sans-serif;
   overflow: hidden;
   margin: 0;
@@ -69,8 +109,11 @@ button:focus:not(:focus-visible),
   outline: none;
 }
 
+.custom-scrollbar {
+  scroll-behavior: smooth;
+}
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -78,8 +121,13 @@ button:focus:not(:focus-visible),
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .line-clamp-1 {
@@ -115,6 +163,38 @@ button:focus:not(:focus-visible),
 .animate-slide-up {
   animation: slide-up 0.2s ease;
 }
+
+/* Smooth tab switching */
+@keyframes tab-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tab-animate { animation: tab-enter 0.25s ease-out; }
+
+/* Card hover lift */
+.hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+
+/* Press scale for buttons */
+.press-scale { transition: transform 0.1s ease; }
+.press-scale:active { transform: scale(0.95); }
+
+/* Fade-in stagger for lists */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.stagger-item { animation: fade-in-up 0.3s ease-out both; }
+.stagger-item:nth-child(1) { animation-delay: 0.02s; }
+.stagger-item:nth-child(2) { animation-delay: 0.04s; }
+.stagger-item:nth-child(3) { animation-delay: 0.06s; }
+.stagger-item:nth-child(4) { animation-delay: 0.08s; }
+.stagger-item:nth-child(5) { animation-delay: 0.10s; }
+
+/* Skeleton loading variants */
+.skeleton-circle { width: 40px; height: 40px; border-radius: 50%; }
+.skeleton-line { height: 12px; border-radius: 6px; }
+.skeleton-line-sm { height: 10px; border-radius: 4px; width: 60%; }
 
 input[type="range"] {
   accent-color: var(--color-primary);

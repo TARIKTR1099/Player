@@ -1,5 +1,6 @@
-import React, { useRef, useEffect, useState } from 'react';
+﻿import React, { useRef, useEffect, useState } from 'react';
 import { Subtitles, Upload, X, Clock, Music } from 'lucide-react';
+import { cn } from '../lib/utils';
 import { useStore } from '../store';
 
 const formatTime = (s) => {
@@ -82,7 +83,7 @@ const SubtitleTimeline = ({ track, progress, audioRef }) => {
 
   if (!track) {
     return (
-      <div className="p-6 text-center" style={{color:'var(--text-secondary)'}}>
+      <div className="p-6 text-center text-muted-foreground">
         <Music size={40} className="mx-auto mb-4 opacity-30" />
         <p className="text-sm">Müzik seçilmedi</p>
       </div>
@@ -92,7 +93,7 @@ const SubtitleTimeline = ({ track, progress, audioRef }) => {
   return (
     <div className="flex flex-col h-full">
       {/* Subtitle file selector */}
-      <div className="p-4 border-b flex-shrink-0 space-y-2" style={{borderColor:'var(--border-color)'}}>
+      <div className="flex flex-col p-4 border-b flex-shrink-0 gap-2" style={{borderColor:'var(--border-color)'}}>
         <div className="flex items-center gap-2">
           <button
             onClick={() => subtitleInputRef.current?.click()}
@@ -110,12 +111,7 @@ const SubtitleTimeline = ({ track, progress, audioRef }) => {
               <div
                 key={track.id}
                 onClick={() => setActiveSubtitle(track.id)}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer transition ${
-                  mapping.activeSubtitle === track.id ? 'text-white' : 'opacity-60 hover:opacity-100'
-                }`}
-                style={{
-                  backgroundColor: mapping.activeSubtitle === track.id ? 'var(--color-primary)' : 'rgba(255,255,255,0.08)'
-                }}
+                className={cn("flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer transition", mapping.activeSubtitle === track.id ? 'text-white bg-primary' : 'opacity-60 hover:opacity-100 bg-white/8')}
               >
                 <Subtitles size={11} />
                 <span className="truncate max-w-[80px]">{track.name}</span>
@@ -131,13 +127,13 @@ const SubtitleTimeline = ({ track, progress, audioRef }) => {
       {/* Timeline */}
       <div ref={containerRef} className="flex-1 overflow-y-auto custom-scrollbar">
         {syncedLyricsLoading ? (
-          <div className="flex flex-col items-center justify-center h-full text-center p-6" style={{color:'var(--text-secondary)'}}>
+          <div className="flex flex-col items-center justify-center h-full text-center p-6 text-muted-foreground">
             <Music size={36} className="mb-3 opacity-30 animate-pulse" />
             <p className="text-sm font-bold">Şarkı sözleri aranıyor...</p>
             <p className="text-xs mt-1 opacity-50">LRCLib</p>
           </div>
         ) : cues.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center p-6" style={{color:'var(--text-secondary)'}}>
+          <div className="flex flex-col items-center justify-center h-full text-center p-6 text-muted-foreground">
             <Subtitles size={36} className="mb-3 opacity-30" />
             <p className="text-sm font-bold">Altyazı/Şarkı Sözü Yok</p>
             <p className="text-xs mt-1">SRT/VTT dosyası yükleyin veya internet bağlantısı ile otomatik şarkı sözleri alın</p>
@@ -159,35 +155,24 @@ const SubtitleTimeline = ({ track, progress, audioRef }) => {
                   key={cue.id || idx}
                   ref={isActive ? activeCueRef : null}
                   onClick={() => handleCueClick(cue)}
-                  className={`group flex items-start gap-3 px-4 py-2.5 cursor-pointer transition-all duration-300 border-l-2 ${
-                    isActive
-                      ? 'border-blue-500 bg-blue-500/10 scale-[1.02] shadow-lg'
-                      : isPast
-                        ? 'border-transparent opacity-40 hover:opacity-70'
-                        : 'border-transparent hover:bg-white/5'
-                  }`}
+                  className={cn("group flex items-start gap-3 px-4 py-2.5 cursor-pointer transition-all duration-300 border-l-2", isActive ? 'border-primary bg-primary/10 scale-[1.02] shadow-lg' : isPast ? 'border-transparent opacity-40 hover:opacity-70' : 'border-transparent hover:bg-white/5')}
                   style={{
-                    borderLeftColor: isActive ? 'var(--color-primary)' : 'transparent',
                     boxShadow: isActive ? '0 0 12px 2px rgba(59, 130, 246, 0.15)' : 'none',
                     animation: isActive ? 'lyrics-glow 2s ease-in-out infinite' : 'none'
                   }}
                 >
                   {/* Timestamp */}
-                  <div className={`flex-shrink-0 text-[10px] font-mono font-bold mt-0.5 min-w-[60px] text-right ${
-                    isActive ? 'text-blue-400' : 'text-gray-500'
-                  }`}>
+                  <div className={cn("flex-shrink-0 text-[10px] font-mono font-bold mt-0.5 min-w-[60px] text-right", isActive ? 'text-primary' : 'text-muted-foreground')}>
                     <Clock size={10} className="inline mr-1" />
                     {formatTime(cue.start)}
                   </div>
                   {/* Text */}
-                  <div className={`text-sm leading-relaxed ${
-                    isActive ? 'font-bold' : 'font-normal'
-                  }`} style={{color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)'}}>
+                  <div className={cn("text-sm leading-relaxed", isActive ? 'font-bold' : 'font-normal')} style={{color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)'}}>
                     {cue.text}
                   </div>
                   {/* Jump button on hover */}
                   <div className="ml-auto flex-shrink-0 opacity-0 group-hover:opacity-100 transition">
-                    <span className="text-[9px] px-1.5 py-0.5 rounded" style={{backgroundColor:'rgba(255,255,255,0.1)', color:'var(--color-primary)'}}>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-primary">
                       {formatTime(cue.start)}
                     </span>
                   </div>
@@ -200,25 +185,24 @@ const SubtitleTimeline = ({ track, progress, audioRef }) => {
 
       {/* Progress indicator */}
       {cues.length > 0 && (
-        <div className="flex-shrink-0 px-4 py-2 border-t text-[10px]" style={{borderColor:'var(--border-color)', color:'var(--text-secondary)'}}>
+        <div className="flex-shrink-0 px-4 py-2 border-t border-border text-[10px] text-muted-foreground">
           <div className="flex items-center gap-2">
             <span className="font-bold">{formatTime(progress)}</span>
             <span className="opacity-40">/</span>
             <span>{activeCueIndex >= 0 ? `${activeCueIndex + 1}/${cues.length}` : `${cues.length} satır`}</span>
             {activeCueIndex >= 0 && (
-              <span className="ml-auto text-blue-400">▶ {cues[activeCueIndex]?.text?.slice(0, 30)}</span>
+              <span className="ml-auto text-primary">▶ {cues[activeCueIndex]?.text?.slice(0, 30)}</span>
         )}
       </div>
 
       {/* Subtitle Timing Offset — from Screenbox pattern (-3000ms to +3000ms) */}
       {cues.length > 0 && (
-        <div className="px-4 py-2 border-b flex-shrink-0" style={{borderColor:'var(--border-color)'}}>
+        <div className="px-4 py-2 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold opacity-60" style={{color:'var(--text-secondary)'}}>Zamanlama:</span>
+            <span className="text-[10px] font-bold opacity-60 text-muted-foreground">Zamanlama:</span>
             <button
               onClick={() => setMapping('subtitleOffset', Math.max(-3000, (mapping.subtitleOffset || 0) - 500))}
-              className="px-2 py-0.5 rounded text-[10px] font-bold transition hover:bg-white/10"
-              style={{color:'var(--text-secondary)'}}
+              className="px-2 py-0.5 rounded text-[10px] font-bold transition hover:bg-white/10 text-muted-foreground"
             >
               -500ms
             </button>
@@ -234,19 +218,17 @@ const SubtitleTimeline = ({ track, progress, audioRef }) => {
             />
             <button
               onClick={() => setMapping('subtitleOffset', Math.min(3000, (mapping.subtitleOffset || 0) + 500))}
-              className="px-2 py-0.5 rounded text-[10px] font-bold transition hover:bg-white/10"
-              style={{color:'var(--text-secondary)'}}
+              className="px-2 py-0.5 rounded text-[10px] font-bold transition hover:bg-white/10 text-muted-foreground"
             >
               +500ms
             </button>
-            <span className={`text-[10px] font-mono font-bold min-w-[48px] text-right ${subtitleOffset !== 0 ? '' : 'opacity-40'}`} style={{color:'var(--text-secondary)'}}>
+            <span className={cn("text-[10px] font-mono font-bold min-w-[48px] text-right text-muted-foreground", subtitleOffset === 0 && 'opacity-40')}>
               {subtitleOffset > 0 ? `+${subtitleOffset}` : subtitleOffset}ms
             </span>
             {subtitleOffset !== 0 && (
               <button
                 onClick={() => setMapping('subtitleOffset', 0)}
-                className="px-1.5 py-0.5 rounded text-[10px] font-bold transition hover:bg-white/10"
-                style={{color:'var(--text-secondary)'}}
+                className="px-1.5 py-0.5 rounded text-[10px] font-bold transition hover:bg-white/10 text-muted-foreground"
                 title="Sıfırla"
               >
                 ⟲

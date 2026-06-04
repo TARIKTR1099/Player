@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store';
 import { Puzzle, Upload, Download, Star, Shield, FolderOpen, Save, Trash2, Eye, Check, X, AlertTriangle, Info, Plus, Search, Copy, FolderOpen as FolderIcon, GitBranch, Database, Globe, Send, Loader } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -357,7 +357,7 @@ const PluginSettings = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <h2 className="text-2xl font-bold">Eklenti Sistemi</h2>
 
       {/* Tabs */}
@@ -370,7 +370,7 @@ const PluginSettings = () => {
         ].map(tab => (
           <button key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className="px-4 py-3 text-sm font-bold transition border-b-2 flex items-center space-x-2"
+            className="flex flex-col px-4 py-3 text-sm font-bold transition border-b-2 flex items-center gap-2"
             style={{
               color: activeTab === tab.id ? 'var(--color-primary)' : 'var(--text-secondary)',
               borderColor: activeTab === tab.id ? 'var(--color-primary)' : 'transparent'
@@ -383,23 +383,23 @@ const PluginSettings = () => {
 
       {/* Create Plugin Tab */}
       {activeTab === 'create' && (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           {/* AI Skills File - Only in Create Tab */}
           <div className="p-4 rounded-xl" style={{backgroundColor:'var(--color-bg-secondary)'}}>
-            <div className="flex items-center space-x-3 mb-3">
+            <div className="flex items-center gap-3 mb-3">
               <FolderIcon size={18} style={{color:'var(--color-primary)'}} />
               <span className="font-bold text-sm">AI Skills Dosyası</span>
             </div>
             <p className="text-xs mb-3" style={{color:'var(--text-secondary)'}}>
               Bu dosya AI'nın eklenti oluşturmayı öğrenmesi için kullanılır. Düzenlenemez, sadece kopyalanabilir.
             </p>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <code className="flex-1 text-xs px-3 py-2 rounded-lg truncate" style={{backgroundColor:'rgba(255,255,255,0.05)', color:'var(--text-primary)', fontFamily:'monospace'}}>
                 {displaySkillsPath}
               </code>
               <button
                 onClick={copySkillsPath}
-                className="px-3 py-2 rounded-lg text-white text-xs flex items-center space-x-2 hover:opacity-80 transition"
+                className="px-3 py-2 rounded-lg text-white text-xs flex items-center gap-2 hover:opacity-80 transition"
                 style={{backgroundColor:'var(--color-primary)'}}
               >
                 {copied ? <Check size={14} /> : <Copy size={14} />}
@@ -407,7 +407,7 @@ const PluginSettings = () => {
               </button>
               <button
                 onClick={copySkillsToLocation}
-                className="px-3 py-2 rounded-lg text-white text-xs flex items-center space-x-2 hover:opacity-80 transition"
+                className="px-3 py-2 rounded-lg text-white text-xs flex items-center gap-2 hover:opacity-80 transition"
                 style={{backgroundColor:'var(--color-primary)'}}
               >
                 <FolderIcon size={14} />
@@ -418,7 +418,7 @@ const PluginSettings = () => {
 
           {/* Category Selection */}
           <div className="p-4 rounded-xl" style={{backgroundColor:'var(--color-bg-secondary)'}}>
-            <h3 className="font-bold mb-3 flex items-center space-x-2">
+            <h3 className="font-bold mb-3 flex items-center gap-2">
               <Puzzle size={16} style={{color:'var(--color-primary)'}} />
               <span>Eklenti Kategorisi Seçin</span>
             </h3>
@@ -446,11 +446,11 @@ const PluginSettings = () => {
 
           {/* Project Folder Selection */}
           <div className="p-4 rounded-xl" style={{backgroundColor:'var(--color-bg-secondary)'}}>
-            <h3 className="font-bold mb-3 flex items-center space-x-2">
+            <h3 className="font-bold mb-3 flex items-center gap-2">
               <FolderIcon size={16} style={{color:'var(--color-primary)'}} />
               <span>Proje Klasörü</span>
             </h3>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <button
                 onClick={selectProjectFolder}
                 className="px-4 py-2 rounded-lg text-sm font-bold transition"
@@ -472,12 +472,12 @@ const PluginSettings = () => {
           {/* AI Chat Interface */}
           <div className="p-4 rounded-xl" style={{backgroundColor:'var(--color-bg-secondary)'}}>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold flex items-center space-x-2">
+              <h3 className="font-bold flex items-center gap-2">
                 <span>AI Sohbet</span>
               </h3>
               <button
                 onClick={clearAiChat}
-                className="px-3 py-1.5 rounded-lg text-xs flex items-center space-x-1 transition hover:bg-white/10"
+                className="px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition hover:bg-white/10"
                 style={{color:'var(--text-secondary)'}}>
                 <Trash2 size={12} />
                 <span>Temizle</span>
@@ -538,7 +538,7 @@ const PluginSettings = () => {
             </div>
 
             {/* Input */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
@@ -550,7 +550,7 @@ const PluginSettings = () => {
               <button
                 onClick={sendAiMessage}
                 disabled={aiChatLoading || !inputMessage.trim()}
-                className="px-4 py-2 rounded-lg font-bold flex items-center space-x-2 transition disabled:opacity-50"
+                className="px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition disabled:opacity-50"
                 style={{backgroundColor:'var(--color-primary)', color:'white'}}>
                 {aiChatLoading ? <Loader size={16} className="animate-spin" /> : <Send size={16} />}
                 <span>{aiChatLoading ? 'Gönderiliyor...' : 'Gönder'}</span>
@@ -559,10 +559,10 @@ const PluginSettings = () => {
 
             {/* Actions */}
             {aiChatMessages.length > 0 && (
-              <div className="mt-3 flex items-center space-x-2">
+              <div className="flex flex-col mt-3 flex items-center gap-2">
                 <button
                   onClick={saveLastResponse}
-                  className="px-3 py-1.5 rounded-lg text-xs flex items-center space-x-1 transition"
+                  className="px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition"
                   style={{backgroundColor:'rgba(34,197,94,0.2)', color:'#22c55e'}}>
                   <Save size={12} />
                   <span>Son Yanıtı Kaydet</span>
@@ -575,13 +575,13 @@ const PluginSettings = () => {
 
       {/* Publish Plugin Tab */}
       {activeTab === 'publish' && (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <div className="p-4 rounded-xl" style={{backgroundColor:'var(--color-bg-secondary)'}}>
-            <h3 className="font-bold mb-4 flex items-center space-x-2">
+            <h3 className="font-bold mb-4 flex items-center gap-2">
               <Upload size={16} style={{color:'var(--color-primary)'}} />
               <span>Eklenti Yayınla</span>
             </h3>
-            <div className="space-y-3">
+            <div className="flex flex-col gap-3">
               <div>
                 <label className="text-xs font-bold mb-1 block">Eklenti Adı</label>
                 <input value={pluginName} onChange={(e) => setPluginName(e.target.value)}
@@ -635,7 +635,7 @@ const PluginSettings = () => {
               </div>
               <div>
                 <label className="text-xs font-bold mb-1 block">Dokümantasyon (.md dosyası)</label>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <input value={pluginMdPath} onChange={(e) => setPluginMdPath(e.target.value)}
                     placeholder=".md dosya yolu..."
                     className="flex-1 border rounded-lg px-3 py-2 text-xs"
@@ -646,7 +646,7 @@ const PluginSettings = () => {
                 </div>
               </div>
               <button onClick={handlePublish} disabled={!pluginName.trim() || !pluginDesc.trim()}
-                className="w-full py-3 rounded-lg text-white font-bold disabled:opacity-50 flex items-center justify-center space-x-2"
+                className="flex flex-col w-full py-3 rounded-lg text-white font-bold disabled:opacity-50 flex items-center justify-center gap-2"
                 style={{backgroundColor:'var(--color-primary)'}}>
                 <Save size={16} /> <span>Yayınla</span>
               </button>
@@ -655,11 +655,11 @@ const PluginSettings = () => {
 
           {/* GitHub Publishing */}
           <div className="p-4 rounded-xl" style={{backgroundColor:'var(--color-bg-secondary)'}}>
-            <h3 className="font-bold mb-4 flex items-center space-x-2">
+            <h3 className="font-bold mb-4 flex items-center gap-2">
               <GitBranch size={16} style={{color:'var(--color-primary)'}} />
               <span>GitHub ile Yayınla</span>
             </h3>
-            <div className="space-y-3">
+            <div className="flex flex-col gap-3">
               <div>
                 <label className="text-xs font-bold mb-1 block">GitHub Personal Access Token</label>
                 <input type="password" value={githubToken} onChange={(e) => setGithubToken(e.target.value)}
@@ -694,7 +694,7 @@ const PluginSettings = () => {
                   style={{backgroundColor:'rgba(255,255,255,0.05)', borderColor:'var(--border-color)', color:'var(--text-primary)'}} />
               </div>
               <button onClick={handleGithubPublish} disabled={githubPublishing || !githubToken.trim() || !githubRepo.trim() || !githubOwner.trim()}
-                className="w-full py-3 rounded-lg text-white font-bold disabled:opacity-50 flex items-center justify-center space-x-2"
+                className="flex flex-col w-full py-3 rounded-lg text-white font-bold disabled:opacity-50 flex items-center justify-center gap-2"
                 style={{backgroundColor:'#24292e'}}>
                 <GitBranch size={16} /> <span>{githubPublishing ? 'Yayınlanıyor...' : 'GitHub\'a Yayınla'}</span>
               </button>
@@ -703,7 +703,7 @@ const PluginSettings = () => {
                   style={{backgroundColor: githubStatus.ok ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)'}}>
                   {githubStatus.ok ? (
                     <div>
-                      <div className="flex items-center space-x-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1">
                         <Check size={14} /> <span className="font-bold">{githubStatus.msg}</span>
                       </div>
                       {githubStatus.url && (
@@ -711,7 +711,7 @@ const PluginSettings = () => {
                       )}
                     </div>
                   ) : (
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                       <X size={14} /> <span>{githubStatus.msg}</span>
                     </div>
                   )}
@@ -723,7 +723,7 @@ const PluginSettings = () => {
           {/* Security Analysis */}
           {pluginMdPath && (
             <div className="p-4 rounded-xl" style={{backgroundColor:'var(--color-bg-secondary)'}}>
-              <h3 className="font-bold mb-3 flex items-center space-x-2">
+              <h3 className="font-bold mb-3 flex items-center gap-2">
                 <Shield size={16} style={{color:'var(--color-primary)'}} />
                 <span>Güvenlik Analizi</span>
               </h3>
@@ -731,7 +731,7 @@ const PluginSettings = () => {
                 AI ile eklenti içeriğini analiz edin. Erişim derecesi, güvenlik riskleri ve işlevselliği hakkında bilgi alın.
               </p>
               <button onClick={analyzePlugin} disabled={analyzing || !aiProvider.apiKey.trim()}
-                className="px-4 py-2 rounded-lg text-white text-xs disabled:opacity-50 flex items-center space-x-2"
+                className="flex flex-col px-4 py-2 rounded-lg text-white text-xs disabled:opacity-50 flex items-center gap-2"
                 style={{backgroundColor:'rgba(255,165,0,0.2)', color:'orange'}}>
                 <Shield size={14} className={analyzing ? 'animate-spin' : ''} />
                 <span>{analyzing ? 'Analiz ediliyor...' : 'AI ile Analiz Et'}</span>
@@ -740,8 +740,8 @@ const PluginSettings = () => {
                 <div className="mt-4 p-3 rounded-lg text-xs"
                   style={{backgroundColor: securityAnalysis.ok ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: securityAnalysis.ok ? '#22c55e' : '#ef4444'}}>
                   {securityAnalysis.ok ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
                         <Check size={14} /> <span className="font-bold">Güvenli</span>
                       </div>
                       <div style={{color:'var(--text-secondary)'}}>{securityAnalysis.details}</div>
@@ -750,7 +750,7 @@ const PluginSettings = () => {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                       <AlertTriangle size={14} /> <span>{securityAnalysis.msg}</span>
                     </div>
                   )}
@@ -763,9 +763,9 @@ const PluginSettings = () => {
 
       {/* Marketplace Tab */}
       {activeTab === 'marketplace' && (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           {/* Filters */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
               className="px-3 py-2 rounded-lg text-xs"
               style={{backgroundColor:'var(--color-bg-secondary)', borderColor:'var(--border-color)', color:'var(--text-primary)'}}>
@@ -776,7 +776,7 @@ const PluginSettings = () => {
               <option value="integration">Entegrasyon</option>
             </select>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <span className="text-xs">Min Puan:</span>
               {[1,2,3,4,5].map(r => (
                 <Star key={r} size={16}
@@ -810,7 +810,7 @@ const PluginSettings = () => {
               <p className="text-sm">Henüz eklenti yok</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="flex flex-col gap-3">
               {marketplaceData
                 .filter(p => categoryFilter === 'all' || p.category === categoryFilter)
                 .filter(p => ratingFilter === 0 || (p.rating || 0) >= ratingFilter)
@@ -829,7 +829,7 @@ const PluginSettings = () => {
                   <p className="text-xs mb-3" style={{color:'var(--text-secondary)'}}>{plugin.description}</p>
                   
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center gap-1">
                       {[1,2,3,4,5].map(star => (
                         <Star key={star} size={14}
                           fill={star <= (plugin.rating || 0) ? '#fbbf24' : 'none'}
@@ -844,14 +844,14 @@ const PluginSettings = () => {
                   <div className="flex items-center justify-between">
                     <button onClick={() => analyzeMarketplacePlugin(plugin)}
                       disabled={analyzingPlugin === plugin.id}
-                      className="px-3 py-1.5 rounded-lg text-xs flex items-center space-x-1"
+                      className="flex flex-col px-3 py-1.5 rounded-lg text-xs flex items-center gap-1"
                       style={{backgroundColor:'rgba(255,165,0,0.2)', color:'orange'}}>
                       <Shield size={12} className={analyzingPlugin === plugin.id ? 'animate-spin' : ''} />
                       <span>{analyzingPlugin === plugin.id ? 'Analiz ediliyor...' : 'AI Analiz'}</span>
                     </button>
                     
                     <button onClick={() => installPlugin(plugin)}
-                      className="px-3 py-1.5 rounded-lg text-white text-xs flex items-center space-x-1"
+                      className="flex flex-col px-3 py-1.5 rounded-lg text-white text-xs flex items-center gap-1"
                       style={{backgroundColor:'var(--color-primary)'}}>
                       <Download size={12} /> <span>İndir</span>
                     </button>
@@ -878,7 +878,7 @@ const PluginSettings = () => {
 
       {/* Installed Plugins Tab */}
       {activeTab === 'installed' && (
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           {installedPlugins.length === 0 ? (
             <div className="text-center py-12" style={{color:'var(--text-secondary)'}}>
               <Puzzle size={40} className="mx-auto mb-4 opacity-30" />
@@ -888,14 +888,14 @@ const PluginSettings = () => {
             installedPlugins.map(plugin => (
               <div key={plugin.id} className="p-4 rounded-xl" style={{backgroundColor:'var(--color-bg-secondary)', opacity: plugin.enabled ? 1 : 0.5}}>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center gap-3">
                     <Puzzle size={18} style={{color:'var(--color-primary)'}} />
                     <div>
                       <div className="font-bold text-sm">{plugin.name}</div>
                       <div className="text-[10px]" style={{color:'var(--text-secondary)'}}>{plugin.category} • {plugin.author}</div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <button onClick={() => analyzeInstalledPlugin(plugin)}
                       disabled={analyzingPlugin === plugin.id}
                       className="px-2 py-1 rounded-lg text-xs"

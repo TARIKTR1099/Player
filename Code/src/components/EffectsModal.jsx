@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import { X, Image, Volume2, Map, Upload, Music, Sliders, RotateCcw, RotateCw, FlipHorizontal, FlipVertical, Crop, ZoomIn, Palette, Layers, TextSelect, Video, Film, Timer, Subtitles, RefreshCw, Trash2, Eye } from 'lucide-react';
+import { cn } from '../lib/utils';
 import { useStore } from '../store';
 
 const VIDEO_TABS = ['temel', 'renk', 'geometri', 'ozel', 'overlay', 'gelismis'];
@@ -7,14 +8,14 @@ const VIDEO_TAB_LABELS = { temel: 'Temel', renk: 'Renk', geometri: 'Geometri', o
 const VIDEO_TAB_ICONS = { temel: Sliders, renk: Palette, geometri: Crop, ozel: Video, overlay: Layers, gelismis: Film };
 
 const SectionLabel = ({ label }) => (
-  <div className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--color-text-secondary)' }}>{label}</div>
+  <div className="text-[10px] font-bold uppercase tracking-wider mb-3 text-muted-foreground">{label}</div>
 );
 
 const EffectSlider = ({ label, value, min, max, step, onChange, unit, icon: Icon }) => (
   <div className="p-3 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
     <div className="flex items-center justify-between mb-2">
-      <div className="flex items-center space-x-2">
-        {Icon && <Icon size={14} style={{ color: 'var(--color-text-secondary)' }} />}
+      <div className="flex items-center gap-2">
+        {Icon && <Icon size={14} className="text-muted-foreground" />}
         <span className="text-xs font-bold">{label}</span>
       </div>
       <span className="text-xs font-bold tabular-nums" style={{ color: value > (max / 2) ? 'var(--color-primary)' : 'var(--color-text-secondary)' }}>
@@ -26,23 +27,22 @@ const EffectSlider = ({ label, value, min, max, step, onChange, unit, icon: Icon
 );
 
 const EffectToggle = ({ label, enabled, onChange, icon: Icon }) => (
-  <div className="flex items-center justify-between p-3 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
-    <div className="flex items-center space-x-2">
-      {Icon && <Icon size={14} style={{ color: 'var(--color-text-secondary)' }} />}
+  <div className="flex items-center justify-between p-3 rounded-xl bg-white/3">
+    <div className="flex items-center gap-2">
+      {Icon && <Icon size={14} className="text-muted-foreground" />}
       <span className="text-xs font-bold">{label}</span>
     </div>
     <button onClick={() => onChange(!enabled)}
-      className={`w-10 h-5 rounded-full transition relative ${enabled ? 'bg-blue-500' : 'bg-gray-600'}`}
+      className={cn("w-10 h-5 rounded-full transition relative", enabled ? 'bg-blue-500' : 'bg-gray-600')}
     >
-      <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-transform shadow ${enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+      <div className={cn("w-4 h-4 bg-white rounded-full absolute top-0.5 transition-transform shadow", enabled ? 'translate-x-5' : 'translate-x-0.5')} />
     </button>
   </div>
 );
 
 const EffectButton = ({ label, active, onClick, icon: Icon }) => (
   <button onClick={onClick}
-    className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition"
-    style={active ? { backgroundColor: 'var(--color-primary)', color: 'white' } : { backgroundColor: 'rgba(255,255,255,0.05)' }}
+    className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition", active ? 'bg-primary text-white' : 'bg-white/5')}
   >
     {Icon && <Icon size={12} />}
     <span>{label}</span>
@@ -64,7 +64,7 @@ const EffectsModal = ({ onClose }) => {
     switch (videoTab) {
       case 'temel':
         return (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             <SectionLabel label="Parlaklık & Kontrast" />
             <EffectSlider label="Parlaklık" value={videoEffects.brightness} min={0} max={200} onChange={handleVideoSlider('brightness')} unit="%" icon={Sun} />
             <EffectSlider label="Kontrast" value={videoEffects.contrast} min={0} max={200} onChange={handleVideoSlider('contrast')} unit="%" icon={Contrast} />
@@ -76,7 +76,7 @@ const EffectsModal = ({ onClose }) => {
         );
       case 'renk':
         return (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             <SectionLabel label="Renk Araçları" />
             <EffectSlider label="Threshold (Eşik)" value={videoEffects.threshold} min={0} max={255} onChange={handleVideoSlider('threshold')} />
             <EffectSlider label="Posterize" value={videoEffects.posterize} min={0} max={8} step={1} onChange={handleVideoSlider('posterize')} />
@@ -85,7 +85,7 @@ const EffectsModal = ({ onClose }) => {
         );
       case 'geometri':
         return (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             <SectionLabel label="Kırpma" />
             <EffectSlider label="Üst" value={videoEffects.cropTop} min={0} max={50} onChange={handleVideoSlider('cropTop')} unit="%" />
             <EffectSlider label="Alt" value={videoEffects.cropBottom} min={0} max={50} onChange={handleVideoSlider('cropBottom')} unit="%" />
@@ -114,7 +114,7 @@ const EffectsModal = ({ onClose }) => {
         );
       case 'ozel':
         return (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             <SectionLabel label="Özel Efektler" />
             <EffectToggle label="Psychedelic Dalgalar" enabled={videoEffects.psychedelic} onChange={handleToggle('psychedelic')} icon={Waves} />
             <EffectToggle label="Su Dalgası" enabled={videoEffects.waterRipple} onChange={handleToggle('waterRipple')} icon={Droplets} />
@@ -123,11 +123,11 @@ const EffectsModal = ({ onClose }) => {
         );
       case 'overlay':
         return (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             <SectionLabel label="Logo Kaplama" />
             <div className="flex gap-2">
               <button onClick={() => fileInputRef.current?.click()}
-                className="flex-1 flex items-center justify-center space-x-2 p-4 rounded-xl border-2 border-dashed text-xs font-bold"
+                className="flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed text-xs font-bold"
                 style={{ borderColor: 'var(--color-border)' }}
               >
                 <Upload size={16} />
@@ -172,7 +172,7 @@ const EffectsModal = ({ onClose }) => {
             <EffectSlider label="Metin Boyutu" value={videoEffects.textSize} min={10} max={72} onChange={handleVideoSlider('textSize')} unit="px" />
             <EffectSlider label="Metin X" value={videoEffects.textX} min={0} max={100} onChange={handleVideoSlider('textX')} unit="%" />
             <EffectSlider label="Metin Y" value={videoEffects.textY} min={0} max={100} onChange={handleVideoSlider('textY')} unit="%" />
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <span className="text-xs">Renk:</span>
               <input type="color" value={videoEffects.textColor} onChange={(e) => setVideoEffect('textColor', e.target.value)} className="w-8 h-8 rounded cursor-pointer" />
             </div>
@@ -180,7 +180,7 @@ const EffectsModal = ({ onClose }) => {
         );
       case 'gelismis':
         return (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             <SectionLabel label="Gelişmiş Efektler" />
             <EffectSlider label="Hareket Bulanıklığı" value={videoEffects.motionBlur} min={0} max={100} onChange={handleVideoSlider('motionBlur')} unit="%" />
           </div>
@@ -191,7 +191,7 @@ const EffectsModal = ({ onClose }) => {
   };
 
   const renderAudioTab = () => (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       <SectionLabel label="Kompresör" />
       <EffectToggle label="Kompresör" enabled={audioV2.compressor.threshold > -60} onChange={(v) => setAudioV2Node('compressor', 'threshold', v ? -24 : -60)} />
       {audioV2.compressor.threshold > -60 && (
@@ -249,9 +249,9 @@ const EffectsModal = ({ onClose }) => {
 
   const renderMappingTab = () => {
     return (
-      <div className="space-y-3">
+      <div className="flex flex-col gap-3">
         <SectionLabel label="AV Senkronizasyon" />
-        <div className="flex items-center space-x-2 p-3 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
+        <div className="flex items-center gap-2 p-3 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
           <Timer size={14} style={{ color: 'var(--color-text-secondary)' }} />
           <span className="text-xs font-bold">Ses Kaydırma:</span>
           <span className="text-xs font-bold tabular-nums" style={{ color: mapping.avSyncOffset !== 0 ? 'var(--color-primary)' : 'var(--color-text-secondary)' }}>
@@ -265,7 +265,7 @@ const EffectsModal = ({ onClose }) => {
         <SectionLabel label="Altyazı" />
         <div className="flex gap-2">
           <button onClick={() => subtitleInputRef.current?.click()}
-            className="flex-1 flex items-center justify-center space-x-2 p-4 rounded-xl border-2 border-dashed text-xs font-bold"
+            className="flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed text-xs font-bold"
             style={{ borderColor: 'var(--color-border)' }}
           >
             <Upload size={16} />
@@ -292,14 +292,13 @@ const EffectsModal = ({ onClose }) => {
         
         {mapping.subtitleTracks.length > 0 && (
           <>
-            <div className="space-y-1">
+            <div className="flex flex-col gap-1">
               {mapping.subtitleTracks.map((track) => (
                 <div key={track.id}
                   onClick={() => setActiveSubtitle(track.id)}
-                  className="flex items-center justify-between p-2.5 rounded-lg cursor-pointer text-xs font-bold transition"
-                  style={mapping.activeSubtitle === track.id ? { backgroundColor: 'rgba(15,108,189,0.15)', color: 'var(--color-primary)' } : { backgroundColor: 'rgba(255,255,255,0.03)' }}
+                  className={cn("flex items-center justify-between p-2.5 rounded-lg cursor-pointer text-xs font-bold transition", mapping.activeSubtitle === track.id ? 'bg-primary/15 text-primary' : 'bg-white/3')}
                 >
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <Subtitles size={14} />
                     <span>{track.name}</span>
                   </div>
@@ -311,7 +310,7 @@ const EffectsModal = ({ onClose }) => {
             <SectionLabel label="Altyazı Ayarları" />
             <EffectSlider label="Zaman Kaydırma" value={mapping.subtitleOffset} min={-10000} max={10000} step={50} onChange={(v) => setMapping('subtitleOffset', v)} unit="ms" />
             <EffectSlider label="Boyut" value={mapping.subtitleSize} min={50} max={200} onChange={(v) => setMapping('subtitleSize', v)} unit="%" />
-            <div className="flex items-center space-x-2 p-3 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
+            <div className="flex items-center gap-2 p-3 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
               <span className="text-xs">Renk:</span>
               <input type="color" value={mapping.subtitleColor} onChange={(e) => setMapping('subtitleColor', e.target.value)} className="w-8 h-8 rounded cursor-pointer" />
             </div>
@@ -329,13 +328,13 @@ const EffectsModal = ({ onClose }) => {
       >
         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--color-border)' }}>
           <h3 className="text-xl font-bold">Efektler</h3>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => {
                 const store = useStore.getState();
                 store.resetAllEffects();
               }}
-              className="flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-bold transition hover:opacity-80"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition hover:opacity-80"
               style={{ backgroundColor: 'rgba(239,68,68,0.2)', color: '#ef4444' }}
               title="Tüm efektleri sıfırla"
             >
@@ -352,14 +351,10 @@ const EffectsModal = ({ onClose }) => {
             { id: 'audio', label: 'Ses', icon: Volume2 },
             { id: 'mapping', label: 'Eşleme', icon: Map },
           ].map((tab) => (
-            <button key={tab.id}
-              onClick={() => setMainTab(tab.id)}
-              className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 text-sm font-bold transition border-b-2"
-              style={{
-                color: mainTab === tab.id ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                borderColor: mainTab === tab.id ? 'var(--color-primary)' : 'transparent'
-              }}
-            >
+              <button key={tab.id}
+                onClick={() => setMainTab(tab.id)}
+                className={cn("flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold transition border-b-2", mainTab === tab.id ? 'text-primary border-primary' : 'text-muted-foreground border-transparent')}
+              >
               <tab.icon size={16} />
               <span>{tab.label}</span>
             </button>
@@ -369,14 +364,13 @@ const EffectsModal = ({ onClose }) => {
         <div className="p-4">
           {mainTab === 'video' && (
             <div className="flex gap-4">
-              <div className="w-32 flex-shrink-0 space-y-1">
+              <div className="flex flex-col w-32 flex-shrink-0 gap-1">
                 {VIDEO_TABS.map((tab) => {
                   const Icon = VIDEO_TAB_ICONS[tab];
                   return (
                     <button key={tab}
                       onClick={() => setVideoTab(tab)}
-                      className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-bold transition"
-                      style={videoTab === tab ? { backgroundColor: 'var(--color-primary)', color: 'white' } : { color: 'var(--color-text-secondary)' }}
+                      className={cn("w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition", videoTab === tab ? 'bg-primary text-white' : 'text-muted-foreground')}
                     >
                       <Icon size={14} />
                       <span>{VIDEO_TAB_LABELS[tab]}</span>

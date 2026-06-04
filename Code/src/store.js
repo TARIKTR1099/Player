@@ -223,6 +223,9 @@ export const useStore = create(
       // Volume Boost (1.0 = normal, 2.0 = max boost)
       volumeBoost: 1.0,
       
+      // Crossfade (0=off, 1-10 seconds)
+      crossfadeDuration: 3,
+      
       // Google Auth
       googleUser: null,
       
@@ -256,6 +259,7 @@ export const useStore = create(
       setGoogleUser: (u) => set({ googleUser: u }),
       setSleepTimer: (t) => set({ sleepTimer: t, sleepTimerEnd: t ? Date.now() + t * 60000 : null }),
       setVolumeBoost: (b) => set({ volumeBoost: Math.max(1.0, Math.min(2.0, b)) }),
+      setCrossfadeDuration: (d) => set({ crossfadeDuration: Math.max(0, Math.min(10, d)) }),
       setEffectsBypass: (v) => set({ effectsBypass: v }),
       setDevLogsEnabled: (v) => set({ devLogsEnabled: v }),
       addLog: (text, type = 'info') => {
@@ -719,6 +723,7 @@ export const useStore = create(
         keyboardShortcuts: state.keyboardShortcuts,
         googleUser: state.googleUser,
         effectsBypass: state.effectsBypass,
+        crossfadeDuration: state.crossfadeDuration,
         devLogsEnabled: state.devLogsEnabled,
         activePlaylist: state.activePlaylist,
         // Queue persistence (capped + sanitized to prevent localStorage bloat)

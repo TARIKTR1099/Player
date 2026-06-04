@@ -24,6 +24,7 @@ export const useAudioPlayer = () => {
   const delayWetRef = useRef(null);
   const bypassGainRef = useRef(null);
   const chainGainRef = useRef(null);
+  const crossfadeStateRef = useRef({ active: false, timer: null });
 
   const initAudioContext = useCallback(() => {
     if (initializedRef.current) return;
@@ -369,6 +370,68 @@ export const useAudioPlayer = () => {
   const { isPlaying, currentTrack, playId, volume, playbackRate, setProgress, setDuration, setLastPlayedTrack } = useStore();
   const lastSaveRef = useRef(0);
 
+  const startCrossfadeOut = useCallback((duration) => {
+    const audio = audioRef.current;
+    if (!audio || !duration) return;
+    
+    if (crossfadeStateRef.current.timer) {
+      clearInterval(crossfadeStateRef.current.timer);
+    }
+    
+    const steps = 20;
+    const fadeMs = duration * 1000;
+    const stepMs = fadeMs / steps;
+    const startVol = audio.volume;
+    const fadePerStep = startVol / steps;
+    let current = startVol;
+    let step = 0;
+    
+    crossfadeStateRef.current.active = true;
+    
+    const interval = setInterval(() => {
+      step++;
+      current = Math.max(0, startVol - (fadePerStep * step));
+      audio.volume = current;
+      if (step >= steps) {
+        clearInterval(interval);
+        audio.volume = 0;
+        crossfadeStateRef.current.active = false;
+        crossfadeStateRef.current.timer = null;
+      }
+    }, stepMs);
+    crossfadeStateRef.current.timer = interval;
+  }, []);
+
+  const startCrossfadeIn = useCallback((targetVol, duration) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    
+    if (crossfadeStateRef.current.timer) {
+      clearInterval(crossfadeStateRef.current.timer);
+    }
+    
+    const steps = 20;
+    const fadeMs = (duration || 1) * 1000;
+    const stepMs = fadeMs / steps;
+    const fadePerStep = targetVol / steps;
+    let current = 0;
+    let step = 0;
+    
+    audio.volume = 0;
+    
+    const interval = setInterval(() => {
+      step++;
+      current = Math.min(targetVol, fadePerStep * step);
+      audio.volume = current;
+      if (step >= steps) {
+        clearInterval(interval);
+        audio.volume = targetVol;
+        crossfadeStateRef.current.timer = null;
+      }
+    }, stepMs);
+    crossfadeStateRef.current.timer = interval;
+  }, []);
+
   useEffect(() => {
     const audio = audioRef.current;
     const onTimeUpdate = () => {
@@ -379,7 +442,14 @@ export const useAudioPlayer = () => {
       }
     };
     const onLoadedMetadata = () => setDuration(audio.duration);
-    const onEnded = () => useStore.getState().nextTrack();
+    const onEnded = () => {
+      const state = useStore.getState();
+      const dur = state.crossfadeDuration || 0;
+      if (dur > 0) {
+        startCrossfadeOut(dur);
+      }
+      state.nextTrack();
+    };
     const onPlay = () => {
       if (contextRef.current && contextRef.current.state === 'suspended') {
         contextRef.current.resume();
@@ -422,14 +492,28 @@ export const useAudioPlayer = () => {
         try { initAudioContext(); } catch(e) {}
       }
       const audio = audioRef.current;
-      if (audio.readyState >= 2) {
+      
+      const doPlay = () => {
         const playPromise = audio.play();
-        if (playPromise !== undefined) playPromise.catch(() => {});
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            // Crossfade in: if crossfade was fading out, fade the new track in
+            if (crossfadeStateRef.current.active) {
+              const state = useStore.getState();
+              const dur = state.crossfadeDuration || 3;
+              const targetVol = (state.volume / 100) * (state.volumeBoost || 1);
+              startCrossfadeIn(targetVol, dur);
+            }
+          }).catch(() => {});
+        }
+      };
+      
+      if (audio.readyState >= 2) {
+        doPlay();
       } else {
         const onCanPlay = () => {
           audio.removeEventListener('canplay', onCanPlay);
-          const playPromise = audio.play();
-          if (playPromise !== undefined) playPromise.catch(() => {});
+          doPlay();
         };
         audio.addEventListener('canplay', onCanPlay, { once: true });
       }
@@ -439,6 +523,27 @@ export const useAudioPlayer = () => {
       isLiveRef.current = false;
     }
   }, [isPlaying, currentTrack, playId]);
+
+  // Preload next track for gapless playback
+  useEffect(() => {
+    const state = useStore.getState();
+    if (!state.currentTrack) return;
+    if (state.queue.length <= 1) return;
+    const nextIdx = (state.currentIndex + 1) % state.queue.length;
+    const nextTrack = state.queue[nextIdx];
+    if (!nextTrack || nextTrack.id === state.currentTrack?.id) return;
+    let url = nextTrack.url || nextTrack.streamUrl || '';
+    if (!url && nextTrack.location) {
+      url = 'file:///' + nextTrack.location.replace(/\\/g, '/');
+    }
+    if (url) {
+      try {
+        const preload = new Audio();
+        preload.preload = 'auto';
+        preload.src = url;
+      } catch {}
+    }
+  }, [currentTrack, playId]);
 
   useEffect(() => {
     if (postGainRef.current) {

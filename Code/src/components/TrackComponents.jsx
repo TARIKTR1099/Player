@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from 'react';
+﻿import React, { useState, useCallback } from 'react';
 import { Play, Music, ListMusic, Plus, Edit3, Copy, Scissors, Tag, Eye, Radio, FileAudio, Info, Trash2, Clock } from 'lucide-react';
+import { cn } from '../lib/utils';
 
 /**
  * Track list rendering components extracted from App.jsx.
@@ -7,51 +8,51 @@ import { Play, Music, ListMusic, Plus, Edit3, Copy, Scissors, Tag, Eye, Radio, F
  */
 
 export const MenuItem = ({ icon, label, onClick }) => (
-  <div onClick={onClick} className="flex items-center space-x-3 px-4 py-2.5 cursor-pointer transition hover:bg-white/5" style={{color:'var(--text-primary)'}}>
+  <div onClick={onClick} className="flex items-center gap-3 px-4 py-2.5 cursor-pointer transition hover:bg-white/5 text-text-primary">
     {icon} <span>{label}</span>
   </div>
 );
 
 export const CtxItem = ({ icon, label, onClick, className = '' }) => (
-  <div onClick={onClick} className={`flex items-center space-x-3 px-4 py-2.5 cursor-pointer transition hover:bg-white/5 ${className}`}>
+  <div onClick={onClick} className={cn("flex items-center gap-3 px-4 py-2.5 cursor-pointer transition hover:bg-white/5", className)}>
     {icon} <span>{label}</span>
   </div>
 );
 
 export const GridTrack = React.memo(({ track, onPlay, onCtx, selected }) => (
-  <div onClick={onPlay} onContextMenu={onCtx} className="p-3 rounded-2xl cursor-pointer group transition" style={{backgroundColor: selected ? 'rgba(59,130,246,0.15)' : 'var(--color-bg-secondary)', border: selected ? '1.5px solid var(--color-primary)' : '1.5px solid transparent'}}>
-    <div className="aspect-square rounded-xl mb-3 overflow-hidden relative border" style={{borderColor:'var(--border-color)', backgroundColor:'var(--color-bg-tertiary)'}}>
+  <div onClick={onPlay} onContextMenu={onCtx} className={cn("p-3 rounded-2xl cursor-pointer group transition border hover-lift press-scale", selected ? 'bg-primary/15 border-primary' : 'bg-bg-secondary border-transparent')}>
+    <div className="aspect-square rounded-xl mb-3 overflow-hidden relative border border-border bg-bg-tertiary">
       {track.picture && <img src={track.picture} className="w-full h-full object-cover group-hover:scale-110 transition duration-500" loading="lazy" />}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition flex items-center justify-center" style={{backgroundColor:'rgba(15,108,189,0.4)'}}>
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition flex items-center justify-center bg-primary/40">
         <Play fill="white" size={24} />
       </div>
     </div>
     <div className="font-bold text-xs truncate">{track.title}</div>
-    <div className="text-[10px] truncate" style={{color:'var(--text-secondary)'}}>{track.artist}</div>
+    <div className="text-[10px] truncate text-muted-foreground">{track.artist}</div>
     {track.bpm > 0 && <div className="text-[9px] mt-1 opacity-40">{track.bpm} BPM</div>}
   </div>
 ));
 
 export const ListTrack = React.memo(({ track, index, onPlay, onCtx, formatTime, selected }) => (
-  <div onClick={onPlay} onContextMenu={onCtx} className="flex items-center px-4 py-2.5 cursor-pointer transition hover:bg-white/5" style={{backgroundColor: selected ? 'rgba(59,130,246,0.15)' : (index % 2 === 0 ? 'var(--color-bg-secondary)' : 'var(--color-bg-primary)'), outline: selected ? '1.5px solid var(--color-primary)' : 'none', outlineOffset: '-1.5px'}}>
-    <div className="w-10 text-xs" style={{color:'var(--text-secondary)'}}>{index + 1}</div>
-    <div className="flex-1 flex items-center space-x-3 min-w-0">
-      {track.picture ? <img src={track.picture} className="w-8 h-8 rounded" loading="lazy" /> : <div className="w-8 h-8 rounded flex items-center justify-center" style={{backgroundColor:'var(--color-bg-tertiary)'}}><Music size={14} className="opacity-30" /></div>}
+  <div onClick={onPlay} onContextMenu={onCtx} className={cn("flex items-center px-4 py-2.5 cursor-pointer transition hover:bg-white/5 transition-colors duration-150 outline-offset-[-1.5px]", selected ? 'bg-primary/15 outline-primary outline-1.5' : index % 2 === 0 ? 'bg-bg-secondary' : 'bg-bg-primary')}>
+    <div className="w-10 text-xs text-muted-foreground">{index + 1}</div>
+    <div className="flex-1 flex items-center gap-3 min-w-0">
+      {track.picture ? <img src={track.picture} className="w-8 h-8 rounded" loading="lazy" /> : <div className="w-8 h-8 rounded flex items-center justify-center bg-bg-tertiary"><Music size={14} className="opacity-30" /></div>}
       <span className="text-xs font-bold truncate" title={track.title}>{track.title}</span>
      </div>
-     <div className="w-40 text-[10px] truncate" style={{color:'var(--text-secondary)'}} title={track.artist}>{track.artist}</div>
-    <div className="w-24 text-[10px]" style={{color:'var(--text-secondary)'}}>{track.duration ? formatTime(track.duration) : '0:00'}</div>
+     <div className="w-40 text-[10px] truncate text-muted-foreground" title={track.artist}>{track.artist}</div>
+    <div className="w-24 text-[10px] text-muted-foreground">{track.duration ? formatTime(track.duration) : '0:00'}</div>
   </div>
 ));
 
 export const CompactTrack = React.memo(({ track, index, onPlay, onCtx, formatTime, selected }) => (
-  <div onClick={onPlay} onContextMenu={onCtx} className="flex items-center px-3 py-1.5 rounded-lg cursor-pointer transition hover:bg-white/5" style={{backgroundColor: selected ? 'rgba(59,130,246,0.15)' : 'var(--color-bg-secondary)', border: selected ? '1.5px solid var(--color-primary)' : '1.5px solid transparent'}}>
-    <div className="w-6 text-[10px]" style={{color:'var(--text-secondary)'}}>{index + 1}</div>
+  <div onClick={onPlay} onContextMenu={onCtx} className={cn("flex items-center px-3 py-1.5 rounded-lg cursor-pointer transition hover:bg-white/5 transition-colors border", selected ? 'bg-primary/15 border-primary' : 'bg-bg-secondary border-transparent')}>
+    <div className="w-6 text-[10px] text-muted-foreground">{index + 1}</div>
     <div className="flex-1 min-w-0">
       <div className="text-xs font-bold truncate">{track.title}</div>
-      <div className="text-[9px] truncate" style={{color:'var(--text-secondary)'}}>{track.artist}</div>
+      <div className="text-[9px] truncate text-muted-foreground">{track.artist}</div>
     </div>
-    <div className="text-[9px] ml-3" style={{color:'var(--text-secondary)'}}>{track.duration ? formatTime(track.duration) : '0:00'}</div>
+    <div className="text-[9px] ml-3 text-muted-foreground">{track.duration ? formatTime(track.duration) : '0:00'}</div>
   </div>
 ));
 

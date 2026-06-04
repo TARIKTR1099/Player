@@ -167,6 +167,8 @@ function getSettings() {
     theme: 'dark',
     width: WINDOW_LAYOUTS.normal.width,
     height: WINDOW_LAYOUTS.normal.height,
+    x: null,
+    y: null,
     layoutMode: 'normal',
     language: 'system',
     startup: false,
@@ -622,12 +624,24 @@ function createWindow() {
   const windowFrame = getWindowFrame();
   const defaultSize = getDefaultWindowSize();
 
+  // Restore position if saved, otherwise center on screen
+  let winX, winY;
+  if (settings.x != null && settings.y != null) {
+    const area = screen.getPrimaryDisplay().workArea;
+    // Only restore if position is visible on screen
+    if (settings.x < area.right && settings.y < area.bottom && settings.x > area.left - 200 && settings.y > area.top - 200) {
+      winX = settings.x;
+      winY = settings.y;
+    }
+  }
+
   mainWindow = new BrowserWindow({
     width: settings.width || defaultSize.width,
     height: settings.height || defaultSize.height,
+    ...(winX != null ? { x: winX, y: winY } : {}),
     minWidth: WINDOW_LAYOUTS.normal.minWidth,
     minHeight: WINDOW_LAYOUTS.normal.minHeight,
-    fullscreenable: false,  // Prevent native F11 fullscreen (use React mediaFullscreen instead)
+    fullscreenable: false,
     transparent: false,
     backgroundColor: '#1a1a1a',
     icon: getAppIcon(),
@@ -637,7 +651,6 @@ function createWindow() {
       webSecurity: false,
     },
     ...windowFrame,
-    // Custom window controls are rendered in React title bar (App.jsx)
   });
 
   // Restore maximized state
@@ -671,6 +684,8 @@ function createWindow() {
         const bounds = mainWindow.getBounds();
         settings.width = bounds.width;
         settings.height = bounds.height;
+        settings.x = bounds.x;
+        settings.y = bounds.y;
         settings.maximized = mainWindow.isMaximized();
         saveSettings(settings);
       }
