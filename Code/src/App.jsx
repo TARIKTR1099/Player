@@ -233,6 +233,21 @@ const App = () => {
     });
   }, [currentTrack?.id, isPlaying]);
 
+  // Desktop notification when track changes (Electron only)
+  useEffect(() => {
+    if (!currentTrack || !isPlaying) return;
+    try {
+      const { ipcRenderer } = window.require('electron');
+      const body = [currentTrack.artist, currentTrack.album].filter(Boolean).join(' — ');
+      ipcRenderer.invoke('show-notification', {
+        title: currentTrack.title || 'Player',
+        body,
+        icon: currentTrack.picture || undefined,
+        trackId: currentTrack.id,
+      }).catch(() => {});
+    } catch {}
+  }, [currentTrack?.id, isPlaying]);
+
   // Power save blocker — prevent system sleep during playback
   useEffect(() => {
     try {

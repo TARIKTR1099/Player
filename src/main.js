@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, ipcMain, dialog, nativeImage, shell, screen, powerSaveBlocker } = require('electron');
+const { app, BrowserWindow, Tray, Menu, ipcMain, dialog, nativeImage, shell, screen, powerSaveBlocker, Notification } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -825,6 +825,38 @@ app.on('will-quit', () => {
   database.closeDb();
   // Release single instance lock
   app.releaseSingleInstanceLock();
+});
+
+// === Desktop Notification ===
+let lastNotifiedTrackId = null;
+
+ipcMain.handle('show-notification', (event, { title, body, icon, trackId }) => {
+  try {
+    // Don't show duplicate notifications for the same track
+    if (trackId && trackId === lastNotifiedTrackId) return false;
+    if (trackId) lastNotifiedTrackId = trackId;
+    
+    // Don't show notification if window is focused
+    if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isFocused()) return false;
+
+    const notification = new Notification({
+      title: title || 'Player',
+      body: body || '',
+      icon: icon || getAppIcon(),
+      silent: true,
+    });
+    notification.on('click', () => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        showWindowFromTray();
+        mainWindow.focus();
+      }
+    });
+    notification.show();
+    return true;
+  } catch (e) {
+    console.error('Notification failed:', e);
+    return false;
+  }
 });
 
 // === IPC Handlers ===
