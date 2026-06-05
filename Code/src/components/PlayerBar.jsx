@@ -1,7 +1,8 @@
 ﻿import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, MoreHorizontal, Sliders, Activity, Eye, Radio, Subtitles, Maximize2, Minimize2, Copy, Video, RotateCcw, RotateCw, FolderOpen, Moon, ArrowRightLeft } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, MoreHorizontal, Sliders, Activity, Eye, Radio, Subtitles, Maximize2, Minimize2, Copy, Video, RotateCcw, RotateCw, FolderOpen, Moon, ArrowRightLeft, Music2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { generateChapters } from '../utils/chapters';
+import { useStore } from '../store';
 
 const formatTime = (s) => {
   if (!s || isNaN(s)) return "0:00";
@@ -15,6 +16,38 @@ const MenuItem = ({ icon, label, onClick, role = 'menuitem' }) => (
     {icon} <span>{label}</span>
   </div>
 );
+
+// Inline preset submenu for the current track. Lists all built-in + custom
+// presets; selecting one saves the binding (trackId → preset) AND applies the
+// bands immediately. "Kapalı" clears the binding.
+const PerTrackPresetMenuItem = ({ currentTrack, onApplied }) => {
+  const [open, setOpen] = useState(false);
+  if (!currentTrack) return null;
+  const state = useStore.getState();
+  const all = { ...state.eqPresets, ...state.customPresets };
+  const names = Object.keys(all);
+  const current = state.perTrackPresets?.[currentTrack.id] || null;
+  const label = current ? `Parça Preset: ${current}` : 'Parça Preset: Kapalı';
+  return (
+    <div className="relative" onMouseLeave={() => setOpen(false)}>
+      <div onClick={() => setOpen(!open)} className="flex items-center gap-3 px-4 py-2.5 cursor-pointer transition hover:bg-white/5 text-text-primary" role="menuitem" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(!open); } }}>
+        <Music2 size={13} /> <span>{label}</span>
+      </div>
+      {open && (
+        <div className="absolute right-full top-0 mr-2 w-44 max-h-72 overflow-y-auto border rounded-xl py-1 shadow-2xl z-50 text-xs custom-scrollbar" style={{backgroundColor:'var(--color-bg-secondary)', borderColor:'var(--border-color)'}}>
+          <div onClick={() => { state.setPerTrackPreset(currentTrack.id, null); onApplied && onApplied(); }} className={cn("flex items-center gap-2 px-3 py-1.5 cursor-pointer transition hover:bg-white/5", !current && "text-primary")} role="menuitem" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); state.setPerTrackPreset(currentTrack.id, null); onApplied && onApplied(); } }}>
+            {!current ? '✓ ' : '   '}Kapalı
+          </div>
+          {names.map(n => (
+            <div key={n} onClick={() => { state.setPerTrackPreset(currentTrack.id, n); onApplied && onApplied(); }} className={cn("flex items-center gap-2 px-3 py-1.5 cursor-pointer transition hover:bg-white/5", current === n && "text-primary")} role="menuitem" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); state.setPerTrackPreset(currentTrack.id, n); onApplied && onApplied(); } }}>
+              {current === n ? '✓ ' : '   '}{n}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const PlayerBar = ({
   currentTrack, isPlaying, togglePlay, progress, duration,
@@ -248,17 +281,21 @@ const PlayerBar = ({
                      setShowMoreMenu(false);
                    }} 
                  />
-                 <MenuItem 
-                   icon={<ArrowRightLeft size={13}/>} 
-                   label={crossfadeDuration > 0 ? `Geçiş: ${crossfadeDuration}s` : 'Geçiş: Kapalı'} 
-                   onClick={() => { 
-                     const cycle = [0, 1, 2, 3, 5, 7, 10];
-                     const idx = cycle.indexOf(crossfadeDuration);
-                     setCrossfadeDuration(cycle[(idx + 1) % cycle.length]);
-                     setShowMoreMenu(false); 
-                   }} 
-                 />
-              </div>
+                  <MenuItem 
+                    icon={<ArrowRightLeft size={13}/>} 
+                    label={crossfadeDuration > 0 ? `Geçiş: ${crossfadeDuration}s` : 'Geçiş: Kapalı'} 
+                    onClick={() => { 
+                      const cycle = [0, 1, 2, 3, 5, 7, 10];
+                      const idx = cycle.indexOf(crossfadeDuration);
+                      setCrossfadeDuration(cycle[(idx + 1) % cycle.length]);
+                      setShowMoreMenu(false); 
+                    }} 
+                  />
+                  <PerTrackPresetMenuItem
+                    currentTrack={currentTrack}
+                    onApplied={() => setShowMoreMenu(false)}
+                  />
+               </div>
             )}
           </div>
         </div>

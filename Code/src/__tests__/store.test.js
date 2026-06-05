@@ -71,7 +71,7 @@ describe('store', () => {
       perTrackEffects: {},
       perTrackVideoEffects: {},
       perTrackMapping: {},
-      searchHistory: [],
+    perTrackPresets: {},
       aiProviders: [],
       aiChatMessages: [],
       installedPlugins: [],
@@ -185,5 +185,31 @@ describe('store', () => {
     const progress = { current: 5, total: 10, progress: 50, status: 'scanning' };
     useStore.setState({ scanProgress: progress });
     expect(useStore.getState().scanProgress).toEqual(progress);
+  });
+
+  it('per-track preset binding: save, apply, clear', () => {
+    const track = { id: 't1', title: 'Test' };
+    useStore.setState({ currentTrack: track, customPresets: { 'MyRock': [5, 4, 3, 2, 1, 0, -1, -2, 0, 0] } });
+
+    // Save a per-track preset
+    useStore.getState().setPerTrackPreset('t1', 'MyRock');
+    expect(useStore.getState().perTrackPresets.t1).toBe('MyRock');
+    // Bands should be applied immediately for the current track
+    expect(useStore.getState().equalizerBands[0]).toBe(5);
+    expect(useStore.getState().selectedPreset).toBe('MyRock');
+
+    // Clear the binding
+    useStore.getState().setPerTrackPreset('t1', null);
+    expect(useStore.getState().perTrackPresets.t1).toBeUndefined();
+  });
+
+  it('per-track preset: invalid preset name is ignored', () => {
+    useStore.getState().setPerTrackPreset('t2', 'NonExistent');
+    expect(useStore.getState().perTrackPresets.t2).toBeUndefined();
+  });
+
+  it('per-track preset: ignores empty trackId', () => {
+    useStore.getState().setPerTrackPreset('', 'Pop');
+    expect(useStore.getState().perTrackPresets).toEqual({});
   });
 });

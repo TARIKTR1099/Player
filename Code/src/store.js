@@ -176,6 +176,7 @@ export const useStore = create(
       perTrackEffects: {},
       perTrackVideoEffects: {},
       perTrackMapping: {},
+      perTrackPresets: {},
       
       videoEffects: { ...DEFAULT_VIDEO_EFFECTS },
       audioV2: { ...DEFAULT_AUDIO_V2 },
@@ -528,6 +529,31 @@ export const useStore = create(
       setPerTrackEq: (trackId, bands) => set((state) => ({
         perTrackEq: { ...state.perTrackEq, [trackId]: bands }
       })),
+      // Per-track preset binding: map trackId → preset name (built-in or custom).
+      // When the user switches to a track, its saved preset is auto-applied via
+      // the `useAudioPlayer` track-change effect.
+      perTrackPresets: {},
+      setPerTrackPreset: (trackId, presetName) => set((state) => {
+        if (!trackId) return {};
+        const presets = { ...state.perTrackPresets };
+        // Validate: only bind if preset exists in built-in or custom
+        const all = { ...state.eqPresets, ...state.customPresets };
+        if (!presetName || presetName === 'Düz' || !all[presetName]) {
+          delete presets[trackId];
+        } else {
+          presets[trackId] = presetName;
+        }
+        // Also apply preset bands to per-track EQ so the audio path picks them up
+        // immediately for the current track.
+        const bands = all[presetName];
+        const next = { perTrackPresets: presets };
+        if (bands && state.currentTrack?.id === trackId) {
+          next.equalizerBands = [...bands];
+          next.selectedPreset = presetName;
+          next.effectsBypass = false;
+        }
+        return next;
+      }),
       setAutoEqRecommended: (rec) => set({ autoEqRecommended: rec }),
       
       // Video Effects
@@ -661,6 +687,15 @@ export const useStore = create(
         if (track && get().perTrackEffects[track.id]) set({ audioEffects: { ...get().perTrackEffects[track.id] } });
         if (track && get().perTrackVideoEffects[track.id]) set({ videoEffects: { ...get().perTrackVideoEffects[track.id] } });
         if (track && get().perTrackMapping[track.id]) set({ mapping: { ...get().perTrackMapping[track.id] } });
+        // Auto-apply per-track preset binding (trackId → presetName)
+        if (track) {
+          const presetName = get().perTrackPresets?.[track.id];
+          if (presetName) {
+            const all = { ...get().eqPresets, ...get().customPresets };
+            const bands = all[presetName];
+            if (bands) set({ equalizerBands: [...bands], selectedPreset: presetName, effectsBypass: false });
+          }
+        }
         // Reuse existing queue if it has content (playlist context), otherwise create from all tracks
         const queue = existingQueue && existingQueue.length > 0 ? existingQueue : [...tracks];
         const index = queue.findIndex(t => t.id === track.id);
@@ -693,9 +728,15 @@ export const useStore = create(
         if (get().perTrackEffects[next.id]) set({ audioEffects: { ...get().perTrackEffects[next.id] } });
         if (get().perTrackVideoEffects[next.id]) set({ videoEffects: { ...get().perTrackVideoEffects[next.id] } });
         if (get().perTrackMapping[next.id]) set({ mapping: { ...get().perTrackMapping[next.id] } });
+        const nextPresetName = get().perTrackPresets?.[next.id];
+        if (nextPresetName) {
+          const allNext = { ...get().eqPresets, ...get().customPresets };
+          const bands = allNext[nextPresetName];
+          if (bands) set({ equalizerBands: [...bands], selectedPreset: nextPresetName, effectsBypass: false });
+        }
         set({ currentTrack: next, currentIndex: nextIndex, progress: 0, isPlaying: true, playId: playId + 1 });
       },
-      
+
       previousTrack: () => {
         const { queue, currentIndex, playId } = get();
         let prevIndex = currentIndex - 1;
@@ -706,6 +747,12 @@ export const useStore = create(
         if (get().perTrackEffects[prev.id]) set({ audioEffects: { ...get().perTrackEffects[prev.id] } });
         if (get().perTrackVideoEffects[prev.id]) set({ videoEffects: { ...get().perTrackVideoEffects[prev.id] } });
         if (get().perTrackMapping[prev.id]) set({ mapping: { ...get().perTrackMapping[prev.id] } });
+        const prevPresetName = get().perTrackPresets?.[prev.id];
+        if (prevPresetName) {
+          const allPrev = { ...get().eqPresets, ...get().customPresets };
+          const bands = allPrev[prevPresetName];
+          if (bands) set({ equalizerBands: [...bands], selectedPreset: prevPresetName, effectsBypass: false });
+        }
         set({ currentTrack: prev, currentIndex: prevIndex, progress: 0, isPlaying: true, playId: playId + 1 });
       },
     }),
@@ -759,6 +806,15 @@ export const useStore = create(
         // Queue persistence (capped + sanitized to prevent localStorage bloat)
         queue: (state.queue || []).slice(0, 25).map(toPersistedTrack).filter(Boolean),
         currentIndex: Math.max(-1, Math.min((state.currentIndex ?? -1), 24)),
+        // Per-track preset bindings (small, bounded — trackId → preset name)
+        perTrackPresets: (() => {
+          const p = state.perTrackPresets || {};
+          const keys = Object.keys(p);
+          if (keys.length <= 200) return p;
+          const capped = {};
+          keys.slice(-200).forEach(k => capped[k] = p[k]);
+          return capped;
+        })(),
         // Per-track settings excluded (too large/unbounded)
       }),
       storage: createJSONStorage(() => safeStorage),
