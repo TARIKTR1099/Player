@@ -37,6 +37,8 @@ const DEFAULT_AUDIO_V2 = {
 
 const DEFAULT_MAPPING = { avSyncOffset: 0, subtitleFile: null, subtitleTracks: [], activeSubtitle: null, subtitleOffset: 0, subtitleSize: 100, subtitleColor: '#ffffff' };
 
+// Track schema placeholder (intentionally empty — chapters live on the track object)
+
 const safeStorage = {
   getItem: (name) => {
     try {
@@ -225,6 +227,9 @@ export const useStore = create(
       
       // Crossfade (0=off, 1-10 seconds)
       crossfadeDuration: 3,
+
+      // Per-track playback positions (trackId → seconds) — resume where you left off
+      playbackPositions: {},
       
       // Google Auth
       googleUser: null,
@@ -261,6 +266,21 @@ export const useStore = create(
       setVolumeBoost: (b) => set({ volumeBoost: Math.max(1.0, Math.min(2.0, b)) }),
       setCrossfadeDuration: (d) => set({ crossfadeDuration: Math.max(0, Math.min(10, d)) }),
       setEffectsBypass: (v) => set({ effectsBypass: v }),
+      // Per-track position save (capped at 100 entries to prevent bloat)
+      savePlaybackPosition: (trackId, position) => {
+        if (!trackId || typeof position !== 'number' || position < 0) return;
+        set((state) => {
+          const positions = { ...state.playbackPositions, [trackId]: Math.floor(position) };
+          // Cap at 100 entries — remove oldest by sorting by value (position as proxy for recency)
+          const keys = Object.keys(positions);
+          if (keys.length > 100) {
+            const sorted = keys.sort((a, b) => positions[a] - positions[b]);
+            const toRemove = sorted.slice(0, keys.length - 100);
+            toRemove.forEach(k => delete positions[k]);
+          }
+          return { playbackPositions: positions };
+        });
+      },
       setDevLogsEnabled: (v) => set({ devLogsEnabled: v }),
       addLog: (text, type = 'info') => {
         const entry = { text, type, timestamp: Date.now(), id: `log-${Date.now()}-${Math.random().toString(36).slice(2,6)}` };
@@ -724,6 +744,16 @@ export const useStore = create(
         googleUser: state.googleUser,
         effectsBypass: state.effectsBypass,
         crossfadeDuration: state.crossfadeDuration,
+        // Per-track positions (capped at 100)
+        playbackPositions: (() => {
+          const p = state.playbackPositions || {};
+          const keys = Object.keys(p);
+          if (keys.length <= 100) return p;
+          const sorted = keys.sort((a, b) => p[a] - p[b]);
+          const capped = {};
+          sorted.slice(-100).forEach(k => capped[k] = p[k]);
+          return capped;
+        })(),
         devLogsEnabled: state.devLogsEnabled,
         activePlaylist: state.activePlaylist,
         // Queue persistence (capped + sanitized to prevent localStorage bloat)

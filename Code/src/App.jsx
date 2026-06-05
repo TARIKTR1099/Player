@@ -274,6 +274,8 @@ const App = () => {
     const handleBeforeUnload = () => {
       if (currentTrack && audioRef.current) {
         setLastPlayedTrack(currentTrack, audioRef.current.currentTime);
+        // Per-track position save
+        useStore.getState().savePlaybackPosition(currentTrack.id, audioRef.current.currentTime);
       }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);

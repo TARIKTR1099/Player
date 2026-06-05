@@ -1,6 +1,7 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, MoreHorizontal, Sliders, Activity, Eye, Radio, Subtitles, Maximize2, Minimize2, Copy, Video, RotateCcw, RotateCw, FolderOpen, Moon, ArrowRightLeft } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { generateChapters } from '../utils/chapters';
 
 const formatTime = (s) => {
   if (!s || isNaN(s)) return "0:00";
@@ -30,9 +31,13 @@ const PlayerBar = ({
   crossfadeDuration, setCrossfadeDuration
 }) => {
   const [showVolumePop, setShowVolumePop] = useState(false);
+  const [hoveredChapter, setHoveredChapter] = useState(null);
   const seekRef = useRef(null);
   const volumePopRef = useRef(null);
   const moreMenuRef = useRef(null);
+
+  // Chapter markers for the current track — auto-generated from duration if no explicit metadata.
+  const chapters = useMemo(() => generateChapters(currentTrack, duration), [currentTrack, duration]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -76,19 +81,59 @@ const PlayerBar = ({
                setHoverTime(p * duration);
              } catch {}
            }}
-           onMouseLeave={() => setHoverTime(null)}
+           onMouseLeave={() => { setHoverTime(null); setHoveredChapter(null); }}
            role="slider"
            aria-label="İlerleme çubuğu"
            aria-valuemin={0}
            aria-valuemax={duration}
            aria-valuenow={progress}
            aria-valuetext={`${formatTime(progress)} / ${formatTime(duration)}`}>
+        {/* Chapter marker tick marks (behind the progress fill) */}
+        {duration > 0 && chapters.length > 1 && (
+          <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+            {chapters.map((ch, i) => {
+              const left = `${(ch.time / duration) * 100}%`;
+              const isActive = progress >= ch.time;
+              return (
+                <div
+                  key={`${ch.time}-${i}`}
+                  className="absolute top-0 h-full pointer-events-auto"
+                  style={{ left, transform: 'translateX(-50%)' }}
+                  onClick={(ev) => {
+                    ev.stopPropagation();
+                    if (audioRef.current) {
+                      audioRef.current.currentTime = ch.time;
+                    }
+                  }}
+                  onMouseEnter={(ev) => {
+                    ev.stopPropagation();
+                    setHoveredChapter({ ...ch, x: left });
+                  }}
+                  onMouseLeave={() => setHoveredChapter(null)}
+                  title={ch.title}
+                >
+                  <div
+                    className={cn(
+                      "w-px h-full transition-colors",
+                      isActive ? "bg-white/30" : "bg-white/60 group-hover:bg-white"
+                    )}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
         <div className="h-full bg-blue-500 relative" style={{ width: `${(progress/duration)*100 || 0}%`, transition: isSeeking ? 'none' : 'all 0.1s ease' }}>
            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full scale-0 group-hover:scale-100 transition-transform shadow-xl border-2 border-blue-500" />
         </div>
         {hoverTime !== null && (
           <div className="absolute bottom-full mb-2 bg-black/90 px-2 py-1 rounded text-xs pointer-events-none" style={{ left: `${(hoverTime/duration)*100}%`, transform: 'translateX(-50%)' }}>
             {formatTime(hoverTime)}
+          </div>
+        )}
+        {hoveredChapter && (
+          <div className="absolute bottom-full mb-6 bg-black/95 px-2 py-1 rounded text-[11px] font-semibold pointer-events-none whitespace-nowrap border border-white/20" style={{ left: hoveredChapter.x, transform: 'translateX(-50%)' }}>
+            {hoveredChapter.title} <span className="opacity-60 ml-1">({formatTime(hoveredChapter.time)})</span>
           </div>
         )}
       </div>

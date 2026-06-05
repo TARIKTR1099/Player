@@ -439,6 +439,8 @@ export const useAudioPlayer = () => {
       if (currentTrack && Date.now() - lastSaveRef.current > 5000) {
         lastSaveRef.current = Date.now();
         setLastPlayedTrack(currentTrack, audio.currentTime);
+        // Per-track position save
+        useStore.getState().savePlaybackPosition(currentTrack.id, audio.currentTime);
       }
     };
     const onLoadedMetadata = () => setDuration(audio.duration);
@@ -482,6 +484,19 @@ export const useAudioPlayer = () => {
       if (url) {
         audioRef.current.src = url;
         audioRef.current.load();
+        // Restore per-track position if available (skip if resuming lastPlayedTrack — App.jsx handles that)
+        const savedPos = useStore.getState().playbackPositions?.[currentTrack.id];
+        if (savedPos && savedPos > 2) {
+          const trySeek = () => {
+            try {
+              if (audioRef.current && audioRef.current.readyState >= 2) {
+                audioRef.current.currentTime = savedPos;
+              }
+            } catch {}
+          };
+          audioRef.current.addEventListener('canplay', trySeek, { once: true });
+          setTimeout(trySeek, 2000);
+        }
       }
     }
   }, [currentTrack, playId]);
