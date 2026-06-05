@@ -11,7 +11,10 @@ const SpectrumAnalyzer = ({ analyserRef }) => {
     const dpr = window.devicePixelRatio || 1;
     let animId;
 
-    const prevBars = new Float32Array(80).fill(0);
+    const barCount = 64;
+    const prevBars = new Float32Array(barCount).fill(0);
+    const peakValues = new Float32Array(barCount).fill(0);
+    const peakHold = new Float32Array(barCount).fill(0); // frames remaining at peak
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -43,6 +46,16 @@ const SpectrumAnalyzer = ({ analyserRef }) => {
       return { r, g, b };
     };
 
+    // Pre-compute logarithmic frequency indices for more natural bar distribution
+    // More bars for low frequencies, fewer for high frequencies
+    const freqIndices = new Array(barCount);
+    for (let i = 0; i < barCount; i++) {
+      const t = i / barCount;
+      // Logarithmic mapping from 0 to bufferLength-1
+      const logIdx = Math.floor(Math.pow(t, 1.5) * (bufferLength - 1));
+      freqIndices[i] = Math.min(Math.max(logIdx, 0), bufferLength - 1);
+    }
+
     const draw = () => {
       animId = requestAnimationFrame(draw);
       analyser.getByteFrequencyData(dataArray);
@@ -51,17 +64,27 @@ const SpectrumAnalyzer = ({ analyserRef }) => {
       const h = canvas.height / dpr;
       ctx.clearRect(0, 0, w, h);
 
-      const barCount = 64;
       const gap = 2;
       const barWidth = Math.max(2, (w - (barCount - 1) * gap) / barCount);
-      const step = bufferLength / barCount;
 
       for (let i = 0; i < barCount; i++) {
-        const idx = Math.floor(i * step);
+        const idx = freqIndices[i];
         const raw = dataArray[idx] / 255;
         const target = Math.max(0.015, raw);
         prevBars[i] += (target - prevBars[i]) * 0.3;
         const value = prevBars[i];
+
+        // Peak tracking
+        if (value >= peakValues[i]) {
+          peakValues[i] = value;
+          peakHold[i] = 12; // hold for ~12 frames (~200ms at 60fps)
+        } else {
+          if (peakHold[i] > 0) {
+            peakHold[i]--;
+          } else {
+            peakValues[i] += (0 - peakValues[i]) * 0.04; // slow decay
+          }
+        }
 
         const barHeight = Math.max(2, value * h * 0.92);
         const x = i * (barWidth + gap);
@@ -69,6 +92,8 @@ const SpectrumAnalyzer = ({ analyserRef }) => {
         const t = i / barCount;
 
         const c = getBarColor(t);
+
+        // Draw bar with gradient
         const gradient = ctx.createLinearGradient(x, h, x, y);
         gradient.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.35)`);
         gradient.addColorStop(0.5, `rgba(${c.r}, ${c.g}, ${c.b}, 0.7)`);
@@ -79,6 +104,7 @@ const SpectrumAnalyzer = ({ analyserRef }) => {
         ctx.roundRect(x, y, barWidth, barHeight, [3, 3, 0, 0]);
         ctx.fill();
 
+        // Glow cap at top of bar
         if (value > 0.08) {
           const glowColor = `rgba(${c.r}, ${c.g}, ${c.b}, ${value * 0.35})`;
           ctx.shadowColor = glowColor;
@@ -87,6 +113,16 @@ const SpectrumAnalyzer = ({ analyserRef }) => {
           ctx.fillRect(x, y - 2, barWidth, 2);
           ctx.shadowBlur = 0;
         }
+
+        // Peak marker dot
+        const peakY = h - (peakValues[i] * h * 0.92);
+        ctx.beginPath();
+        ctx.arc(x + barWidth / 2, peakY, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.5 + peakValues[i] * 0.5})`;
+        ctx.shadowColor = `rgba(${c.r}, ${c.g}, ${c.b}, 0.6)`;
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.shadowBlur = 0;
       }
     };
     draw();
