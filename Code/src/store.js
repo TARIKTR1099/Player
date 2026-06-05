@@ -399,6 +399,13 @@ export const useStore = create(
           }
         } catch (e) { get().addLog('Çalma listesi oluşturulamadı', 'error'); }
       },
+      renamePlaylist: async (id, newName) => {
+        try {
+          await getIpcRenderer()?.invoke('db-rename-playlist', id, newName);
+          set((state) => ({ playlists: state.playlists.map(p => p.id === id ? { ...p, name: newName } : p) }));
+          get().addLog(`✏️ Çalma listesi yeniden adlandırıldı: ${newName}`, 'success');
+        } catch (e) { get().addLog('Yeniden adlandırma başarısız', 'error'); }
+      },
       deletePlaylist: async (id) => {
         try {
           await getIpcRenderer()?.invoke('db-delete-playlist', id);

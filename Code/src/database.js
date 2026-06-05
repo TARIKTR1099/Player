@@ -303,6 +303,11 @@ const playlistOps = {
     return { id, name, tracks: [] };
   },
   
+  rename(id, newName) {
+    db.run('UPDATE playlists SET name = ?, updatedAt = ? WHERE id = ?', [newName, Date.now(), id]);
+    saveDb();
+  },
+
   delete(id) {
     db.run('DELETE FROM playlists WHERE id = ?', [id]);
     saveDb();

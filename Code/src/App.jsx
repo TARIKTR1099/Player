@@ -58,7 +58,7 @@ const App = () => {
     contextMenu, setContextMenu, dbEnabled, libraryViewMode, setLibraryViewMode, isLoading, scanProgress,
     lastPlayedTrack, lastPlayedPosition, setLastPlayedTrack, sidebarMode, setSidebarMode, sidebarToggleBehavior, sidebarWidth, setSidebarWidth, keyboardShortcuts,
     accentColor,
-    playlists, activePlaylist, setActivePlaylist, createPlaylist, deletePlaylist, addToPlaylist, removeFromPlaylist,
+    playlists, activePlaylist, setActivePlaylist, createPlaylist, renamePlaylist, deletePlaylist, addToPlaylist, removeFromPlaylist,
     queue: queueTracks, addToQueue, playNext, removeFromQueue, clearQueue, reorderQueue,
     importM3U, exportPlaylistAsM3U, exportLibraryBackup, importLibraryBackup,
     sleepTimer, sleepTimerEnd, setSleepTimer, volumeBoost, setVolumeBoost,
@@ -1248,6 +1248,18 @@ const App = () => {
                               style={{color:'var(--text-secondary)'}}
                               title="M3U olarak dışa aktar"
                             ><Download size={10} /></button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const newName = prompt('Yeni ad:', pl.name);
+                                if (newName && newName.trim() && newName.trim() !== pl.name) {
+                                  renamePlaylist(pl.id, newName.trim());
+                                }
+                              }}
+                              className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-white/10 transition"
+                              style={{color:'var(--text-secondary)'}}
+                              title="Yeniden adlandır"
+                            ><Edit3 size={10} /></button>
                             <button
                               onClick={(e) => { e.stopPropagation(); if (confirm(`"${pl.name}" silinsin mi?`)) deletePlaylist(pl.id); }}
                               className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-white/10 transition"

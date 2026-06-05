@@ -57,6 +57,7 @@ function init(mainWin) {
   // Playlists
   ipcMain.handle('db-get-playlists', () => playlistOps.getAll());
   ipcMain.handle('db-create-playlist', (e, name) => playlistOps.create(name));
+  ipcMain.handle('db-rename-playlist', (e, id, newName) => playlistOps.rename(id, newName));
   ipcMain.handle('db-delete-playlist', (e, id) => playlistOps.delete(id));
   ipcMain.handle('db-get-playlist-tracks', (e, id) => playlistOps.getTracks(id));
   ipcMain.handle('db-add-to-playlist', (e, plId, tId) => playlistOps.addTrack(plId, tId));
