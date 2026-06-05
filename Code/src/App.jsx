@@ -1555,7 +1555,15 @@ const App = () => {
                 {showQueuePanel && (
                   <div className="w-64 shrink-0 border-l overflow-y-auto custom-scrollbar" style={{borderColor:'var(--border-color)'}} role="region" aria-label="Çalma Sırası">
                     <div className="flex items-center justify-between px-3 py-2.5 border-b" style={{borderColor:'var(--border-color)'}}>
-                      <span className="text-xs font-bold uppercase tracking-wider" style={{color:'var(--text-secondary)'}}>Sıra ({queueTracks.length})</span>
+                      <span className="text-xs font-bold uppercase tracking-wider" style={{color:'var(--text-secondary)'}}>
+                        Sıra ({queueTracks.length})
+                        {(() => {
+                          const totalSec = queueTracks.reduce((a, t) => a + (t.duration || 0), 0) + (currentTrack?.duration || 0);
+                          if (totalSec <= 0) return '';
+                          const min = Math.floor(totalSec / 60);
+                          return ` · ${min}dk`;
+                        })()}
+                      </span>
                       <div className="flex items-center gap-1">
                         <button onClick={refreshLibrary} className="text-[10px] px-2 py-0.5 rounded hover:bg-white/10 transition" style={{color:'var(--color-primary)'}} title="Yenile" aria-label="Sırayı yenile">
                           <RotateCcw size={12} />
@@ -1565,6 +1573,27 @@ const App = () => {
                         )}
                       </div>
                     </div>
+                    {queueTracks.length > 0 && (
+                      <div className="flex items-center gap-1 px-2 py-1.5 border-b" style={{borderColor:'var(--border-color)'}}>
+                        <button onClick={() => { if (queueTracks.length > 0) playTrack(queueTracks[0]); }} className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition hover:bg-white/10" style={{backgroundColor:'var(--color-bg-tertiary)', color:'var(--text-primary)'}}>
+                          <Play size={10} fill="currentColor" /> Tümünü Oynat
+                        </button>
+                        <button onClick={async () => {
+                          const name = prompt('Yeni çalma listesi adı:');
+                          if (name && name.trim()) {
+                            await createPlaylist(name.trim());
+                            const pls = await useStore.getState().loadPlaylists();
+                            const pl = useStore.getState().playlists.find(p => p.name === name.trim());
+                            if (pl) {
+                              for (const t of queueTracks) await addToPlaylist(pl.id, t.id);
+                              showToast(`Sıra "${name.trim()}" listesine kaydedildi`, 'success');
+                            }
+                          }
+                        }} className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition hover:bg-white/10" style={{backgroundColor:'var(--color-bg-tertiary)', color:'var(--text-primary)'}}>
+                          <Plus size={10} /> Listeye Kaydet
+                        </button>
+                      </div>
+                    )}
                     <div className="flex flex-col gap-0.5 p-2">
                       {currentTrack && (
                         <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs" style={{backgroundColor:'var(--color-primary)', color:'white'}} role="status" aria-label="Şu an çalıyor">
@@ -1578,7 +1607,9 @@ const App = () => {
                           <Play fill="white" size={10} />
                         </div>
                       )}
-                      {queueTracks.map((t, idx) => (
+                      {queueTracks.map((t, idx) => {
+                        const isNextUp = idx === 0 && !currentTrack;
+                        return (
                         <div
                           key={t.id + '-' + idx}
                           draggable
@@ -1592,23 +1623,28 @@ const App = () => {
                             const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
                             reorderQueue(fromIdx, idx);
                           }}
-                          className="group flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs cursor-pointer transition hover:bg-white/5"
+                          className={cn("group flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs cursor-pointer transition hover:bg-white/5", isNextUp && "border border-primary/30")}
                         >
                           <span className="shrink-0 w-4 text-center text-[9px] cursor-grab active:cursor-grabbing" style={{color:'var(--text-secondary)'}} title="Sürükle">
                             <GripVertical size={10} />
                           </span>
                           <div className="min-w-0 flex-1" onClick={() => playTrack(t)} role="button" tabIndex={0} aria-label={`${t.title} - ${t.artist}`}>
-                            <div className="truncate">{t.title}</div>
+                            <div className="truncate flex items-center gap-1">
+                              {isNextUp && <span className="text-[8px] font-bold text-primary">SIRADA</span>}
+                              <span>{t.title}</span>
+                            </div>
                             <div className="truncate text-[9px]" style={{color:'var(--text-secondary)'}}>{t.artist}</div>
                           </div>
                           <button onClick={() => removeFromQueue(t.id)} className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-white/10 transition shrink-0" style={{color:'var(--text-secondary)'}} aria-label="Sıradan çıkar">
                             <X size={10} />
                           </button>
                         </div>
-                      ))}
+                      );})}
                       {queueTracks.length === 0 && !currentTrack && (
-                        <div className="px-2 py-6 text-center text-[10px]" style={{color:'var(--text-secondary)'}}>
-                          Sırada şarkı yok
+                        <div className="px-2 py-8 text-center" style={{color:'var(--text-secondary)'}}>
+                          <ListMusic size={32} className="mx-auto mb-2 opacity-30" />
+                          <p className="text-[11px] font-medium mb-1">Sırada şarkı yok</p>
+                          <p className="text-[9px] opacity-60">Müziklere sağ tıklayarak <br />sıraya ekleyebilirsiniz</p>
                         </div>
                       )}
                     </div>
