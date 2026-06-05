@@ -31,6 +31,10 @@ const Downloader = () => {
   const [downloadFormat, setDownloadFormat] = useState('audio');
   const { playTrack, refreshLibrary } = useStore();
 
+  // Auto-detect YouTube URL
+  const ytUrlRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|music\.youtube\.com)\/.+/i;
+  const isYoutubeUrl = query.trim() ? ytUrlRegex.test(query.trim()) : false;
+
   useEffect(() => {
     let ipcRenderer;
     try {
@@ -72,27 +76,33 @@ const Downloader = () => {
   }, [refreshLibrary]);
 
   const handleSearch = useCallback(async () => {
-    if (!query.trim()) return;
+    const q = query.trim();
+    if (!q) return;
     setLoading(true);
     setResults([]);
     setSelectedIds(new Set());
+
+    // Auto-detect YouTube URL vs search query
+    const ytRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|music\.youtube\.com)\/.+/i;
+    const isYoutubeUrl = ytRegex.test(q);
+
     try {
       const { ipcRenderer } = window.require('electron');
-      const response = await ipcRenderer.invoke('search-online-tracks', query.trim());
-      setResults(response.results || []);
+      const response = await ipcRenderer.invoke('search-online-tracks', q);
+      const fetchedResults = response.results || [];
+      setResults(fetchedResults);
       setIsPlaylist(response.isPlaylist || false);
-      
-      if (response.results) {
-        const checkStatus = {};
-        response.results.forEach(r => { checkStatus[r.id] = true; });
-        setIsChecking(checkStatus);
-        
-        for (const track of response.results) {
+
+      // Check download status for each result
+      if (fetchedResults.length > 0) {
+        // Use a local variable to avoid stale closures
+        for (const track of fetchedResults) {
           try {
             const check = await ipcRenderer.invoke('check-track-downloaded', track);
-            setResults(prev => prev.map(t => t.id === track.id ? { ...t, _downloaded: check.downloaded, _localTrack: check.track } : t));
+            if (check.downloaded) {
+              setResults(prev => prev.map(t => t.id === track.id ? { ...t, _downloaded: true, _localTrack: check.track } : t));
+            }
           } catch(e) {}
-          setIsChecking(prev => { const n = { ...prev }; delete n[track.id]; return n; });
         }
       }
     } catch (e) {
@@ -208,9 +218,14 @@ const Downloader = () => {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             placeholder="Şarkı adı, sanatçı, YouTube linki veya playlist..."
-            className="w-full border rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none transition"
+            className="w-full border rounded-xl py-3 pl-10 pr-10 text-sm focus:outline-none transition"
             style={{backgroundColor:'rgba(255,255,255,0.05)', borderColor:'var(--border-color)', color:'var(--text-primary)'}}
           />
+          {isYoutubeUrl && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{backgroundColor:'rgba(255,0,0,0.15)', color:'#ff4444'}}>
+              YouTube
+            </div>
+          )}
         </div>
         <button onClick={handleSearch} disabled={loading}
           className="flex flex-col px-6 rounded-xl font-bold transition disabled:opacity-50 text-white flex items-center gap-2"
@@ -319,7 +334,25 @@ const Downloader = () => {
                 <X size={14} className="text-red-500 flex-shrink-0" />
                 <span className="text-xs truncate">{dl.title}</span>
               </div>
-              <span className="text-[10px] text-red-400">{dl.error}</span>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className="text-[10px] text-red-400 max-w-[120px] truncate">{dl.error}</span>
+                <button
+                  onClick={() => {
+                    setDownloads(prev => { const n = { ...prev }; delete n[id]; return n; });
+                    // Re-download by creating a result entry
+                    if (dl.url) {
+                      const fakeTrack = { pageUrl: dl.url, title: dl.title, id: dl.url };
+                      handleDownload(fakeTrack);
+                    }
+                  }}
+                  className="text-[10px] px-2 py-0.5 rounded font-bold"
+                  style={{backgroundColor:'var(--color-primary)', color:'white'}}
+                  title="Tekrar dene"
+                >
+                  Tekrar Dene
+                </button>
+                <button onClick={() => { setDownloads(prev => { const n = { ...prev }; delete n[id]; return n; }); }} className="text-red-400 hover:text-red-300"><X size={14} /></button>
+              </div>
             </div>
           ))}
         </div>
