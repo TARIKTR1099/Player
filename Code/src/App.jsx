@@ -10,6 +10,7 @@ import PlayerBar from './components/PlayerBar';
 import { GridTrack, ListTrack, CompactTrack, ContextMenu } from './components/TrackComponents';
 import { cn } from './lib/utils';
 import { fetchSyncedLyrics, parseLRC } from './services/lrclib';
+import ToastContainer, { showToast } from './components/Toast';
 const Downloader = React.lazy(() => import('./components/Downloader'));
 const EqualizerModal = React.lazy(() => import('./components/EqualizerModal'));
 const EffectsModal = React.lazy(() => import('./components/EffectsModal'));
@@ -97,6 +98,7 @@ const App = () => {
   const [currentPlaylistTracks, setCurrentPlaylistTracks] = useState(null);
   const [showQueuePanel, setShowQueuePanel] = useState(false);
   const [showPlaylistSidebar, setShowPlaylistSidebar] = useState(true);
+  const [isDragOver, setIsDragOver] = useState(false);
   // Keep ref in sync
   useEffect(() => { selectedTrackIdsRef.current = selectedTrackIds; }, [selectedTrackIds]);
 
@@ -120,10 +122,18 @@ const App = () => {
       if (selectedCategory !== 'all') {
         result = result.filter(t => (t.category || '').toLowerCase() === selectedCategory.toLowerCase());
       }
-      // Filter by search query
+      // Filter by search query — expanded to album, genre, year, filename
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        result = result.filter(t => (t.title || '').toLowerCase().includes(q) || (t.artist || '').toLowerCase().includes(q));
+        result = result.filter(t =>
+          (t.title || '').toLowerCase().includes(q) ||
+          (t.artist || '').toLowerCase().includes(q) ||
+          (t.album || '').toLowerCase().includes(q) ||
+          (t.genre || '').toLowerCase().includes(q) ||
+          (t.year && String(t.year).includes(q)) ||
+          (t.location || '').toLowerCase().includes(q) ||
+          (t.filename || '').toLowerCase().includes(q)
+        );
       }
       return result;
     } catch { return []; }
@@ -281,6 +291,114 @@ const App = () => {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [currentTrack, audioRef, setLastPlayedTrack]);
+
+  // Drag-and-drop file support (Electron): accept OS-dropped audio files into the library.
+  // Files flow: renderer drop → `handle-dropped-files` IPC → main filters by extension →
+  // re-emits `open-files` to renderer → renderer extracts metadata → adds to library + plays first.
+  useEffect(() => {
+    let dragCounter = 0;
+    const isFileDrag = (e) => {
+      const types = e.dataTransfer?.types;
+      if (!types) return false;
+      return Array.from(types).includes('Files');
+    };
+    const onDragEnter = (e) => {
+      if (!isFileDrag(e)) return;
+      e.preventDefault();
+      dragCounter++;
+      setIsDragOver(true);
+    };
+    const onDragOver = (e) => {
+      if (!isFileDrag(e)) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+    };
+    const onDragLeave = (e) => {
+      if (!isFileDrag(e)) return;
+      e.preventDefault();
+      dragCounter = Math.max(0, dragCounter - 1);
+      if (dragCounter === 0) setIsDragOver(false);
+    };
+    const onDrop = async (e) => {
+      if (!isFileDrag(e)) return;
+      e.preventDefault();
+      dragCounter = 0;
+      setIsDragOver(false);
+      const files = Array.from(e.dataTransfer?.files || []);
+      if (files.length === 0) return;
+      // Extract absolute paths. Electron 28+ exposes .path on dropped File objects;
+      // newer versions require webUtils.getPathForFile. Both are tried for forward compat.
+      const paths = files.map((f) => {
+        try {
+          if (f.path) return f.path;
+          const electron = window.require?.('electron');
+          if (electron?.webUtils?.getPathForFile) {
+            return electron.webUtils.getPathForFile(f);
+          }
+        } catch {}
+        return null;
+      }).filter(Boolean);
+      if (paths.length === 0) return;
+      try {
+        const { ipcRenderer } = window.require('electron');
+        await ipcRenderer.invoke('handle-dropped-files', paths);
+      } catch (err) {
+        console.error('Drop failed:', err);
+      }
+    };
+    window.addEventListener('dragenter', onDragEnter);
+    window.addEventListener('dragover', onDragOver);
+    window.addEventListener('dragleave', onDragLeave);
+    window.addEventListener('drop', onDrop);
+    return () => {
+      window.removeEventListener('dragenter', onDragEnter);
+      window.removeEventListener('dragover', onDragOver);
+      window.removeEventListener('dragleave', onDragLeave);
+      window.removeEventListener('drop', onDrop);
+    };
+  }, []);
+
+  // Listen for the main process's `open-files` event (sent after it filters dropped files)
+  useEffect(() => {
+    let ipcRenderer;
+    try {
+      ipcRenderer = window.require?.('electron')?.ipcRenderer;
+    } catch {}
+    if (!ipcRenderer) return;
+    const onOpenFiles = async (_event, filePaths) => {
+      if (!Array.isArray(filePaths) || filePaths.length === 0) return;
+      const newTracks = [];
+      for (const filePath of filePaths) {
+        try {
+          const metadata = await ipcRenderer.invoke('extract-metadata', filePath);
+          if (metadata) {
+            const track = { id: `track-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, ...metadata, location: filePath };
+            newTracks.push(track);
+          }
+        } catch (e) {
+          console.warn('Failed to extract metadata for', filePath, e);
+        }
+      }
+      if (newTracks.length === 0) return;
+      try {
+        const library = await ipcRenderer.invoke('get-library-state');
+        const existingPaths = new Set((library.tracks || []).map((t) => t.location));
+        const deduped = newTracks.filter((t) => !existingPaths.has(t.location));
+        library.tracks = [...(library.tracks || []), ...deduped];
+        await ipcRenderer.invoke('save-library-state', library);
+        await refreshLibrary();
+        // Auto-play the first newly added track
+        if (deduped.length > 0) playTrack(deduped[0]);
+        addLog(`📁 ${deduped.length} dosya sürüklenip bırakıldı`, 'info');
+      } catch (e) {
+        console.error('Save dropped files failed:', e);
+      }
+    };
+    ipcRenderer.on('open-files', onOpenFiles);
+    return () => {
+      try { ipcRenderer.removeListener('open-files', onOpenFiles); } catch {}
+    };
+  }, [refreshLibrary, playTrack, addLog]);
 
   // Auto-fetch synced lyrics from LRCLib when track changes (Spotube pattern)
   useEffect(() => {
@@ -573,7 +691,7 @@ const App = () => {
   const copyTrackName = (track) => {
     if (!track?.title) return;
     try {
-      navigator.clipboard.writeText(track.title);
+      navigator.clipboard.writeText(track.title); showToast('Ad kopyalandı', 'copy');
     } catch {}
     setContextMenu(null);
     setShowMoreMenu(false);
@@ -905,7 +1023,7 @@ const App = () => {
                     <MenuItem icon={<Radio size={13}/>} label={showWaveform ? "✓ Ses Dalgası" : "Ses Dalgası"} onClick={() => { setShowWaveform(!showWaveform); setShowFSMenu(false); }} />
                     <MenuItem icon={<Subtitles size={13}/>} label={showLyrics ? "✓ Altyazı" : "Altyazı"} onClick={() => { setShowLyrics(!showLyrics); setShowFSMenu(false); }} />
                     <div className="h-px my-1" style={{backgroundColor:'rgba(255,255,255,0.1)'}} />
-                    <MenuItem icon={<Copy size={13}/>} label="Adı Kopyala" onClick={() => { if(currentTrack?.title) navigator.clipboard.writeText(currentTrack.title); setShowFSMenu(false); }} />
+                    <MenuItem icon={<Copy size={13}/>} label="Adı Kopyala" onClick={() => { if(currentTrack?.title) { navigator.clipboard.writeText(currentTrack.title); showToast('Ad kopyalandı', 'copy'); } setShowFSMenu(false); }} />
                   </div>
                 )}
               </div>
@@ -1158,7 +1276,7 @@ const App = () => {
                         <input 
                           value={searchQuery} 
                           onChange={(e) => setSearchQuery(e.target.value)} 
-                          placeholder="Müziklerde veya sanatçılarda ara..." 
+                          placeholder="Ad, sanatçı, albüm, tür, yıl..." 
                           className="border rounded-xl py-2 pl-9 pr-4 text-xs w-full focus:outline-none transition" 
                           style={{backgroundColor:'var(--color-bg-tertiary)', borderColor:'var(--border-color)', color:'var(--text-primary)'}} 
                         />
@@ -1267,6 +1385,60 @@ const App = () => {
                       </div>
                     </div>
 
+                    {/* Library info bar — total tracks, artists, duration, and quick filters */}
+                    {libraryLoaded && safeTracks.length > 0 && !scanProgress && (
+                      <div className="flex items-center justify-between flex-wrap gap-2 px-1 py-1.5">
+                        <div className="flex items-center gap-3 text-[11px]" style={{color:'var(--text-secondary)'}}>
+                          <span className="font-medium" style={{color:'var(--text-primary)'}}>{safeTracks.length} müzik</span>
+                          <span className="w-px h-3" style={{backgroundColor:'var(--border-color)'}} />
+                          <span>{new Set(safeTracks.filter(t=>t.artist).map(t=>t.artist)).size} sanatçı</span>
+                          <span className="w-px h-3" style={{backgroundColor:'var(--border-color)'}} />
+                          <span>{(() => {
+                            const totalSec = safeTracks.reduce((a,t) => a + (t.duration || 0), 0);
+                            const hh = Math.floor(totalSec / 3600);
+                            const mm = Math.floor((totalSec % 3600) / 60);
+                            return hh > 0 ? `${h}s ${mm}dk` : `${mm}dk`;
+                          })()}</span>
+                          {searchQuery && sortedTracks.length > 0 && (
+                            <>
+                              <span className="w-px h-3" style={{backgroundColor:'var(--border-color)'}} />
+                              <span className="text-primary">{sortedTracks.length} sonuç</span>
+                            </>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {['all', 'recent', 'mostplayed'].map(filter => {
+                            const labels = { all: 'Tümü', recent: 'Yeni Eklenen', mostplayed: 'En Çok Dinlenen' };
+                            const isActive = selectedCategory === filter || (selectedCategory === filter);
+                            return (
+                              <button
+                                key={filter}
+                                onClick={() => {
+                                  if (filter === 'all') { setSelectedCategory('all'); setSortBy('name'); setSortDir('asc'); }
+                                  else if (filter === 'recent') { setSelectedCategory('all'); setSortBy('date'); setSortDir('desc'); }
+                                  else if (filter === 'mostplayed') { setSelectedCategory('all'); setSortBy('playcount'); setSortDir('desc'); }
+                                }}
+                                className={cn(
+                                  "px-2.5 py-1 rounded-lg text-[10px] font-bold transition",
+                                  (filter === 'all' && sortBy === 'name') ||
+                                  (filter === 'recent' && sortBy === 'date') ||
+                                  (filter === 'mostplayed' && sortBy === 'playcount')
+                                    ? "text-white" : ""
+                                )}
+                                style={(filter === 'all' && sortBy === 'name') ||
+                                  (filter === 'recent' && sortBy === 'date') ||
+                                  (filter === 'mostplayed' && sortBy === 'playcount')
+                                  ? {backgroundColor:'var(--color-primary)'}
+                                  : {backgroundColor:'var(--color-bg-tertiary)'}
+                                }
+                              >
+                                {labels[filter]}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   
                   {/* Loading state — compact spinner when library loading (no scan progress) */}
                   {!libraryLoaded && !scanProgress && (
@@ -1302,9 +1474,6 @@ const App = () => {
                   {/* Track list */}
                   {libraryLoaded && safeTracks.length > 0 && (
                     <>
-                      {searchQuery && sortedTracks.length > 0 && (
-                        <div className="text-sm" style={{color:'var(--text-secondary)'}}>{sortedTracks.length} sonuç bulundu</div>
-                      )}
                       {libraryViewMode === 'grid' && (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                           {displayTracks.map((track, idx) => (
@@ -1365,6 +1534,7 @@ const App = () => {
                                   const selectedTracks = safeTracks.filter(t => selectedTrackIds.includes(t.id));
                                   for (const t of selectedTracks) await addToPlaylist(pl.id, t.id);
                                 }
+                                showToast(`"${name.trim()}" listesine kaydedildi`, 'success');
                               }
                             }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition hover:bg-white/10" style={{backgroundColor:'var(--color-bg-tertiary)', color:'var(--text-primary)'}}>
                               <Plus size={14} /> <span>Listeye Kaydet</span>
@@ -1574,10 +1744,10 @@ const App = () => {
           onToggleWaveform={() => { setShowWaveform(!showWaveform); setContextMenu(null); }}
           categories={categories}
           onAssignCategory={(categoryId, trackId) => addTrackToCategory(categoryId, trackId)}
-          onAddToQueue={() => addToQueue(contextMenu.track)}
+          onAddToQueue={() => { addToQueue(contextMenu.track); showToast('Sıraya eklendi', 'success'); }}
           onPlayNext={() => playNext(contextMenu.track)}
           playlists={playlists}
-          onAddToPlaylist={(plId, tId) => { addToPlaylist(plId, tId); setContextMenu(null); }}
+          onAddToPlaylist={(plId, tId) => { addToPlaylist(plId, tId); const pl = playlists.find(p => p.id === plId); showToast(`"${pl?.name || 'Liste'}" eklendi`, 'success'); setContextMenu(null); }}
         />
       )}
       
@@ -1606,6 +1776,7 @@ const App = () => {
       
       {showEqualizer && <Suspense fallback={null}><EqualizerModal onClose={() => setShowEqualizer(false)} /></Suspense>}
       {showEffects && <Suspense fallback={null}><EffectsModal onClose={() => setShowEffects(false)} /></Suspense>}
+      <ToastContainer />
     </div>
   </ErrorBoundary>
   );

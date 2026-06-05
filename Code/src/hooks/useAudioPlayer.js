@@ -1,7 +1,23 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useStore } from '../store';
+import { showToast } from '../components/Toast';
 
 const EQ_FREQUENCIES = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+
+// Global AudioContext resume: called on any user interaction
+let _globalResumeAttached = false;
+function attachGlobalResume(ctxRef) {
+  if (_globalResumeAttached) return;
+  _globalResumeAttached = true;
+  const handler = () => {
+    if (ctxRef.current && ctxRef.current.state === 'suspended') {
+      ctxRef.current.resume().catch(() => {});
+    }
+  };
+  document.addEventListener('click', handler, { once: false });
+  document.addEventListener('touchstart', handler, { once: false });
+  document.addEventListener('keydown', handler, { once: false });
+}
 
 export const useAudioPlayer = () => {
   const audioRef = useRef(new Audio());
@@ -228,6 +244,9 @@ export const useAudioPlayer = () => {
     
     initializedRef.current = true;
     
+    // Attach global AudioContext resume handler
+    attachGlobalResume(contextRef);
+    
     // Apply initial state
     const state = useStore.getState();
     postGain.gain.value = state.volume / 100;
@@ -367,7 +386,7 @@ export const useAudioPlayer = () => {
     }
   }, []);
 
-  const { isPlaying, currentTrack, playId, volume, playbackRate, setProgress, setDuration, setLastPlayedTrack } = useStore();
+  const { isPlaying, currentTrack, playId, volume, muted, playbackRate, setProgress, setDuration, setLastPlayedTrack } = useStore();
   const lastSaveRef = useRef(0);
 
   const startCrossfadeOut = useCallback((duration) => {
@@ -375,31 +394,30 @@ export const useAudioPlayer = () => {
     if (!audio || !duration) return;
     
     if (crossfadeStateRef.current.timer) {
-      clearInterval(crossfadeStateRef.current.timer);
+      cancelAnimationFrame(crossfadeStateRef.current.timer);
     }
     
-    const steps = 20;
     const fadeMs = duration * 1000;
-    const stepMs = fadeMs / steps;
     const startVol = audio.volume;
-    const fadePerStep = startVol / steps;
-    let current = startVol;
-    let step = 0;
+    const startTime = performance.now();
     
     crossfadeStateRef.current.active = true;
     
-    const interval = setInterval(() => {
-      step++;
-      current = Math.max(0, startVol - (fadePerStep * step));
-      audio.volume = current;
-      if (step >= steps) {
-        clearInterval(interval);
+    const tick = (now) => {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / fadeMs, 1);
+      // Cubic ease-out for more natural fade
+      const eased = 1 - Math.pow(1 - t, 3);
+      audio.volume = Math.max(0, startVol * (1 - eased));
+      if (t >= 1) {
         audio.volume = 0;
         crossfadeStateRef.current.active = false;
         crossfadeStateRef.current.timer = null;
+      } else {
+        crossfadeStateRef.current.timer = requestAnimationFrame(tick);
       }
-    }, stepMs);
-    crossfadeStateRef.current.timer = interval;
+    };
+    crossfadeStateRef.current.timer = requestAnimationFrame(tick);
   }, []);
 
   const startCrossfadeIn = useCallback((targetVol, duration) => {
@@ -407,29 +425,30 @@ export const useAudioPlayer = () => {
     if (!audio) return;
     
     if (crossfadeStateRef.current.timer) {
-      clearInterval(crossfadeStateRef.current.timer);
+      cancelAnimationFrame(crossfadeStateRef.current.timer);
     }
     
-    const steps = 20;
-    const fadeMs = (duration || 1) * 1000;
-    const stepMs = fadeMs / steps;
-    const fadePerStep = targetVol / steps;
-    let current = 0;
-    let step = 0;
+    const fadeMs = (duration || 3) * 1000;
+    const startTime = performance.now();
     
     audio.volume = 0;
+    crossfadeStateRef.current.active = true;
     
-    const interval = setInterval(() => {
-      step++;
-      current = Math.min(targetVol, fadePerStep * step);
-      audio.volume = current;
-      if (step >= steps) {
-        clearInterval(interval);
+    const tick = (now) => {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / fadeMs, 1);
+      // Cubic ease-in for more natural fade
+      const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+      audio.volume = Math.min(targetVol, targetVol * eased);
+      if (t >= 1) {
         audio.volume = targetVol;
+        crossfadeStateRef.current.active = false;
         crossfadeStateRef.current.timer = null;
+      } else {
+        crossfadeStateRef.current.timer = requestAnimationFrame(tick);
       }
-    }, stepMs);
-    crossfadeStateRef.current.timer = interval;
+    };
+    crossfadeStateRef.current.timer = requestAnimationFrame(tick);
   }, []);
 
   useEffect(() => {
@@ -458,8 +477,9 @@ export const useAudioPlayer = () => {
       }
     };
     const onError = () => {
-      const errMsg = audio.error ? `Audio error: ${audio.error.code} - ${audio.error.message}` : 'Unknown audio error';
+      const errMsg = audio.error ? `Ses hatası (${audio.error.code}): ${audio.error.message}` : 'Bilinmeyen ses hatası';
       console.warn(errMsg);
+      showToast(errMsg, 'error', 4000);
     };
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoadedMetadata);
@@ -516,8 +536,8 @@ export const useAudioPlayer = () => {
             if (crossfadeStateRef.current.active) {
               const state = useStore.getState();
               const dur = state.crossfadeDuration || 3;
-              const targetVol = (state.volume / 100) * (state.volumeBoost || 1);
-              startCrossfadeIn(targetVol, dur);
+              const baseVol = state.muted ? 0 : (state.volume / 100) * (state.volumeBoost || 1);
+              startCrossfadeIn(baseVol, dur);
             }
           }).catch(() => {});
         }
@@ -561,12 +581,13 @@ export const useAudioPlayer = () => {
   }, [currentTrack, playId]);
 
   useEffect(() => {
+    const targetVol = muted ? 0 : volume / 100;
     if (postGainRef.current) {
-      postGainRef.current.gain.value = volume / 100;
+      postGainRef.current.gain.value = targetVol;
     } else {
-      audioRef.current.volume = volume / 100;
+      audioRef.current.volume = targetVol;
     }
-  }, [volume]);
+  }, [volume, muted]);
 
   useEffect(() => {
     audioRef.current.playbackRate = playbackRate;

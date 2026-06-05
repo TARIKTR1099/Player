@@ -146,6 +146,8 @@ export const useStore = create(
       queue: [],
       currentIndex: -1,
       playbackRate: 1.0,
+      muted: false,
+      previousVolume: 80,
       
       categories: [],
       
@@ -267,6 +269,17 @@ export const useStore = create(
       setVolumeBoost: (b) => set({ volumeBoost: Math.max(1.0, Math.min(2.0, b)) }),
       setCrossfadeDuration: (d) => set({ crossfadeDuration: Math.max(0, Math.min(10, d)) }),
       setEffectsBypass: (v) => set({ effectsBypass: v }),
+      toggleMute: () => set((state) => {
+        if (state.muted) {
+          return { muted: false, volume: state.previousVolume || 80 };
+        }
+        return { muted: true, previousVolume: state.volume };
+      }),
+      setMuted: (v) => set((state) => {
+        if (v && !state.muted) return { muted: true, previousVolume: state.volume };
+        if (!v && state.muted) return { muted: false, volume: state.previousVolume || 80 };
+        return {};
+      }),
       // Per-track position save (capped at 100 entries to prevent bloat)
       savePlaybackPosition: (trackId, position) => {
         if (!trackId || typeof position !== 'number' || position < 0) return;
@@ -761,7 +774,7 @@ export const useStore = create(
       partialize: (state) => ({
         // UI preferences (small, safe)
         theme: state.theme, language: state.language, layoutMode: state.layoutMode,
-        volume: state.volume, shuffleMode: state.shuffleMode, repeatMode: state.repeatMode,
+        volume: state.volume, previousVolume: state.previousVolume, muted: state.muted, shuffleMode: state.shuffleMode, repeatMode: state.repeatMode,
         playbackRate: state.playbackRate,
         equalizerBands: state.equalizerBands,
         customPresets: state.customPresets, selectedPreset: state.selectedPreset,

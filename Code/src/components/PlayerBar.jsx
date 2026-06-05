@@ -1,5 +1,5 @@
 ﻿import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, MoreHorizontal, Sliders, Activity, Eye, Radio, Subtitles, Maximize2, Minimize2, Copy, Video, RotateCcw, RotateCw, FolderOpen, Moon, ArrowRightLeft, Music2 } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, VolumeX, MoreHorizontal, Sliders, Activity, Eye, Radio, Subtitles, Maximize2, Minimize2, Copy, Video, RotateCcw, RotateCw, FolderOpen, Moon, ArrowRightLeft, Music2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { generateChapters } from '../utils/chapters';
 import { useStore } from '../store';
@@ -68,6 +68,8 @@ const PlayerBar = ({
   const seekRef = useRef(null);
   const volumePopRef = useRef(null);
   const moreMenuRef = useRef(null);
+  const muted = useStore((s) => s.muted);
+  const toggleMute = useStore((s) => s.toggleMute);
 
   // Chapter markers for the current track — auto-generated from duration if no explicit metadata.
   const chapters = useMemo(() => generateChapters(currentTrack, duration), [currentTrack, duration]);
@@ -207,23 +209,35 @@ const PlayerBar = ({
            <button onClick={() => setLayoutMode(layoutMode === 'mini' ? 'normal' : 'mini')} className="p-1.5 md:p-2 rounded-lg transition hover:bg-white/10 text-muted-foreground" title={layoutMode === 'mini' ? 'Normal Görünüm' : 'Mini Oynatıcı'} aria-label={layoutMode === 'mini' ? 'Normal görünüm' : 'Mini oynatıcı'}>
               {layoutMode === 'mini' ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
            </button>
-           <div className="relative flex items-center" ref={volumePopRef}>
-              <Volume2 size={18} className="cursor-pointer text-muted-foreground" onClick={() => setShowVolumePop(!showVolumePop)} role="button" tabIndex={0} aria-label="Ses seviyesi" aria-expanded={showVolumePop} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowVolumePop(!showVolumePop); } }} />
-             {showVolumePop && (
-               <div className="absolute bottom-full right-0 mb-3 p-3 rounded-2xl border shadow-2xl z-50" style={{backgroundColor:'var(--color-bg-secondary)', borderColor:'var(--border-color)', width:'160px'}}>
-                 <div className="flex items-center justify-center mb-2">
-                   <span className="text-lg font-black tabular-nums" style={{color: volumeBoost > 1.0 ? '#ef4444' : 'var(--color-primary)'}}>{volume}%</span>
-                   {volumeBoost > 1.0 &&                    <span className="text-[10px] ml-1 font-bold text-destructive">BOOST {Math.round(volumeBoost * 100)}%</span>}
-                 </div>
-                 <input type="range" min="0" max="100" value={volume} onChange={(e) => setVolume(parseInt(e.target.value))} className="w-full" />
-                 <div className="mt-2 flex items-center gap-2">
-                   <span className="text-[10px] text-muted-foreground">Güçlendirme</span>
-                   <input type="range" min="100" max="200" value={volumeBoost * 100} onChange={(e) => setVolumeBoost(parseInt(e.target.value) / 100)} className="flex-1" />
-                   <span className={cn("text-[10px] font-bold", volumeBoost > 1.0 ? "text-destructive" : "text-muted-foreground")}>{Math.round(volumeBoost * 100)}%</span>
-                 </div>
-               </div>
-             )}
-          </div>
+            <div className="relative flex items-center" ref={volumePopRef}>
+               {muted ? (
+                 <VolumeX size={18} className="cursor-pointer text-destructive" onClick={toggleMute} role="button" tabIndex={0} aria-label="Sesi aç" title="Ses kapalı — tıklayarak aç" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMute(); } }} />
+               ) : (
+                 <Volume2 size={18} className="cursor-pointer text-muted-foreground" onClick={() => setShowVolumePop(!showVolumePop)} role="button" tabIndex={0} aria-label="Ses seviyesi" aria-expanded={showVolumePop} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowVolumePop(!showVolumePop); } }} />
+               )}
+              {showVolumePop && (
+                <div className="absolute bottom-full right-0 mb-3 p-3 rounded-2xl border shadow-2xl z-50" style={{backgroundColor:'var(--color-bg-secondary)', borderColor:'var(--border-color)', width:'200px'}}>
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <button
+                      onClick={toggleMute}
+                      className={cn("p-1 rounded-lg transition press-scale", muted ? "text-destructive bg-destructive/10" : "text-muted-foreground hover:bg-white/10")}
+                      title={muted ? 'Sesi aç' : 'Sesi kapat'}
+                      aria-label={muted ? 'Sesi aç' : 'Sesi kapat'}
+                    >
+                      {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                    </button>
+                    <span className="text-lg font-black tabular-nums" style={{color: muted ? '#ef4444' : (volumeBoost > 1.0 ? '#ef4444' : 'var(--color-primary)')}}>{muted ? 'SES KAPALI' : `${volume}%`}</span>
+                    {volumeBoost > 1.0 && !muted && <span className="text-[10px] ml-1 font-bold text-destructive">BOOST {Math.round(volumeBoost * 100)}%</span>}
+                  </div>
+                  <input type="range" min="0" max="100" value={muted ? 0 : volume} onChange={(e) => { if (muted) toggleMute(); setVolume(parseInt(e.target.value)); }} className="w-full" aria-label="Ses seviyesi kaydırıcısı" />
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-[10px] text-muted-foreground">Güçlendirme</span>
+                    <input type="range" min="100" max="200" value={volumeBoost * 100} onChange={(e) => setVolumeBoost(parseInt(e.target.value) / 100)} className="flex-1" aria-label="Ses güçlendirme" />
+                    <span className={cn("text-[10px] font-bold", volumeBoost > 1.0 ? "text-destructive" : "text-muted-foreground")}>{Math.round(volumeBoost * 100)}%</span>
+                  </div>
+                </div>
+              )}
+           </div>
 
            <div className="relative" ref={moreMenuRef}>
              <MoreHorizontal size={18} className="md:w-[20px] md:h-[20px] cursor-pointer text-muted-foreground" onClick={() => setShowMoreMenu(!showMoreMenu)} role="button" tabIndex={0} aria-label="Daha fazla seçenek" aria-expanded={showMoreMenu} aria-haspopup="true" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowMoreMenu(!showMoreMenu); } }} />
