@@ -211,6 +211,25 @@ export const useStore = create(
       // Effects Master Bypass (default: true = all effects OFF, pristine audio)
       effectsBypass: true,
       
+      // Error Log System
+      errors: [], // [{ message, name, componentStack, timestamp }]
+
+      addError: (message, details = {}) => {
+        const errorEntry = {
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          message: String(message || 'Unknown error').slice(0, 200),
+          name: details.name || 'Error',
+          componentStack: details.componentStack || null,
+          context: details.context || null,
+          timestamp: Date.now(),
+        };
+        set((s) => ({
+          errors: [errorEntry, ...(s.errors || [])].slice(0, 50),
+        }));
+      },
+
+      clearErrors: () => set({ errors: [] }),
+
       // Developer Console
       devLogsEnabled: false,
       logs: [],

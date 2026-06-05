@@ -11,6 +11,7 @@ import { GridTrack, ListTrack, CompactTrack, ContextMenu } from './components/Tr
 import { cn } from './lib/utils';
 import { fetchSyncedLyrics, parseLRC } from './services/lrclib';
 import ToastContainer, { showToast } from './components/Toast';
+import ErrorBoundary from './components/ErrorBoundary';
 const Downloader = React.lazy(() => import('./components/Downloader'));
 const EqualizerModal = React.lazy(() => import('./components/EqualizerModal'));
 const EffectsModal = React.lazy(() => import('./components/EffectsModal'));
@@ -20,32 +21,6 @@ const SpectrumAnalyzer = React.lazy(() => import('./components/SpectrumAnalyzer'
 const Visualizer3DSphere = React.lazy(() => import('./components/Visualizer'));
 const LyricsPanel = React.lazy(() => import('./components/LyricsPanel'));
 const VideoPlayer = React.lazy(() => import('./components/VideoPlayer'));
-
-// Error Boundary Component
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="flex items-center justify-center h-full" style={{backgroundColor:'var(--color-bg-primary)', color:'var(--text-primary)'}}>
-          <div className="text-center p-8">
-            <Activity size={48} className="mx-auto mb-4 opacity-30" style={{color:'var(--color-primary)'}} />
-            <h3 className="text-lg font-bold mb-2">Bir hata oluştu</h3>
-            <p className="text-sm mb-4" style={{color:'var(--text-secondary)'}}>{this.state.error?.message || 'Bilinmeyen hata'}</p>
-            <button onClick={() => this.setState({ hasError: false, error: null })} className="px-4 py-2 rounded-lg text-white text-sm" style={{backgroundColor:'var(--color-primary)'}}>Tekrar Dene</button>
-          </div>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
 
 const App = () => {
   const { 
@@ -245,7 +220,9 @@ const App = () => {
         icon: currentTrack.picture || undefined,
         trackId: currentTrack.id,
       }).catch(() => {});
-    } catch {}
+    } catch (e) {
+      try { useStore.getState().addError?.('Notification failed', { name: e.name, message: e.message, context: 'notification-effect' }); } catch {}
+    }
   }, [currentTrack?.id, isPlaying]);
 
   // Power save blocker — prevent system sleep during playback
@@ -257,7 +234,9 @@ const App = () => {
       } else {
         ipcRenderer.invoke('power-save-stop').catch(() => {});
       }
-    } catch {}
+    } catch (e) {
+      try { useStore.getState().addError?.('Power save blocker failed', { name: e.name, message: e.message, context: 'power-save-effect' }); } catch {}
+    }
   }, [isPlaying]);
 
   // Resume last played track on mount
@@ -411,7 +390,9 @@ const App = () => {
     };
     ipcRenderer.on('open-files', onOpenFiles);
     return () => {
-      try { ipcRenderer.removeListener('open-files', onOpenFiles); } catch {}
+      try { ipcRenderer.removeListener('open-files', onOpenFiles); } catch (e) {
+        try { useStore.getState().addError?.('IPC cleanup failed', { name: e.name, message: e.message, context: 'open-files-removeListener' }); } catch {}
+      }
     };
   }, [refreshLibrary, playTrack, addLog]);
 
