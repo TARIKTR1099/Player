@@ -14,7 +14,34 @@ const Settings = () => {
   const [activeSection, setActiveSection] = useState('general');
   const [sidebarWidth, setSidebarWidth] = useState(220);
   const [isResizing, setIsResizing] = useState(false);
+  const [settingsSearch, setSettingsSearch] = useState('');
   const resizeRef = useRef(null);
+
+  const navItems = [
+    { id: 'general', label: 'Genel', icon: <SettingsIcon size={16} />, keywords: 'başlatma başlangıç tepsi startup' },
+    { id: 'account', label: 'Hesap', icon: <User size={16} />, keywords: 'google hesap account giriş login' },
+    { id: 'audio', label: 'Ses', icon: <Volume2 size={16} />, keywords: 'ses volume equalizer eq efekt preset' },
+    { id: 'library', label: 'Kütüphane', icon: <ListMusic size={16} />, keywords: 'kütüphane library müzik music yedek' },
+    { id: 'categories', label: 'Kategoriler', icon: <Tag size={16} />, keywords: 'kategori tag category etiket' },
+    { id: 'plugins', label: 'Eklentiler', icon: <Puzzle size={16} />, keywords: 'plugin eklenti uzantı' },
+    { id: 'personalization', label: 'Kişiselleştirme', icon: <Palette size={16} />, keywords: 'tema theme dil language renk color pencere window' },
+    { id: 'shortcuts', label: 'Klavye Kısayolları', icon: <Keyboard size={16} />, keywords: 'kısayol shortcut tuş key' },
+    { id: 'ai', label: 'AI', icon: <Brain size={16} />, keywords: 'ai yapay zeka model api provider' },
+    { id: 'download', label: 'İndirme', icon: <Download size={16} />, keywords: 'indirme download klasör folder' },
+    { id: 'updates', label: 'Güncellemeler', icon: <RefreshCw size={16} />, keywords: 'güncelleme update sürüm version' },
+    { id: 'tempmusic', label: 'Geçici Müzikler', icon: <HardDrive size={16} />, keywords: 'geçici temp müzik temizleme' },
+    { id: 'advanced', label: 'Gelişmiş', icon: <Sliders size={16} />, keywords: 'gelişmiş advanced efekt log debug reset' },
+    { id: 'about', label: 'Hakkında', icon: <Info size={16} />, keywords: 'hakkında about bilgi info' },
+  ];
+
+  const filteredNavItems = settingsSearch.trim()
+    ? navItems.filter(item => {
+        const q = settingsSearch.toLowerCase();
+        return item.label.toLowerCase().includes(q) ||
+               item.id.toLowerCase().includes(q) ||
+               item.keywords.toLowerCase().includes(q);
+      })
+    : navItems;
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -37,27 +64,39 @@ const Settings = () => {
     <div className="flex h-full relative" style={{height:'100%'}}>
       <div className="flex flex-col border-r flex-shrink-0 relative" style={{width: sidebarWidth, borderColor:'var(--border-color)', backgroundColor:'var(--color-bg-secondary)'}}>
         <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
+          <div className="relative mb-3" style={{display: sidebarWidth < 100 ? 'none' : 'block'}}>
+            <input
+              type="text"
+              value={settingsSearch}
+              onChange={(e) => { setSettingsSearch(e.target.value); setActiveSection('general'); }}
+              placeholder="Ayarlarda ara..."
+              className="w-full px-3 py-2 rounded-lg text-xs border focus:outline-none"
+              style={{backgroundColor:'rgba(255,255,255,0.05)', borderColor:'var(--border-color)', color:'var(--text-primary)', paddingLeft:'30px'}}
+            />
+            <svg className="absolute left-2 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{color:'var(--text-secondary)'}}>
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            {settingsSearch && (
+              <button
+                onClick={() => setSettingsSearch('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2"
+                style={{color:'var(--text-secondary)'}}
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
           <SettingsNav 
-            items={[
-              { id: 'general', label: 'Genel', icon: <SettingsIcon size={16} /> },
-              { id: 'account', label: 'Hesap', icon: <User size={16} /> },
-              { id: 'audio', label: 'Ses', icon: <Volume2 size={16} /> },
-              { id: 'library', label: 'Kütüphane', icon: <ListMusic size={16} /> },
-              { id: 'categories', label: 'Kategoriler', icon: <Tag size={16} /> },
-              { id: 'plugins', label: 'Eklentiler', icon: <Puzzle size={16} /> },
-              { id: 'personalization', label: 'Kişiselleştirme', icon: <Palette size={16} /> },
-              { id: 'shortcuts', label: 'Klavye Kısayolları', icon: <Keyboard size={16} /> },
-              { id: 'ai', label: 'AI', icon: <Brain size={16} /> },
-              { id: 'download', label: 'İndirme', icon: <Download size={16} /> },
-              { id: 'updates', label: 'Güncellemeler', icon: <RefreshCw size={16} /> },
-              { id: 'tempmusic', label: 'Geçici Müzikler', icon: <HardDrive size={16} /> },
-              { id: 'advanced', label: 'Gelişmiş', icon: <Sliders size={16} /> },
-              { id: 'about', label: 'Hakkında', icon: <Info size={16} /> },
-            ]}
+            items={filteredNavItems}
             active={activeSection}
             onChange={setActiveSection}
             narrow={sidebarWidth < 100}
           />
+          {settingsSearch && filteredNavItems.length === 0 && (
+            <div className="text-center py-4 text-xs" style={{color:'var(--text-secondary)'}}>
+              Sonuç bulunamadı
+            </div>
+          )}
         </div>
         <div className="p-2 border-t flex items-center justify-center" style={{borderColor:'var(--border-color)'}}>
           <button
@@ -398,9 +437,11 @@ const AccountSettings = () => {
 };
 
 const AudioSettings = () => {
-  const { volume, setVolume } = useStore();
+  const { volume, setVolume, equalizerBands, eqPresets, customPresets, selectedPreset, applyPreset, saveCustomPreset, deleteCustomPreset } = useStore();
   const [audioService, setAudioService] = useState('running');
   const [isDragging, setIsDragging] = useState(false);
+  const [presetName, setPresetName] = useState('');
+  const [presetMsg, setPresetMsg] = useState('');
   const sliderRef = useRef(null);
   
   const restartAudioService = async () => {
@@ -471,6 +512,113 @@ const AudioSettings = () => {
               <span className="relative z-10 text-sm font-bold">{volume}%</span>
             </div>
           </div>
+      </SettingGroup>
+      
+      <SettingGroup title="Ekolayzer Presetleri" description="EQ presetlerini yönetin. Yeni preset kaydedin veya mevcut özel presetleri silin.">
+        {/* Built-in presets */}
+        <div className="mb-3">
+          <div className="text-xs font-bold mb-2" style={{color:'var(--text-secondary)'}}>Hazır Presetler</div>
+          <div className="flex flex-wrap gap-2">
+            {Object.keys(eqPresets).map(name => (
+              <button
+                key={name}
+                onClick={() => applyPreset(name)}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold transition hover:scale-105"
+                style={{
+                  backgroundColor: selectedPreset === name ? 'var(--color-primary)' : 'rgba(255,255,255,0.08)',
+                  color: selectedPreset === name ? 'white' : 'var(--text-primary)'
+                }}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+        </div>
+        {/* Custom presets */}
+        <div className="mb-3">
+          <div className="text-xs font-bold mb-2" style={{color:'var(--text-secondary)'}}>Özel Presetler</div>
+          {Object.keys(customPresets).length === 0 ? (
+            <div className="text-xs" style={{color:'var(--text-secondary)'}}>Henüz özel preset kaydedilmemiş</div>
+          ) : (
+            <div className="flex flex-col gap-1.5">
+              {Object.entries(customPresets).map(([name, bands]) => (
+                <div key={name} className="flex items-center justify-between p-2 rounded-lg" style={{backgroundColor:'rgba(255,255,255,0.03)', border:'1px solid var(--border-color)'}}>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => applyPreset(name)}
+                      className="text-xs font-bold hover:opacity-80 transition"
+                      style={{color: selectedPreset === name ? 'var(--color-primary)' : 'var(--text-primary)'}}
+                    >
+                      {name}
+                    </button>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded" style={{backgroundColor:'rgba(255,255,255,0.05)', color:'var(--text-secondary)'}}>
+                      {bands.map(b => b > 0 ? `+${b}` : b).join(', ')}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => { deleteCustomPreset(name); setPresetMsg('Preset silindi'); setTimeout(() => setPresetMsg(''), 2000); }}
+                    className="p-1 rounded hover:bg-white/10 transition"
+                    style={{color:'#ef4444'}}
+                    title="Preseti Sil"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        {/* Save current EQ as preset */}
+        <div className="flex items-center gap-2">
+          <input
+            value={presetName}
+            onChange={(e) => setPresetName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && presetName.trim()) {
+                if (eqPresets[presetName.trim()] || customPresets[presetName.trim()]) {
+                  setPresetMsg('Bu isimde preset zaten var!');
+                  setTimeout(() => setPresetMsg(''), 2500);
+                  return;
+                }
+                saveCustomPreset(presetName.trim(), [...equalizerBands]);
+                setPresetName('');
+                setPresetMsg('Preset kaydedildi ✓');
+                setTimeout(() => setPresetMsg(''), 2000);
+              }
+            }}
+            placeholder="Yeni preset adı..."
+            className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none"
+            style={{backgroundColor:'rgba(255,255,255,0.05)', borderColor:'var(--border-color)', color:'var(--text-primary)'}}
+          />
+          <button
+            onClick={() => {
+              if (!presetName.trim()) return;
+              if (eqPresets[presetName.trim()] || customPresets[presetName.trim()]) {
+                setPresetMsg('Bu isimde preset zaten var!');
+                setTimeout(() => setPresetMsg(''), 2500);
+                return;
+              }
+              saveCustomPreset(presetName.trim(), [...equalizerBands]);
+              setPresetName('');
+              setPresetMsg('Preset kaydedildi ✓');
+              setTimeout(() => setPresetMsg(''), 2000);
+            }}
+            disabled={!presetName.trim()}
+            className="px-4 py-2 rounded-lg text-white text-sm font-bold disabled:opacity-50 transition"
+            style={{backgroundColor:'var(--color-primary)'}}
+          >
+            <Save size={14} className="inline mr-1" />
+            Kaydet
+          </button>
+        </div>
+        {presetMsg && (
+          <div className={`text-xs mt-1 ${presetMsg.includes('✓') ? 'text-green-500' : 'text-red-500'}`}>
+            {presetMsg}
+          </div>
+        )}
+        <div className="text-xs mt-2" style={{color:'var(--text-secondary)'}}>
+          Aktif preset: <strong>{selectedPreset}</strong> · Mevcut EQ değerlerinizi kaydetmek için ad girin ve Kaydet'e tıklayın.
+        </div>
       </SettingGroup>
     </div>
   );
