@@ -1517,7 +1517,7 @@ const App = () => {
                       {libraryViewMode === 'grid' && (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                           {displayTracks.map((track, idx) => (
-                            <GridTrack key={track.id} track={track} selected={selectedTrackIds.includes(track.id)} onPlay={(e) => handleTrackClick(e, track, idx)} onCtx={(e) => handleCtxMenu(e, track)} />
+                            <GridTrack key={track.id} track={track} selected={selectedTrackIds.includes(track.id)} onPlay={(e) => handleTrackClick(e, track, idx)} onCtx={(e) => handleCtxMenu(e, track)} searchQuery={searchQuery} />
                           ))}
                         </div>
                       )}
@@ -1530,14 +1530,14 @@ const App = () => {
                             <div className="w-24">Süre</div>
                           </div>
                           {displayTracks.map((track, idx) => (
-                            <ListTrack key={track.id} track={track} index={idx} selected={selectedTrackIds.includes(track.id)} onPlay={(e) => handleTrackClick(e, track, idx)} onCtx={(e) => handleCtxMenu(e, track)} formatTime={formatTime} />
+                            <ListTrack key={track.id} track={track} index={idx} selected={selectedTrackIds.includes(track.id)} onPlay={(e) => handleTrackClick(e, track, idx)} onCtx={(e) => handleCtxMenu(e, track)} formatTime={formatTime} searchQuery={searchQuery} />
                           ))}
                         </div>
                       )}
                       {libraryViewMode === 'compact' && (
                         <div className="flex flex-col gap-1">
                           {displayTracks.map((track, idx) => (
-                            <CompactTrack key={track.id} track={track} index={idx} selected={selectedTrackIds.includes(track.id)} onPlay={(e) => handleTrackClick(e, track, idx)} onCtx={(e) => handleCtxMenu(e, track)} formatTime={formatTime} />
+                            <CompactTrack key={track.id} track={track} index={idx} selected={selectedTrackIds.includes(track.id)} onPlay={(e) => handleTrackClick(e, track, idx)} onCtx={(e) => handleCtxMenu(e, track)} formatTime={formatTime} searchQuery={searchQuery} />
                           ))}
                         </div>
                       )}
