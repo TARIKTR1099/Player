@@ -12,6 +12,7 @@ import { cn } from './lib/utils';
 import { fetchSyncedLyrics, parseLRC } from './services/lrclib';
 import ToastContainer, { showToast } from './components/Toast';
 import ErrorBoundary from './components/ErrorBoundary';
+import BottomNav from './components/BottomNav';
 const Downloader = React.lazy(() => import('./components/Downloader'));
 const EqualizerModal = React.lazy(() => import('./components/EqualizerModal'));
 const EffectsModal = React.lazy(() => import('./components/EffectsModal'));
@@ -57,6 +58,8 @@ const App = () => {
   const [isSeeking, setIsSeeking] = useState(false);
   const [visualizerOpacity, setVisualizerOpacity] = useState(0.7);
   const [visualizerMode, setVisualizerMode] = useState('spectrum');
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [showVisualizerControls, setShowVisualizerControls] = useState(false);
@@ -137,6 +140,17 @@ const App = () => {
     const timer = setTimeout(() => {
       if (mounted) setLibraryLoaded(true);
     }, 5000);
+
+    // Mobile viewport detection
+    const mql = window.matchMedia('(max-width: 768px)');
+    const handler = (e) => setIsMobileViewport(e.matches);
+    mql.addEventListener('change', handler);
+    setIsMobileViewport(mql.matches);
+    return () => {
+      mounted = false;
+      clearTimeout(timer);
+      mql.removeEventListener('change', handler);
+    };
   }, []);
 
   // Instant navigation transition support for Library
@@ -1063,23 +1077,29 @@ const App = () => {
   return (
     <ErrorBoundary>
     <div className="flex h-screen w-full overflow-hidden" style={{backgroundColor:'var(--color-bg-primary)', color:'var(--text-primary)'}}>
-       <Sidebar
-          sidebarMode={sidebarMode}
-          setSidebarMode={setSidebarMode}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          sidebarWidth={sidebarWidth}
-          setSidebarWidth={setSidebarWidth}
-          isResizingSidebar={isResizingSidebar}
-          setIsResizingSidebar={setIsResizingSidebar}
-          sidebarResizeRef={sidebarResizeRef}
-        />
+       {/* Desktop sidebar — hidden on mobile */}
+       {!isMobileViewport && (
+         <Sidebar
+            sidebarMode={sidebarMode}
+            setSidebarMode={setSidebarMode}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            sidebarWidth={sidebarWidth}
+            setSidebarWidth={setSidebarWidth}
+            isResizingSidebar={isResizingSidebar}
+            setIsResizingSidebar={setIsResizingSidebar}
+            sidebarResizeRef={sidebarResizeRef}
+          />
+       )}
 
       <div className="flex-1 flex flex-col min-w-0" style={{backgroundColor:'var(--color-bg-primary)'}}>
         <TitleBar
           sidebarMode={sidebarMode}
           setSidebarMode={setSidebarMode}
           sidebarToggleBehavior={sidebarToggleBehavior}
+          isMobileViewport={isMobileViewport}
+          showMobileSidebar={showMobileSidebar}
+          setShowMobileSidebar={setShowMobileSidebar}
         />
 
         {/* Main Content */}
@@ -1711,8 +1731,16 @@ const App = () => {
            setVolumeBoost={setVolumeBoost}
            crossfadeDuration={crossfadeDuration}
            setCrossfadeDuration={setCrossfadeDuration}
-         />
-          
+          />
+           
+          {/* Mobile Bottom Navigation */}
+          {isMobileViewport && (
+            <BottomNav
+              activeTab={activeTab}
+              setActiveTab={(tab) => { setActiveTab(tab); setShowMobileSidebar(false); }}
+            />
+          )}
+
           {/* Global Visualizer/Waveform Overlay — renders above PlayerBar on ALL tabs */}
           {(showVisualizer || showWaveform) && (
             <div
@@ -1759,6 +1787,39 @@ const App = () => {
       </div>
       </div>
 
+      {/* Mobile Sidebar Drawer Overlay */}
+      {isMobileViewport && showMobileSidebar && (
+        <div className="fixed inset-0 z-50 flex">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/60" onClick={() => setShowMobileSidebar(false)} />
+          {/* Drawer */}
+          <div className="relative w-72 h-full flex flex-col shadow-2xl animate-slide-in-left overflow-y-auto" style={{backgroundColor:'var(--color-bg-secondary)'}}>
+            <div className="flex items-center gap-3 p-6" style={{color:'var(--color-primary)'}}>
+              <img src={appIcon} className="w-9 h-9 rounded-xl" />
+              <span className="font-black tracking-tighter text-2xl">PLAYER</span>
+            </div>
+            <nav className="flex-1 px-4 gap-1 flex flex-col">
+              {[
+                { id: 'home', icon: Activity, label: 'Ana Sayfa' },
+                { id: 'library', icon: ListMusic, label: 'Kütüphane' },
+                { id: 'search', icon: Download, label: 'Müzik İndir' },
+                { id: 'settings', icon: Settings, label: 'Ayarlar' },
+              ].map(({ id, icon: Icon, label }) => (
+                <div
+                  key={id}
+                  onClick={() => { setActiveTab(id); setShowMobileSidebar(false); }}
+                  className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all text-sm font-bold tracking-tight"
+                  style={activeTab === id ? {backgroundColor:'var(--color-primary)', color:'white'} : {color:'var(--text-secondary)'}}
+                >
+                  <Icon size={20} />
+                  <span>{label}</span>
+                </div>
+              ))}
+            </nav>
+            <div className="p-4 text-center text-[10px] opacity-30 font-mono">Player v1.0</div>
+          </div>
+        </div>
+      )}
       {/* Dev Console kaldırıldı — log ayarları Settings > Gelişmiş Ayarlar'dan yönetilir */}
 
       {/* Context Menu */}

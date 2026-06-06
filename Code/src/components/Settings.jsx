@@ -2,6 +2,7 @@
 import { useStore } from '../store';
 import { Settings as SettingsIcon, Volume2, ListMusic, Download, Upload, Sliders, Info, RefreshCw, Wrench, FolderOpen, Tag, Brain, Plus, Trash2, Edit3, Save, X, Database, Copy, Check, Eye, EyeOff, User, Key, Link as LinkIcon, Puzzle, Palette, Eye as EyeIcon, Maximize, Keyboard, ChevronLeft, HardDrive, RotateCcw, Activity, Terminal, Speaker, AlertTriangle } from 'lucide-react';
 import PluginSettings from './PluginSettings';
+import { showToast } from './Toast';
 
 const openLink = (url) => {
   try {
@@ -1693,30 +1694,63 @@ const TempMusicSettings = () => {
   );
 };
 
-const AboutSettings = () => (
+const AboutSettings = () => {
+  const [pwaInstallable, setPwaInstallable] = useState(false);
+  useEffect(() => {
+    const handler = (e) => setPwaInstallable(!!e.detail);
+    document.addEventListener('pwa-install-ready', handler);
+    return () => document.removeEventListener('pwa-install-ready', handler);
+  }, []);
+  const handleInstall = async () => {
+    if (!window.deferredInstallPrompt) return;
+    try {
+      window.deferredInstallPrompt.prompt();
+      const result = await window.deferredInstallPrompt.userChoice;
+      if (result?.outcome === 'accepted') {
+        showToast('Uygulama kuruldu!', 'success');
+      } else {
+        showToast('Kurulum iptal edildi', 'info');
+      }
+    } catch (e) {
+      showToast('Kurulum hatası', 'error');
+    }
+    window.deferredInstallPrompt = null;
+    setPwaInstallable(false);
+  };
+  return (
   <div className="flex flex-col gap-8">
     <h2 className="text-2xl font-bold">Hakkında</h2>
     <SettingGroup title="Player Music" description="Modern müzik çalar uygulaması">
       <div className="flex flex-col text-sm gap-2" style={{color:'var(--text-secondary)'}}>
         <p>Sürüm: 1.0.0</p>
         <p>Geliştirici: TARIKELER</p>
+        {pwaInstallable && (
+          <button
+            onClick={handleInstall}
+            className="mt-3 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:scale-105 transition shadow-lg text-white self-start"
+            style={{backgroundColor:'var(--color-primary)'}}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Uygulamayı Yükle
+          </button>
+        )}
       </div>
     </SettingGroup>
     <SettingGroup title="Geliştirici" description="Bağlantılar ve iletişim">
       <div className="flex flex-col gap-2">
         {[
-          { 
-            name: 'GitHub', 
-            url: 'https://github.com/TARIKTR1099', 
+          {
+            name: 'GitHub',
+            url: 'https://github.com/TARIKTR1099',
             icon: <svg width="20" height="20" viewBox="0 0 176 176" fill="currentColor"><path d="m152 0h-128a24 24 0 0 0 -24 24v128a24 24 0 0 0 24 24h128a24 24 0 0 0 24-24v-128a24 24 0 0 0 -24-24zm-46.75 140.55c-2.82.54-3.78-1.16-3.78-2.57 0-1.76.07-7.57.07-14.8 0-5.07-1.79-8.38-3.71-10 12.23-1.33 25.09-5.9 25.09-26.66a20.71 20.71 0 0 0 -5.64-14.52c.55-1.37 2.41-6.87-.55-14.31 0 0-4.6-1.45-15 5.54a52.85 52.85 0 0 0 -27.5 0c-10.52-7-15.13-5.54-15.13-5.54-3 7.46-1.1 12.96-.53 14.31a20.64 20.64 0 0 0 -5.66 14.5c0 20.7 12.84 25.35 25 26.7a11.45 11.45 0 0 0 -3.48 7.23c-3.15 1.38-11.12 3.77-16-4.49 0 0-2.9-5.2-8.42-5.57 0 0-5.37-.07-.39 3.28 0 0 3.62 1.67 6.12 7.9 0 0 3.23 10.51 18.53 7.26 0 4.5.06 7.9.06 9.19s-1 3.1-3.75 2.59c-21.82-7.12-37.58-27.37-37.58-51.25 0-29.85 24.61-54 55-54s55 24.2 55 54.05c0 23.79-15.74 44.06-37.75 51.16z"/></svg>
           },
-          { 
-            name: 'GitGit', 
-            url: 'https://gitgit.me/tarikeler', 
+          {
+            name: 'GitGit',
+            url: 'https://gitgit.me/tarikeler',
             icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           },
         ].map((link, idx) => (
-          <div key={idx} 
+          <div key={idx}
                onClick={() => openLink(link.url)}
                className="flex items-center justify-between p-3 rounded-xl cursor-pointer hover:bg-white/5 transition">
             <div className="flex items-center gap-3">
@@ -1729,7 +1763,8 @@ const AboutSettings = () => (
       </div>
     </SettingGroup>
   </div>
-);
+  );
+};
 
 
 const AdvancedSettings = () => {

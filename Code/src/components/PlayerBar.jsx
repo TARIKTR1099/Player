@@ -3,6 +3,7 @@ import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, VolumeX, 
 import { cn } from '../lib/utils';
 import { generateChapters } from '../utils/chapters';
 import { useStore } from '../store';
+import { useIsTouchDevice } from '../hooks/useIsTouchDevice';
 
 const formatTime = (s) => {
   if (!s || isNaN(s)) return "0:00";
@@ -68,6 +69,7 @@ const PlayerBar = ({
   const seekRef = useRef(null);
   const volumePopRef = useRef(null);
   const moreMenuRef = useRef(null);
+  const isTouch = useIsTouchDevice();
   const muted = useStore((s) => s.muted);
   const toggleMute = useStore((s) => s.toggleMute);
 
@@ -189,9 +191,9 @@ const PlayerBar = ({
             <div className="flex items-center gap-3 md:gap-4 mb-1" role="toolbar" aria-label="Oynatma kontrolleri">
                <button onClick={() => setShuffleMode(!shuffleMode)} className={cn("p-1.5 md:p-2 rounded-lg transition press-scale", shuffleMode ? "text-primary" : "text-muted-foreground")} aria-label={shuffleMode ? 'Karışık çalmayı kapat' : 'Karışık çal'} aria-pressed={shuffleMode}><Shuffle size={14} /></button>
                <SkipBack size={18} className="md:w-[20px] md:h-[20px] cursor-pointer transition text-muted-foreground press-scale" onClick={previousTrack} role="button" tabIndex={0} aria-label="Önceki şarkı" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); previousTrack(); } }} />
-               <button onClick={togglePlay} className="p-3 md:p-4 rounded-full hover:scale-110 active:scale-95 transition-all shadow-lg text-white bg-primary press-scale" aria-label={isPlaying ? 'Duraklat' : 'Oynat'}>
-                 {isPlaying ? <Pause fill="white" size={18} /> : <Play fill="white" size={18} />}
-               </button>
+                <button onClick={togglePlay} className={cn("rounded-full hover:scale-110 active:scale-95 transition-all shadow-lg text-white bg-primary press-scale", isTouch ? "p-4" : "p-3 md:p-4")} aria-label={isPlaying ? 'Duraklat' : 'Oynat'}>
+                  {isPlaying ? <Pause fill="white" size={isTouch ? 22 : 18} /> : <Play fill="white" size={isTouch ? 22 : 18} />}
+                </button>
                <SkipForward size={18} className="md:w-[20px] md:h-[20px] cursor-pointer transition text-muted-foreground press-scale" onClick={nextTrack} role="button" tabIndex={0} aria-label="Sonraki şarkı" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nextTrack(); } }} />
                  <button onClick={() => {
                    setRepeatMode(repeatMode === 'off' ? 'track' : 'off');

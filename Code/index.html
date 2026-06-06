@@ -155,6 +155,18 @@
       });
     </script>
     <script>
+      // PWA install prompt — captured for later use in Settings
+      let deferredInstallPrompt = null;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        document.dispatchEvent(new CustomEvent('pwa-install-ready', { detail: true }));
+      });
+      window.addEventListener('appinstalled', () => {
+        deferredInstallPrompt = null;
+        document.dispatchEvent(new CustomEvent('pwa-install-ready', { detail: false }));
+        console.log('PWA: installed successfully');
+      });
       // Register service worker for PWA offline support
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

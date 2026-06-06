@@ -3,7 +3,7 @@ import { Menu, Minus, Square, Copy, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { isElectron, isMacOS } from '../platform';
 
-function TitleBar({ sidebarMode, setSidebarMode, sidebarToggleBehavior }) {
+function TitleBar({ sidebarMode, setSidebarMode, sidebarToggleBehavior, isMobileViewport, showMobileSidebar, setShowMobileSidebar }) {
   const [isMaximized, setIsMaximized] = useState(false);
 
   useEffect(() => {
@@ -24,7 +24,9 @@ function TitleBar({ sidebarMode, setSidebarMode, sidebarToggleBehavior }) {
     <div className={cn("h-10 flex justify-between items-center px-4 select-none", isMacOS() && 'pl-20')} style={{backgroundColor:'var(--color-bg-tertiary)', WebkitAppRegion:'drag'}}>
       <div className="flex items-center gap-4 text-muted-foreground">
         <Menu size={18} className="cursor-pointer hover:text-primary transition" style={{WebkitAppRegion:'no-drag'}} onClick={() => {
-          if (sidebarToggleBehavior === 'fullToggle') {
+          if (isMobileViewport) {
+            setShowMobileSidebar(!showMobileSidebar);
+          } else if (sidebarToggleBehavior === 'fullToggle') {
             setSidebarMode(sidebarMode === 'collapsed' ? 'full' : 'collapsed');
           } else {
             setSidebarMode(sidebarMode === 'icons' ? 'full' : 'icons');

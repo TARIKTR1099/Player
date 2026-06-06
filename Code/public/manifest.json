@@ -17,10 +17,63 @@
       "purpose": "any maskable"
     },
     {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
       "src": "../src/assets/icon.png",
       "sizes": "256x256",
       "type": "image/png",
       "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Kitaplık",
+      "short_name": "Kitaplık",
+      "description": "Müzik kitaplığını aç",
+      "url": "./index.html?view=library",
+      "icons": [
+        {
+          "src": "icons/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Arama",
+      "short_name": "Arama",
+      "description": "Müzik ara",
+      "url": "./index.html?view=search",
+      "icons": [
+        {
+          "src": "icons/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Şu An Çalan",
+      "short_name": "Çalan",
+      "description": "Şu an çalan şarkıyı göster",
+      "url": "./index.html?view=nowplaying",
+      "icons": [
+        {
+          "src": "icons/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ],
   "screenshots": [],
