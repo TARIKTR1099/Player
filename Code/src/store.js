@@ -243,7 +243,10 @@ export const useStore = create(
       // Sleep Timer (minutes, null = off)
       sleepTimer: null,
       sleepTimerEnd: null,
-      
+
+      // Recently played history (max 20 entries: trackId + timestamp)
+      playHistory: [],
+
       // Volume Boost (1.0 = normal, 2.0 = max boost)
       volumeBoost: 1.0,
       
@@ -285,6 +288,12 @@ export const useStore = create(
       setPluginSkillsPath: (p) => set({ pluginSkillsPath: p }),
       setGoogleUser: (u) => set({ googleUser: u }),
       setSleepTimer: (t) => set({ sleepTimer: t, sleepTimerEnd: t ? Date.now() + t * 60000 : null }),
+      addToHistory: (trackId) => set((s) => {
+        const filtered = s.playHistory.filter((e) => e.trackId !== trackId);
+        const newEntry = { trackId, playedAt: Date.now() };
+        return { playHistory: [newEntry, ...filtered].slice(0, 20) };
+      }),
+      clearHistory: () => set({ playHistory: [] }),
       setVolumeBoost: (b) => set({ volumeBoost: Math.max(1.0, Math.min(2.0, b)) }),
       setCrossfadeDuration: (d) => set({ crossfadeDuration: Math.max(0, Math.min(10, d)) }),
       setEffectsBypass: (v) => set({ effectsBypass: v }),
@@ -722,6 +731,10 @@ export const useStore = create(
       
       playTrack: (track) => {
         const { tracks, playId, queue: existingQueue } = get();
+        if (track) {
+          // Track play history (most recent first, max 20)
+          get().addToHistory(track.id);
+        }
         if (track && get().perTrackEq[track.id]) set({ equalizerBands: [...get().perTrackEq[track.id]] });
         if (track && get().perTrackEffects[track.id]) set({ audioEffects: { ...get().perTrackEffects[track.id] } });
         if (track && get().perTrackVideoEffects[track.id]) set({ videoEffects: { ...get().perTrackVideoEffects[track.id] } });

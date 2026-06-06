@@ -13,6 +13,7 @@ import { fetchSyncedLyrics, parseLRC } from './services/lrclib';
 import ToastContainer, { showToast } from './components/Toast';
 import ErrorBoundary from './components/ErrorBoundary';
 import ShortcutsHelp from './components/ShortcutsHelp';
+import RecentlyPlayed from './components/RecentlyPlayed';
 import BottomNav from './components/BottomNav';
 const Downloader = React.lazy(() => import('./components/Downloader'));
 const EqualizerModal = React.lazy(() => import('./components/EqualizerModal'));
@@ -1514,6 +1515,7 @@ const App = () => {
                   {/* Track list */}
                   {libraryLoaded && safeTracks.length > 0 && (
                     <>
+                      {!searchQuery && <RecentlyPlayed onPlay={(t) => playTrack(t)} searchQuery={searchQuery} />}
                       {libraryViewMode === 'grid' && (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                           {displayTracks.map((track, idx) => (
