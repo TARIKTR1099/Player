@@ -1,0 +1,168 @@
+# Player — Cross-Platform Release Pipeline
+# Triggers on version tag push (v*) or manual dispatch.
+# Builds Windows / macOS / Linux installers + Android APK + iOS archive,
+# then uploads everything to a GitHub Release.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Build a single platform (or all)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - win
+          - mac
+          - linux
+          - android
+          - ios
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: ${{ matrix.platform.label }}
+    runs-on: ${{ matrix.platform.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: { id: win,      label: 'Windows (NSIS + portable + zip)' }
+            os: windows-latest
+            cmd: bunx electron-builder --win nsis portable zip --x64
+            artifact: dist/*.exe dist/*.zip
+            needs_web: true
+
+          - platform: { id: mac,      label: 'macOS (DMG + zip, x64 + arm64)' }
+            os: macos-latest
+            cmd: |
+              bunx electron-builder --mac dmg zip --x64 --arm64 \
+                --config.mac.notarize.identity=null \
+                --config.mac.hardenedRuntime=false
+            artifact: dist/*.dmg dist/*.zip
+            needs_web: true
+            env_extras: 'CSC_IDENTITY_AUTO_DISCOVERY: false'
+
+          - platform: { id: linux,    label: 'Linux (AppImage + deb + rpm)' }
+            os: ubuntu-latest
+            cmd: bunx electron-builder --linux AppImage deb rpm --x64
+            artifact: dist/*.AppImage dist/*.deb dist/*.rpm
+            needs_web: true
+
+          - platform: { id: android,  label: 'Android (APK via Capacitor)' }
+            os: ubuntu-latest
+            cmd: |
+              npm run build-web && \
+              cd Code/mobile && \
+              npx cap sync android && \
+              cd android && \
+              echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties && \
+              ./gradlew assembleRelease
+            artifact: Code/mobile/android/app/build/outputs/apk/release/*.apk
+            needs_web: false
+            java: '17'
+
+          - platform: { id: ios,      label: 'iOS (archive via Capacitor)' }
+            os: macos-latest
+            cmd: |
+              npm run build-web && \
+              cd Code/mobile && \
+              npx cap sync ios && \
+              xcodebuild -workspace ios/App/App.xcworkspace \
+                -scheme App -configuration Release \
+                -archivePath $RUNNER_TEMP/Player.xcarchive \
+                -destination 'generic/platform=iOS' archive
+            artifact: ${{ runner.temp }}/Player.xcarchive
+            needs_web: false
+            ios_only: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Java ${{ matrix.java }}
+        if: matrix.java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java }}
+
+      - name: Install Linux build deps
+        if: matrix.platform.id == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libarchive-tools fakeroot rpm \
+            libgtk-3-0 libnss3 libxss1 libasound2t64 libgbm1
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web assets
+        if: matrix.needs_web
+        run: npm run build-web
+
+      - name: Build ${{ matrix.platform.label }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ${{ matrix.env_extras }}: ${{ matrix.env_extras_value }}
+        run: ${{ matrix.cmd }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: player-${{ matrix.platform.id }}
+          path: ${{ matrix.artifact }}
+          if-no-files-found: warn
+          retention-days: 30
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Show what we have
+        run: |
+          echo "=== Artifacts ==="
+          find artifacts -type f -exec ls -lh {} \;
+
+      - name: Flatten for release
+        run: |
+          mkdir -p release
+          find artifacts -type f -exec cp {} release/ \;
+          ls -lh release/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
