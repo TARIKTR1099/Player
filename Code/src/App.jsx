@@ -15,6 +15,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import ShortcutsHelp from './components/ShortcutsHelp';
 import RecentlyPlayed from './components/RecentlyPlayed';
 import BottomNav from './components/BottomNav';
+import ContentImporter from './components/ContentImporter';
 const Downloader = React.lazy(() => import('./components/Downloader'));
 const EqualizerModal = React.lazy(() => import('./components/EqualizerModal'));
 const EffectsModal = React.lazy(() => import('./components/EffectsModal'));
@@ -1506,6 +1507,18 @@ const App = () => {
                           <ListMusic size={14} />
                           {queueTracks.length > 0 && <span className="ml-1 text-[10px] font-bold" style={{color: showQueuePanel ? 'white' : 'var(--color-primary)'}}>{queueTracks.length}</span>}
                         </button>
+
+                        {/* Hamburger Content Importer */}
+                        <ContentImporter
+                          onAdded={(info) => {
+                            const labels = { files: 'dosya', folder: 'klasör', zip: 'ZIP', url: 'URL', youtube: 'YouTube' };
+                            const label = labels[info.source] || info.source;
+                            showToast?.(`✓ ${info.count ?? 1} ${label} eklendi`, 'success');
+                            setLibraryLoaded(false);
+                            setTimeout(() => setLibraryLoaded(true), 100);
+                          }}
+                          onError={(msg) => showToast?.(`✗ ${msg}`, 'error')}
+                        />
                       </div>
                     </div>
 

@@ -305,6 +305,96 @@ Player, basit bir medya oynatıcı fikrinden doğdu. Zamanla eklenti sistemi, AI
 
 ---
 
+## 📚 Kütüphaneye İçerik Ekleme
+
+Kütüphane ekranının sağ üstündeki **☰ (hamburger) butonuna** tıklayın. Açılan menüden bir içerik türü seçin:
+
+| Seçenek | Açıklama |
+|---------|----------|
+| 📁 **Dosya Ekle** | Tek veya birden çok ses/video dosyası seçin (mp3, wav, flac, mp4, mkv, vb.) |
+| 📂 **Klasör Ekle** | Tüm medya içeren bir klasör seçin — uygulama klasörü özyinelemeli olarak tarar |
+| 🗜️ **ZIP Ekle** | `.zip` arşivi seçin — içindeki medya dosyaları otomatik çıkarılır ve eklenir |
+| 🔗 **URL / Bağlantı Ekle** | `http(s)://` ile başlayan doğrudan medya bağlantısı (mp4, m3u8, mp3, vb.) |
+| ▶️ **YouTube Linki Ekle** | `youtube.com/watch?v=...` veya `youtu.be/...` — yt-dlp ile indirilir |
+
+**Özellikler:**
+- ✅ Platform bazlı izin kontrolü (Android: STORAGE, iOS: PHOTO_LIBRARY, masaüstü: doğrudan erişim)
+- ✅ Tüm eklenen öğeler SQLite'a kaydedilir (path, type, title, thumbnail, date_added)
+- ✅ Thumbnail'lar `userData/thumbnails/` altında önbelleğe alınır
+- ✅ Duplicate kontrolü: aynı path zaten varsa atlanır, kullanıcıya bildirilir
+- ✅ ZIP dosyalarında Zip Slip açığı önlenir (extract path doğrulaması)
+
+---
+
+## 🛠️ Geliştirici Notları
+
+### SQLite Şeması (sql.js)
+
+Veritabanı: `userData/player-library.db`
+
+| Tablo | Amaç |
+|-------|------|
+| `tracks` | Tüm medya öğeleri (id, title, artist, album, location, duration, picture, addedAt, playCount, lastPlayed, favorite, lyrics) |
+| `playlists` | Kullanıcı çalma listeleri |
+| `playlist_tracks` | Playlist-track ilişki tablosu |
+| `categories` | Kullanıcı kategorileri |
+| `track_categories` | Track-category many-to-many |
+| `eq_presets` | Ekolayzer preset'leri |
+| `track_eq` | Track-spesifik EQ ayarları |
+| `scrobbles` | Dinleme geçmişi |
+| `settings` | Key-value store (key, value, updatedAt) |
+| `cache_metadata` | Thumbnail önbellek metadata (cacheKey, path, size, mimeType, expiresAt) |
+
+### Önbellek Yapısı
+
+- **LRU Bellek Cache**: Son 100 thumbnail Map'te (LRU eviction) — `Code/src/lib/lru-cache.js`
+- **Disk Cache**: `userData/thumbnails/{hash}.jpg` (SHA-256 prefix, 12 karakter)
+- **TTL**: 7 gün (DEFAULT_TTL_MS), cache_metadata tablosunda expiresAt ile
+- **Hash**: Dosya adı + boyut → SHA-256 → 12 char prefix
+
+### Güvenlik Katmanı (Code/src/lib/security.js)
+
+- `sanitizePath()` — path traversal (`..`) ve mutlak yol engeli
+- `escapeHtml()` — XSS önlemi (kullanıcı girdisi → HTML)
+- `escapeUrl()` — `javascript:`, `vbscript:`, `data:` tehlikeli scheme'lerini engelle
+- `parseSafeUrl()` — URL API ile, sadece `http(s):` kabul eder
+- `parseYouTubeUrl()` — sadece bilinen YouTube domain'leri (`youtube.com`, `youtu.be`, `/shorts/`, `/embed/`)
+- `isSafeZipEntry()` — Zip Slip önlemi (entry path `..` içeremez, base dışına çıkamaz)
+- `getMediaType()` — izin verilen ses/video uzantıları whitelist
+
+### IPC Handler'lar (src/main.js)
+
+- `add-music-files` — Tek/çoklu dosya seçici
+- `add-music-folder` — Klasör seçici + recursive tarama
+- `add-music-compressed` — ZIP açma + tarama
+- `add-music-link` — HTTP(S) URL / YouTube indirme
+- `validate-location` — Path doğrulama (güvenlik)
+- `select-source-files` / `select-source-folder` — Source bundle için
+
+### Platform-Spesifik
+
+- **Windows**: System tray (src/platform/tray.js), Media Foundation codec'leri
+- **macOS**: Menu bar (src/platform/menu.js), Keychain erişimi, dark mode
+- **Linux**: AppImage self-contained, libnotify, xdg-open
+- **Android**: MediaSession API, STORAGE izni, immersive mode
+- **iOS**: AVAudioSession, MPNowPlayingInfoCenter, document picker
+
+### Build Süreci
+
+```bash
+npm install
+npm start              # development (Vite + Electron)
+npm run build-web      # sadece Vite build
+npm run build          # Windows NSIS installer
+npm run build:win:portable
+npm run build:mac      # macOS DMG (x64+arm64)
+npm run build:linux    # Linux AppImage/deb/rpm
+npm run mobile:android # Capacitor sync + Android Studio
+npm run mobile:ios     # Capacitor sync + Xcode
+```
+
+---
+
 ## Lisans
 
 © 2026 TARIK ELER — Tüm hakları saklıdır.

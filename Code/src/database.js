@@ -106,6 +106,23 @@ function initSchema() {
       duration REAL DEFAULT 0
     );
     
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT,
+      updatedAt INTEGER DEFAULT 0
+    );
+    
+    CREATE TABLE IF NOT EXISTS cache_metadata (
+      cacheKey TEXT PRIMARY KEY,
+      path TEXT NOT NULL,
+      size INTEGER DEFAULT 0,
+      mimeType TEXT DEFAULT '',
+      createdAt INTEGER DEFAULT 0,
+      expiresAt INTEGER DEFAULT 0
+    );
+    
+    CREATE INDEX IF NOT EXISTS idx_cache_expires ON cache_metadata(expiresAt);
+    
     CREATE INDEX IF NOT EXISTS idx_tracks_title ON tracks(title);
     CREATE INDEX IF NOT EXISTS idx_tracks_artist ON tracks(artist);
     CREATE INDEX IF NOT EXISTS idx_tracks_category ON tracks(category);
