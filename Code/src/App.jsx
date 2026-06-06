@@ -55,6 +55,15 @@ const App = () => {
   const [isResizingSidebar, setIsResizingSidebar] = useState(false);
   const [sortBy, setSortBy] = useState('name');
   const [sortDir, setSortDir] = useState('asc');
+
+  // ⚡ Hide branded splash screen once React mounts
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.__hideSplash) {
+      // Small delay to let the first paint of App settle
+      const t = setTimeout(() => window.__hideSplash(), 120);
+      return () => clearTimeout(t);
+    }
+  }, []);
   const [libraryLoaded, setLibraryLoaded] = useState(false);
   const [libraryReady, setLibraryReady] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');

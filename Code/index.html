@@ -16,143 +16,119 @@
     <link rel="modulepreload" href="./src/index.jsx" />
     <title>Player</title>
     <style>
-      /* ⚡ Startup skeleton — shows instantly while React loads */
-      .skeleton-root {
+      /* ⚡ Branded splash screen — shows INSTANTLY before any JS loads */
+      html, body { margin: 0; padding: 0; background: #0a0a0f; height: 100%; overflow: hidden; }
+      #root { height: 100vh; }
+      #splash-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
         display: flex;
         flex-direction: column;
-        height: 100vh;
-        background: #0a0a0f;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 70%);
+        color: #fff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        transition: opacity 0.4s ease, visibility 0.4s ease;
+      }
+      #splash-screen.hide {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      .splash-logo {
+        width: 96px;
+        height: 96px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 12px 40px rgba(139, 92, 246, 0.4);
+        margin-bottom: 24px;
+        animation: splash-pulse 2.4s ease-in-out infinite;
+      }
+      .splash-logo svg { width: 56px; height: 56px; }
+      .splash-title {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        margin-bottom: 6px;
+        background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .splash-subtitle {
+        font-size: 12px;
+        font-weight: 500;
         color: rgba(255,255,255,0.5);
+        margin-bottom: 40px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
       }
-      .skeleton-header {
-        height: 38px;
-        background: rgba(255,255,255,0.03);
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-        flex-shrink: 0;
-      }
-      .skeleton-body {
-        display: flex;
-        flex: 1;
-        overflow: hidden;
-      }
-      .skeleton-sidebar {
-        width: 52px;
-        border-right: 1px solid rgba(255,255,255,0.06);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 16px 0;
-        gap: 16px;
-        flex-shrink: 0;
-      }
-      .skeleton-sidebar-item {
-        width: 20px;
-        height: 20px;
-        border-radius: 4px;
-        background: rgba(255,255,255,0.06);
-      }
-      .skeleton-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        padding: 24px;
-        gap: 12px;
-      }
-      .skeleton-line {
-        height: 14px;
-        border-radius: 4px;
-        background: rgba(255,255,255,0.04);
-        animation: skeleton-pulse 1.8s ease-in-out infinite;
-      }
-      .skeleton-line:nth-child(1) { width: 45%; }
-      .skeleton-line:nth-child(2) { width: 70%; }
-      .skeleton-line:nth-child(3) { width: 55%; }
-      .skeleton-line:nth-child(4) { width: 30%; }
-      .skeleton-line:nth-child(5) { width: 65%; }
-      .skeleton-playerbar {
-        height: 112px;
-        border-top: 1px solid rgba(255,255,255,0.06);
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        padding: 0 32px;
-        gap: 16px;
-      }
-      .skeleton-track {
-        width: 48px;
-        height: 48px;
-        border-radius: 10px;
-        background: rgba(255,255,255,0.04);
-        flex-shrink: 0;
-      }
-      .skeleton-track-text {
-        flex: 1;
-        max-width: 200px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-      .skeleton-track-text .skeleton-line { animation: none; background: rgba(255,255,255,0.04); }
-      .skeleton-controls {
-        display: flex;
-        gap: 16px;
-        margin: 0 auto;
-      }
-      .skeleton-btn {
-        width: 20px;
-        height: 20px;
-        border-radius: 4px;
-        background: rgba(255,255,255,0.06);
-      }
-      .skeleton-btn-play {
-        width: 40px;
-        height: 40px;
+      .splash-spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid rgba(139, 92, 246, 0.15);
+        border-top-color: #8b5cf6;
         border-radius: 50%;
-        background: rgba(255,255,255,0.08);
+        animation: splash-spin 0.9s linear infinite;
       }
-      @keyframes skeleton-pulse {
-        0%, 100% { opacity: 0.4; }
-        50% { opacity: 0.8; }
+      .splash-progress {
+        margin-top: 20px;
+        font-size: 11px;
+        color: rgba(255,255,255,0.4);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        min-height: 14px;
       }
+      @keyframes splash-spin {
+        to { transform: rotate(360deg); }
+      }
+      @keyframes splash-pulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 12px 40px rgba(139, 92, 246, 0.4); }
+        50% { transform: scale(1.05); box-shadow: 0 16px 50px rgba(139, 92, 246, 0.55); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .splash-logo, .splash-spinner { animation: none; }
+      }
+
+      /* ⚡ Skeleton fallback (after splash fades) */
+      .skeleton-root { display: none; }
     </style>
     <script>
-      // ⚡ Show skeleton immediately
-      document.addEventListener('DOMContentLoaded', () => {
-        const root = document.getElementById('root');
-        root.innerHTML = `
-          <div class="skeleton-root">
-            <div class="skeleton-header"></div>
-            <div class="skeleton-body">
-              <div class="skeleton-sidebar">
-                <div class="skeleton-sidebar-item"></div>
-                <div class="skeleton-sidebar-item"></div>
-                <div class="skeleton-sidebar-item"></div>
-              </div>
-              <div class="skeleton-content">
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line"></div>
-              </div>
-            </div>
-            <div class="skeleton-playerbar">
-              <div class="skeleton-track"></div>
-              <div class="skeleton-track-text">
-                <div class="skeleton-line" style="width:60%"></div>
-                <div class="skeleton-line" style="width:40%"></div>
-              </div>
-              <div class="skeleton-controls">
-                <div class="skeleton-btn"></div>
-                <div class="skeleton-btn"></div>
-                <div class="skeleton-btn-play"></div>
-                <div class="skeleton-btn"></div>
-                <div class="skeleton-btn"></div>
-              </div>
-            </div>
+      // ⚡ Render branded splash IMMEDIATELY (no DOMContentLoaded — even before HTML parsed)
+      (function() {
+        const splash = document.createElement('div');
+        splash.id = 'splash-screen';
+        splash.innerHTML = `
+          <div class="splash-logo">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 18V5l12-2v13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="6" cy="18" r="3" stroke="white" stroke-width="2"/>
+              <circle cx="18" cy="16" r="3" stroke="white" stroke-width="2"/>
+            </svg>
           </div>
+          <div class="splash-title">Player</div>
+          <div class="splash-subtitle">Yükleniyor…</div>
+          <div class="splash-spinner"></div>
+          <div class="splash-progress" id="splash-progress">v1.0.0</div>
         `;
-      });
+        // Insert as first child of body when body exists, else wait
+        const insert = () => {
+          if (document.body) {
+            document.body.insertBefore(splash, document.body.firstChild);
+          } else {
+            document.addEventListener('DOMContentLoaded', insert, { once: true });
+          }
+        };
+        insert();
+        // Safety: hide after 10s no matter what (avoid stuck splash on error)
+        setTimeout(() => splash.classList.add('hide'), 10000);
+        // Expose hide function for React to call when ready
+        window.__hideSplash = () => splash.classList.add('hide');
+      })();
     </script>
     <script>
       // PWA install prompt — captured for later use in Settings
