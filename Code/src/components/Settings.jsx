@@ -3,6 +3,7 @@ import { useStore } from '../store';
 import { Settings as SettingsIcon, Volume2, ListMusic, Download, Upload, Sliders, Info, RefreshCw, Wrench, FolderOpen, Tag, Brain, Plus, Trash2, Edit3, Save, X, Database, Copy, Check, Eye, EyeOff, User, Key, Link as LinkIcon, Puzzle, Palette, Eye as EyeIcon, Maximize, Keyboard, ChevronLeft, HardDrive, RotateCcw, Activity, Terminal, Speaker, AlertTriangle } from 'lucide-react';
 import PluginSettings from './PluginSettings';
 import { showToast } from './Toast';
+import Statistics from './Statistics';
 
 const openLink = (url) => {
   try {
@@ -27,6 +28,7 @@ const Settings = () => {
     { id: 'plugins', label: 'Eklentiler', icon: <Puzzle size={16} />, keywords: 'plugin eklenti uzantı' },
     { id: 'personalization', label: 'Kişiselleştirme', icon: <Palette size={16} />, keywords: 'tema theme dil language renk color pencere window' },
     { id: 'shortcuts', label: 'Klavye Kısayolları', icon: <Keyboard size={16} />, keywords: 'kısayol shortcut tuş key' },
+    { id: 'stats', label: 'İstatistikler', icon: <Activity size={16} />, keywords: 'istatistik stats sayı dinleme' },
     { id: 'ai', label: 'AI', icon: <Brain size={16} />, keywords: 'ai yapay zeka model api provider' },
     { id: 'download', label: 'İndirme', icon: <Download size={16} />, keywords: 'indirme download klasör folder' },
     { id: 'updates', label: 'Güncellemeler', icon: <RefreshCw size={16} />, keywords: 'güncelleme update sürüm version' },
@@ -126,6 +128,7 @@ const Settings = () => {
           {activeSection === 'plugins' && <PluginSettings />}
           {activeSection === 'personalization' && <PersonalizationSettings />}
           {activeSection === 'shortcuts' && <ShortcutsSettings />}
+          {activeSection === 'stats' && <Statistics />}
           {activeSection === 'ai' && <AISettings />}
           {activeSection === 'download' && <DownloadSettings />}
           {activeSection === 'updates' && <UpdatesSettings />}
