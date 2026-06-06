@@ -1,5 +1,6 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store';
+import { t } from '../i18n';
 import { Settings as SettingsIcon, Volume2, ListMusic, Download, Upload, Sliders, Info, RefreshCw, Wrench, FolderOpen, Tag, Brain, Plus, Trash2, Edit3, Save, X, Database, Copy, Check, Eye, EyeOff, User, Key, Link as LinkIcon, Puzzle, Palette, Eye as EyeIcon, Maximize, Keyboard, ChevronLeft, HardDrive, RotateCcw, Activity, Terminal, Speaker, AlertTriangle } from 'lucide-react';
 import PluginSettings from './PluginSettings';
 import { showToast } from './Toast';
@@ -1129,10 +1130,10 @@ const PersonalizationSettings = () => {
         </SettingRow>
       </SettingGroup>
 
-      <SettingGroup title="Dil" description="Arayüz dili">
+      <SettingGroup title={t('settings.language')} description={t('settings.language')}>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <select 
+              <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
                 className="border rounded-lg px-4 py-2"
@@ -1140,10 +1141,10 @@ const PersonalizationSettings = () => {
               >
                 <option value="tr">Türkçe</option>
                 <option value="en">English</option>
-                <option value="auto">Otomatik Algıla</option>
+                <option value="auto">{t('settings.checkUpdates').replace('Check for updates', 'Auto-detect').replace('Güncellemeleri kontrol et', 'Otomatik Algıla')}</option>
               </select>
               <button onClick={handleDetectLanguage} className="px-3 py-2 rounded-lg text-xs" style={{backgroundColor:'rgba(255,255,255,0.05)', color:'var(--text-secondary)'}}>
-                Algıla
+                {t('settings.checkUpdates').replace('Check for updates', 'Detect').replace('Güncellemeleri kontrol et', 'Algıla')}
               </button>
             </div>
             <div className="text-[10px] px-2 py-1 rounded-lg" style={{backgroundColor:'rgba(255,165,0,0.1)', color:'orange'}}>

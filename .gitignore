@@ -36,6 +36,19 @@ electron-builder/
 
 # Environment secrets
 .env
+Code/.env
+Code/.env.local
+Code/.env.production
+mobile/.env
+mobile/android/app/google-services.json
+mobile/android/app/*.keystore
+mobile/ios/GoogleService-Info.plist
+mobile/ios/App/App.xcworkspace/xcuserdata/
+*.pem
+*.key
+*.p12
+secrets.json
+credentials.json
 
 # Artifacts
 $null

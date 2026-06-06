@@ -271,7 +271,20 @@ export const useStore = create(
       setIsLoading: (v) => set({ isLoading: v }),
       setScanProgress: (p) => set({ scanProgress: p }),
       setTheme: (t) => set({ theme: t }),
-      setLanguage: (l) => set({ language: l }),
+      setLanguage: (l) => {
+        set({ language: l });
+        // Persist + notify main process so tray menu / notifications /
+        // window title can switch languages without a restart.
+        try {
+          if (typeof localStorage !== 'undefined') localStorage.setItem('player-language', l);
+        } catch (e) {}
+        try {
+          const ipc = window.require?.('electron')?.ipcRenderer;
+          ipc?.invoke?.('set-language', l);
+        } catch (e) {
+          // Not running under Electron (e.g. tests) — silently ignore.
+        }
+      },
       setLayoutMode: (m) => set({ layoutMode: m }),
       setActiveTab: (t) => set({ activeTab: t }),
       setSearchQuery: (q) => set({ searchQuery: q }),
@@ -388,6 +401,17 @@ export const useStore = create(
         repeatMode: mode,
         shuffleMode: mode !== 'off' ? false : state.shuffleMode
       })),
+      // Convenience: cycle shuffle off -> on (or back to off)
+      toggleShuffle: () => {
+        const cur = get().shuffleMode;
+        get().setShuffleMode?.(!cur);
+      },
+      // Convenience: cycle repeat off -> all -> track -> off
+      toggleRepeat: () => {
+        const order = ['off', 'all', 'track'];
+        const next = order[(order.indexOf(get().repeatMode) + 1) % order.length];
+        get().setRepeatMode?.(next);
+      },
       setPlaybackRate: (rate) => set({ playbackRate: rate }),
       togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
       setVolume: (v) => set({ volume: v }),

@@ -556,24 +556,24 @@ function updateTrayMenu() {
           mainWindow?.webContents.send('navigate-category', cat.name);
         }
       }))
-    : [{ label: 'Henüz kategori yok', enabled: false }];
+    : [{ label: tMain('tray.noCategory'), enabled: false }];
 
   const contextMenu = Menu.buildFromTemplate([
     // Now Playing
     { label: titleLine, enabled: false },
     { type: 'separator' },
     // Playback controls
-    { label: playbackState.isPlaying ? '⏸  Duraklat' : '▶  Oynat', click: () => triggerTrayAction('toggle-play') },
-    { label: '⏮  Önceki', enabled: playbackState.canGoPrev, click: () => triggerTrayAction('prev') },
-    { label: '⏭  Sonraki', enabled: playbackState.canGoNext, click: () => triggerTrayAction('next') },
-    { label: '🔀  Karıştır', type: 'checkbox', checked: playbackState.shuffleMode, click: () => triggerTrayAction('shuffle') },
-    { label: '🔁  Tekrarla', type: 'checkbox', checked: playbackState.repeatMode !== 'off', click: () => triggerTrayAction('repeat') },
+    { label: playbackState.isPlaying ? `⏸  ${tMain('player.pause')}` : `▶  ${tMain('player.play')}`, click: () => triggerTrayAction('toggle-play') },
+    { label: `⏮  ${tMain('player.prev')}`, enabled: playbackState.canGoPrev, click: () => triggerTrayAction('prev') },
+    { label: `⏭  ${tMain('player.next')}`, enabled: playbackState.canGoNext, click: () => triggerTrayAction('next') },
+    { label: `🔀  ${tMain('player.shuffle')}`, type: 'checkbox', checked: playbackState.shuffleMode, click: () => triggerTrayAction('shuffle') },
+    { label: `🔁  ${tMain('player.repeat')}`, type: 'checkbox', checked: playbackState.repeatMode !== 'off', click: () => triggerTrayAction('repeat') },
     { type: 'separator' },
     // Volume submenu
-    { label: '🔊  Ses', submenu: [
-      { label: 'Sesi Aç', click: () => { sendTransportAction('volume-up'); } },
-      { label: 'Sesi Kıs', click: () => { sendTransportAction('volume-down'); } },
-      { label: 'Sessiz', click: () => { sendTransportAction('mute-toggle'); } },
+    { label: `🔊  ${tMain('player.volume')}`, submenu: [
+      { label: tMain('player.volumeUp'), click: () => { sendTransportAction('volume-up'); } },
+      { label: tMain('player.volumeDown'), click: () => { sendTransportAction('volume-down'); } },
+      { label: tMain('player.mute'), click: () => { sendTransportAction('mute-toggle'); } },
       { type: 'separator' },
       { label: '%25', click: () => mainWindow?.webContents.send('set-volume', 25) },
       { label: '%50', click: () => mainWindow?.webContents.send('set-volume', 50) },
@@ -582,36 +582,36 @@ function updateTrayMenu() {
     ]},
     { type: 'separator' },
     // Navigation submenu
-    { label: '📂  Git', submenu: [
-      { label: 'Ana Sayfa', click: () => { showWindowFromTray(); mainWindow?.webContents.send('navigate-tab', 'home'); } },
-      { label: 'Kütüphane', click: () => { showWindowFromTray(); mainWindow?.webContents.send('navigate-tab', 'library'); } },
-      { label: 'Müzik İndir', click: () => { showWindowFromTray(); mainWindow?.webContents.send('navigate-tab', 'search'); } },
-      { label: 'Ayarlar', click: () => { showWindowFromTray(); mainWindow?.webContents.send('navigate-tab', 'settings'); } },
+    { label: `📂  ${tMain('common.open')}`, submenu: [
+      { label: tMain('tray.tabs.home'), click: () => { showWindowFromTray(); mainWindow?.webContents.send('navigate-tab', 'home'); } },
+      { label: tMain('tray.tabs.library'), click: () => { showWindowFromTray(); mainWindow?.webContents.send('navigate-tab', 'library'); } },
+      { label: tMain('tray.tabs.search'), click: () => { showWindowFromTray(); mainWindow?.webContents.send('navigate-tab', 'search'); } },
+      { label: tMain('tray.tabs.settings'), click: () => { showWindowFromTray(); mainWindow?.webContents.send('navigate-tab', 'settings'); } },
     ]},
     // Categories submenu
-    { label: '🏷  Kategoriler', submenu: categorySubmenu },
+    { label: `🏷  ${tMain('tray.categories')}`, submenu: categorySubmenu },
     { type: 'separator' },
     // Tools
-    { label: '⚡  Araçlar', submenu: [
-      { label: 'Ekolayzer', click: () => { showWindowFromTray(); mainWindow?.webContents.send('open-equalizer'); } },
-      { label: 'Efektler', click: () => { showWindowFromTray(); mainWindow?.webContents.send('open-effects'); } },
-      { label: 'Görselleştirici', click: () => { showWindowFromTray(); mainWindow?.webContents.send('toggle-visualizer'); } },
+    { label: `⚡  ${tMain('tray.tools')}`, submenu: [
+      { label: tMain('tray.tools.equalizer'), click: () => { showWindowFromTray(); mainWindow?.webContents.send('open-equalizer'); } },
+      { label: tMain('tray.tools.effects'), click: () => { showWindowFromTray(); mainWindow?.webContents.send('open-effects'); } },
+      { label: tMain('tray.tools.visualizer'), click: () => { showWindowFromTray(); mainWindow?.webContents.send('toggle-visualizer'); } },
       { type: 'separator' },
-      { label: 'Dosya Aç...', click: () => { showWindowFromTray(); mainWindow?.webContents.send('open-file-dialog'); } },
+      { label: tMain('tray.openFile'), click: () => { showWindowFromTray(); mainWindow?.webContents.send('open-file-dialog'); } },
     ]},
     { type: 'separator' },
     // Window
-    { label: mainWindow && mainWindow.isVisible() ? '👁  Gizle' : '👁  Göster', click: () => {
+    { label: mainWindow && mainWindow.isVisible() ? `👁  ${tMain('tray.hide')}` : `👁  ${tMain('tray.show')}`, click: () => {
       suppressTrayToggleUntil = Date.now() + 500;
       if (mainWindow && mainWindow.isVisible()) hideWindowToTray();
       else showWindowFromTray();
     }},
-    { label: '🖥  Tam Ekran', click: () => {
+    { label: `🖥  ${tMain('player.fullscreen')}`, click: () => {
       showWindowFromTray();
       mainWindow?.webContents.send('toggle-fullscreen');
     }},
     { type: 'separator' },
-    { label: '❌  Çıkış', click: () => { isQuitting = true; app.quit(); } },
+    { label: `❌  ${tMain('tray.quit')}`, click: () => { isQuitting = true; app.quit(); } },
   ]);
   tray.setContextMenu(contextMenu);
   tray.setToolTip(titleLine);
@@ -2416,6 +2416,54 @@ ipcMain.handle('playback-updated', (event, data) => {
   updateThumbarButtons();
   updateTrayMenu();
   return true;
+});
+
+// === i18n — language switching for tray / notifications / window title ===
+let currentLanguage = 'tr';
+ipcMain.handle('set-language', (_event, lang) => {
+  if (lang && (lang === 'tr' || lang === 'en')) {
+    currentLanguage = lang;
+    mainDict = loadMainDict(lang);
+    updateTrayMenu();
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.setTitle('Player');
+    }
+  }
+  return currentLanguage;
+});
+
+ipcMain.handle('get-language', () => currentLanguage);
+
+// Load translation dictionaries into the main process so the tray and
+// notifications can render in the same language as the UI. The renderer's
+// Code/src/locales/*.js files are the single source of truth — we re-read
+// them when the language changes.
+function loadMainDict(lang) {
+  try {
+    // main.js runs from the project root, Code/ is the React app source dir.
+    const dictPath = path.join(__dirname, 'Code', 'src', 'locales', `${lang}.js`);
+    if (!fs.existsSync(dictPath)) return {};
+    // Strip the ESM `export default` and import the object literal.
+    // Capacitor build doesn't touch this file, so a tiny regex loader is
+    // good enough and avoids an extra dependency.
+    const raw = fs.readFileSync(dictPath, 'utf8');
+    const m = raw.match(/export\s+default\s+(\{[\s\S]*\})/);
+    if (!m) return {};
+    // eslint-disable-next-line no-new-func
+    return new Function(`return (${m[1]});`)();
+  } catch (e) {
+    return {};
+  }
+}
+let mainDict = loadMainDict('tr');
+function tMain(key) {
+  return mainDict[key] || key;
+}
+ipcMain.handle('get-i18n-dict', () => mainDict);
+
+ipcMain.handle('refresh-i18n', () => {
+  mainDict = loadMainDict(currentLanguage);
+  return mainDict;
 });
 
 function getVlcPath() {

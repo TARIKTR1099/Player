@@ -1,10 +1,6 @@
 # Player — Cross-Platform Release Pipeline
-# Triggers on version tag push (v*) or manual dispatch.
-# Builds Windows (local) + Linux (AppImage) + macOS (DMG, unsigned)
-# via GitHub Actions. iOS/Android built locally — see mobile/BUILD.md.
-#
-# The release job aggregates Windows (local) + Linux (GH) + macOS (GH)
-# assets and publishes to a GitHub Release.
+# Builds Windows / Linux / macOS installers + Android APK + iOS archive,
+# publishes all to a single GitHub Release.
 
 name: Release
 
@@ -19,97 +15,249 @@ permissions:
 
 jobs:
   # ------------------------------------------------------------------
-  # Linux — AppImage / deb / rpm (easiest to build on GitHub)
+  # 1. Windows — NSIS Setup
   # ------------------------------------------------------------------
-  build-linux:
-    name: Build Linux (AppImage / deb / rpm)
-    runs-on: ubuntu-22.04
+  build-windows:
+    name: 🪟 Windows (NSIS Setup)
+    runs-on: windows-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libgtk-3-0 libnss3 libxss1 libasound2t64 libgbm1 \
-            fakeroot rpm
-      - name: Install dependencies
-        run: npm ci
-      - name: Build web
-        run: npm run build-web
-      - name: Build electron (Linux x64)
+      - run: npm ci
+      - run: npm run build-web
+      - name: Build NSIS Setup
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx --yes electron-builder --linux --x64 --publish never
-      - name: Upload Linux artifacts
-        uses: actions/upload-artifact@v4
+        run: bunx electron-builder --win nsis --x64
+      - name: Build portable EXE
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bunx electron-builder --win portable --x64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: player-windows
+          path: |
+            dist/Player-1.0.0-setup-x64.exe
+            dist/Player-1.0.0-portable-x64.exe
+            dist/latest.yml
+
+  # ------------------------------------------------------------------
+  # 2. macOS — DMG (x64 + arm64)
+  # ------------------------------------------------------------------
+  build-macos:
+    name: 🍎 macOS (DMG x64 + arm64)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build-web
+      - name: Build DMG (x64 + arm64, unsigned)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: bunx electron-builder --mac --x64 --arm64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: player-macos
+          path: |
+            dist/Player-*.dmg
+            dist/Player-*-mac-*.zip
+            dist/latest-mac.yml
+
+  # ------------------------------------------------------------------
+  # 3. Linux — AppImage, deb, rpm
+  # ------------------------------------------------------------------
+  build-linux:
+    name: 🐧 Linux (AppImage / deb / rpm)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install Linux system libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-0 libnss3 libxss1 libasound2t64 libgbm1 \
+            fakeroot rpm
+      - run: npm ci
+      - run: npm run build-web
+      - name: Build Linux installers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bunx electron-builder --linux --x64
+      - uses: actions/upload-artifact@v4
         with:
           name: player-linux
           path: |
             dist/Player-*.AppImage
             dist/Player-*.deb
             dist/Player-*.rpm
+            dist/latest-linux.yml
 
   # ------------------------------------------------------------------
-  # macOS — DMG (unsigned, Intel + Apple Silicon)
+  # 4. Android — APK via Capacitor
   # ------------------------------------------------------------------
-  build-macos:
-    name: Build macOS (DMG, x64 + arm64, unsigned)
-    runs-on: macos-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Build web
-        run: npm run build-web
-      - name: Build electron (macOS x64 + arm64, unsigned)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: npx --yes electron-builder --mac --x64 --arm64 --publish never
-      - name: Upload macOS artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: player-macos
-          path: |
-            dist/Player-*.dmg
-            dist/Player-*-mac-*.zip
-
-  # ------------------------------------------------------------------
-  # Source bundle (zip + tar.gz, re-runnable on any runner)
-  # ------------------------------------------------------------------
-  build-source:
-    name: Build source bundle
+  build-android:
+    name: 🤖 Android (APK)
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Build web
-        run: npm run build-web
-      - name: Create source bundle
-        run: node Scripts/create-source-bundle.js
-      - name: Upload source bundle
-        uses: actions/upload-artifact@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - run: npm ci
+      - run: npm run build-web
+      - name: Install Capacitor deps
+        run: cd mobile && npm ci
+      - name: Sync Capacitor Android
+        run: cd mobile && npx cap sync android
+      - name: Build Android Release APK
+        run: |
+          cd mobile/android
+          ./gradlew --no-daemon assembleRelease
+      - name: Locate APK
+        id: find_apk
+        run: |
+          APK=$(find mobile/android/app/build/outputs/apk/release -name '*.apk' | head -1)
+          cp "$APK" player-1.0.0.apk
+          echo "apk_path=player-1.0.0.apk" >> $GITHUB_OUTPUT
+      - uses: actions/upload-artifact@v4
+        with:
+          name: player-android
+          path: player-1.0.0.apk
+
+  # ------------------------------------------------------------------
+  # 5. iOS — xcodebuild archive (unsigned)
+  # ------------------------------------------------------------------
+  build-ios:
+    name: 🍎 iOS (xcodebuild archive)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build-web
+      - name: Install Capacitor deps
+        run: cd mobile && npm ci
+      - name: Add iOS platform
+        run: cd mobile && npx cap add ios
+      - name: Sync Capacitor iOS
+        run: cd mobile && npx cap sync ios
+      - name: Build iOS archive (unsigned)
+        run: |
+          cd mobile/ios/App
+          xcodebuild \
+            -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -archivePath $RUNNER_TEMP/Player.xcarchive \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            archive
+      - name: Export IPA from archive (unsigned)
+        run: |
+          # Build a minimal exportOptions.plist
+          cat > /tmp/exportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>development</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+          </dict>
+          </plist>
+          EOF
+          xcodebuild \
+            -exportArchive \
+            -archivePath $RUNNER_TEMP/Player.xcarchive \
+            -exportPath $RUNNER_TEMP/Player-ipa \
+            -exportOptionsPlist /tmp/exportOptions.plist || true
+          # If unsigned export fails, just zip the .xcarchive as fallback
+          cd $RUNNER_TEMP
+          if [ -d Player-ipa ]; then
+            cd Player-ipa && zip -r player-1.0.0-unsigned.zip .
+          else
+            zip -r player-1.0.0-unsigned.zip Player.xcarchive
+          fi
+          cp player-1.0.0-unsigned.zip $GITHUB_WORKSPACE/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: player-ios
+          path: player-1.0.0-unsigned.zip
+
+  # ------------------------------------------------------------------
+  # 6. Source bundle
+  # ------------------------------------------------------------------
+  build-source:
+    name: 📦 Source bundle
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: node Scripts/create-source-bundle.js
+      - uses: actions/upload-artifact@v4
         with:
           name: player-source
           path: |
-            dist/Player-*-source.zip
-            dist/Player-*-source.tar.gz
+            Player-1.0.0-source.zip
+            Player-1.0.0-source.tar.gz
+
+  # ------------------------------------------------------------------
+  # 7. Final — collect all artifacts & publish
+  # ------------------------------------------------------------------
+  release:
+    name: 📤 Publish Release
+    needs: [build-windows, build-macos, build-linux, build-android, build-ios, build-source]
+    runs-on: ubuntu-22.04
+    if: always()
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: List all collected artifacts
+        run: |
+          echo "=== Collected artifacts ==="
+          find release-artifacts -type f -exec ls -lh {} \;
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-artifacts/**/*.exe
+            release-artifacts/**/*.zip
+            release-artifacts/**/*.tar.gz
+            release-artifacts/**/*.AppImage
+            release-artifacts/**/*.deb
+            release-artifacts/**/*.rpm
+            release-artifacts/**/*.dmg
+            release-artifacts/**/*.apk
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

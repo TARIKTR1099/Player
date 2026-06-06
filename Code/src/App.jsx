@@ -396,6 +396,51 @@ const App = () => {
       ipcRenderer = window.require?.('electron')?.ipcRenderer;
     } catch {}
     if (!ipcRenderer) return;
+
+    // Transport actions from tray menu / media keys / global shortcuts.
+    // These arrive on the `transport-action` channel from src/main.js + features.js.
+    const onTransportAction = (_event, action) => {
+      const state = useStore.getState();
+      switch (action) {
+        case 'toggle-play':
+          state.togglePlay?.();
+          break;
+        case 'play':
+          if (!state.isPlaying) state.togglePlay?.();
+          break;
+        case 'pause':
+          if (state.isPlaying) state.togglePlay?.();
+          break;
+        case 'next':
+          state.nextTrack?.();
+          break;
+        case 'prev':
+          state.previousTrack?.();
+          break;
+        case 'stop':
+          if (state.isPlaying) state.togglePlay?.();
+          break;
+        case 'shuffle':
+          state.toggleShuffle?.();
+          break;
+        case 'repeat':
+          state.toggleRepeat?.();
+          break;
+        case 'volume-up':
+          state.setVolume?.(Math.min(100, (state.volume ?? 0) + 5));
+          break;
+        case 'volume-down':
+          state.setVolume?.(Math.max(0, (state.volume ?? 0) - 5));
+          break;
+        case 'mute-toggle':
+          state.toggleMute?.();
+          break;
+        default:
+          break;
+      }
+    };
+    ipcRenderer.on('transport-action', onTransportAction);
+
     const onOpenFiles = async (_event, filePaths) => {
       if (!Array.isArray(filePaths) || filePaths.length === 0) return;
       const newTracks = [];
@@ -429,6 +474,9 @@ const App = () => {
     return () => {
       try { ipcRenderer.removeListener('open-files', onOpenFiles); } catch (e) {
         try { useStore.getState().addError?.('IPC cleanup failed', { name: e.name, message: e.message, context: 'open-files-removeListener' }); } catch {}
+      }
+      try { ipcRenderer.removeListener('transport-action', onTransportAction); } catch (e) {
+        try { useStore.getState().addError?.('IPC cleanup failed', { name: e.name, message: e.message, context: 'transport-action-removeListener' }); } catch {}
       }
     };
   }, [refreshLibrary, playTrack, addLog]);
