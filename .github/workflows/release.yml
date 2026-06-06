@@ -52,14 +52,23 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run build-web
-      - name: Build NSIS Setup
+      - name: Build NSIS + portable (uses package.json targets)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bunx electron-builder --win nsis --x64
-      - name: Build portable EXE
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bunx electron-builder --win portable --x64
+        run: bunx electron-builder --win --x64
+      - name: Rename artifacts to standard names
+        if: always()
+        shell: pwsh
+        run: |
+          $v = "${{ needs.resolve-version.outputs.version }}"
+          Get-ChildItem dist/*.exe -ErrorAction SilentlyContinue | ForEach-Object {
+            $name = $_.Name
+            if ($name -like "Player Setup *.exe") {
+              Rename-Item $_ "Player-${v}-setup-x64.exe"
+            } elseif ($name -like "Player *.exe") {
+              Rename-Item $_ "Player-${v}-portable-x64.exe"
+            }
+          }
       - uses: actions/upload-artifact@v4
         with:
           name: player-windows
@@ -67,7 +76,6 @@ jobs:
           path: |
             dist/Player-${{ needs.resolve-version.outputs.version }}-setup-x64.exe
             dist/Player-${{ needs.resolve-version.outputs.version }}-portable-x64.exe
-            dist/Player-${{ needs.resolve-version.outputs.version }}-x64.exe
             dist/latest.yml
 
   # ------------------------------------------------------------------

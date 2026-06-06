@@ -36,7 +36,6 @@
   "build": {
     "appId": "com.player.media",
     "productName": "Player",
-    "artifactName": "${productName}-${version}-${arch}.${ext}",
     "copyright": "Copyright © 2026 TARIK ELER",
     "directories": {
       "output": "dist"
@@ -71,18 +70,11 @@
         {
           "target": "nsis",
           "arch": [
-            "x64",
-            "ia32"
-          ]
-        },
-        {
-          "target": "portable",
-          "arch": [
             "x64"
           ]
         },
         {
-          "target": "zip",
+          "target": "portable",
           "arch": [
             "x64"
           ]
