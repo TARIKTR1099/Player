@@ -55,7 +55,7 @@ jobs:
       - name: Build NSIS + portable (uses package.json targets)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bunx electron-builder --win --x64
+        run: npx --no-install electron-builder --win --x64
       - name: Rename artifacts to standard names
         if: always()
         shell: pwsh
@@ -98,7 +98,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: bunx electron-builder --mac --x64 --arm64
+        run: npx --no-install electron-builder --mac --x64 --arm64
       - uses: actions/upload-artifact@v4
         with:
           name: player-macos
@@ -136,7 +136,7 @@ jobs:
       - name: Build Linux installers
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bunx electron-builder --linux --x64
+        run: npx --no-install electron-builder --linux --x64
       - uses: actions/upload-artifact@v4
         with:
           name: player-linux
@@ -184,6 +184,8 @@ jobs:
       - name: Build Android Release APK (debug-signed)
         run: |
           cd mobile/android
+          # GitHub Actions checkout strips executable bit; restore it for gradlew
+          chmod +x ./gradlew
           # Ensure release build type uses debug signing for CI
           ./gradlew --no-daemon assembleRelease
       - name: Locate APK
@@ -276,9 +278,10 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: player-source
+          if-no-files-found: warn
           path: |
-            Player-${{ needs.resolve-version.outputs.version }}-source.zip
-            Player-${{ needs.resolve-version.outputs.version }}-source.tar.gz
+            dist/Player-${{ needs.resolve-version.outputs.version }}-source.zip
+            dist/Player-${{ needs.resolve-version.outputs.version }}-source.tar.gz
 
   # ------------------------------------------------------------------
   # 7. Final — collect artifacts & publish
