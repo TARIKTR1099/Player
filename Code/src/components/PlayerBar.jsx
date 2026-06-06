@@ -4,6 +4,7 @@ import { cn } from '../lib/utils';
 import { generateChapters } from '../utils/chapters';
 import { useStore } from '../store';
 import { useIsTouchDevice } from '../hooks/useIsTouchDevice';
+import { showToast } from './Toast';
 
 const formatTime = (s) => {
   if (!s || isNaN(s)) return "0:00";
@@ -284,19 +285,28 @@ const PlayerBar = ({
                  <MenuItem icon={<RotateCcw size={13}/>} label="10 sn Geri" onClick={() => { if(audioRef.current) audioRef.current.currentTime -= 10; setShowMoreMenu(false); }} />
                  <MenuItem icon={<RotateCw size={13}/>} label="30 sn İleri" onClick={() => { if(audioRef.current) audioRef.current.currentTime += 30; setShowMoreMenu(false); }} />
                  <div className="h-px my-1" style={{backgroundColor:'var(--border-color)'}} />
-                 <MenuItem 
-                   icon={<Moon size={13}/>} 
-                   label={sleepTimer ? `Uyku Zamanlayıcı: ${sleepTimer} dk` : "Uyku Zamanlayıcı"} 
-                   onClick={() => {
-                     if (sleepTimer) {
-                       setSleepTimer(null);
-                     } else {
-                       const mins = prompt('Dakika girin (örn: 30):', '30');
-                       if (mins && !isNaN(parseInt(mins))) setSleepTimer(parseInt(mins));
-                     }
-                     setShowMoreMenu(false);
-                   }} 
-                 />
+                  <MenuItem
+                    icon={<Moon size={13}/>}
+                    label={sleepTimer ? `Uyku Zamanlayıcı: ${sleepTimer} dk (kapat)` : "Uyku Zamanlayıcı"}
+                    onClick={() => {
+                      if (sleepTimer) {
+                        setSleepTimer(null);
+                        showToast('Uyku zamanlayıcı kapatıldı', 'info');
+                      } else {
+                        const choice = prompt('Dakika seçin: 15, 30, 45, 60, 90, 120', '30');
+                        if (choice) {
+                          const mins = parseInt(choice);
+                          if (!isNaN(mins) && mins > 0 && mins <= 600) {
+                            setSleepTimer(mins);
+                            showToast(`⏰ ${mins} dakika sonra duraklatılacak`, 'success');
+                          } else {
+                            showToast('Geçersiz süre (1-600 dakika)', 'error');
+                          }
+                        }
+                      }
+                      setShowMoreMenu(false);
+                    }}
+                  />
                   <MenuItem 
                     icon={<ArrowRightLeft size={13}/>} 
                     label={crossfadeDuration > 0 ? `Geçiş: ${crossfadeDuration}s` : 'Geçiş: Kapalı'} 

@@ -867,6 +867,7 @@ const App = () => {
       if (sleepTimerEnd && Date.now() >= sleepTimerEnd) {
         togglePlay();
         setSleepTimer(null);
+        showToast('😴 Uyku zamanlayıcı: Çalma duraklatıldı', 'info');
         clearInterval(interval);
       }
     }, 1000);
