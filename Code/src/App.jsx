@@ -12,6 +12,7 @@ import { cn } from './lib/utils';
 import { fetchSyncedLyrics, parseLRC } from './services/lrclib';
 import ToastContainer, { showToast } from './components/Toast';
 import ErrorBoundary from './components/ErrorBoundary';
+import ShortcutsHelp from './components/ShortcutsHelp';
 import BottomNav from './components/BottomNav';
 const Downloader = React.lazy(() => import('./components/Downloader'));
 const EqualizerModal = React.lazy(() => import('./components/EqualizerModal'));
@@ -60,6 +61,7 @@ const App = () => {
   const [visualizerMode, setVisualizerMode] = useState('spectrum');
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [showVisualizerControls, setShowVisualizerControls] = useState(false);
@@ -795,7 +797,16 @@ const App = () => {
           clearSelection();
           return;
         }
-        
+
+        // ? or F1 shows shortcut help
+        if (e.key === '?' || e.key === 'F1' || (e.key === '/' && e.shiftKey)) {
+          if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            setShowShortcutsHelp((v) => !v);
+            return;
+          }
+        }
+
         // C key toggles subtitles (YouTube-style)
         if (e.key === 'c' || e.key === 'C') {
           if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
@@ -1882,6 +1893,7 @@ const App = () => {
       {showEqualizer && <Suspense fallback={null}><EqualizerModal onClose={() => setShowEqualizer(false)} /></Suspense>}
       {showEffects && <Suspense fallback={null}><EffectsModal onClose={() => setShowEffects(false)} /></Suspense>}
       <ToastContainer />
+      {showShortcutsHelp && <ShortcutsHelp onClose={() => setShowShortcutsHelp(false)} />}
     </div>
   </ErrorBoundary>
   );
