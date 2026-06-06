@@ -16,13 +16,20 @@ const BODY = `## 📥 Downloads
 
 | Platform | Architecture | File | Size |
 |----------|--------------|------|------|
-| **Windows** | x86-64 (Setup) | [Player-1.0.0-setup-x64.exe](https://github.com/${OWNER}/${REPO}/releases/download/v1.0.0/Player-1.0.0-setup-x64.exe) | 106 MB |
-| **Windows** | x86-64 (Portable) | [Player-1.0.0-portable-x64.exe](https://github.com/${OWNER}/${REPO}/releases/download/v1.0.0/Player-1.0.0-portable-x64.exe) | 94 MB |
-| **Windows** | x86-64 (Zip) | [Player-1.0.0-x64.zip](https://github.com/${OWNER}/${REPO}/releases/download/v1.0.0/Player-1.0.0-x64.zip) | 138 MB |
-| **Source** | (zip) | [Player-1.0.0-source.zip](https://github.com/${OWNER}/${REPO}/releases/download/v1.0.0/Player-1.0.0-source.zip) | 86 MB |
-| **Source** | (tar.gz) | [Player-1.0.0-source.tar.gz](https://github.com/${OWNER}/${REPO}/releases/download/v1.0.0/Player-1.0.0-source.tar.gz) | 84 MB |
+| **🪟 Windows** | x86-64 (Setup) | [Player-1.0.0-setup-x64.exe](https://github.com/${OWNER}/${REPO}/releases/download/v1.0.0/Player-1.0.0-setup-x64.exe) | 106 MB |
+| **🪟 Windows** | x86-64 (NSIS alt.) | [Player-1.0.0-x64.exe](https://github.com/${OWNER}/${REPO}/releases/download/v1.0.0/Player-1.0.0-x64.exe) | 106 MB |
+| **🪟 Windows** | x86-64 (Portable) | [Player-1.0.0-portable-x64.exe](https://github.com/${OWNER}/${REPO}/releases/download/v1.0.0/Player-1.0.0-portable-x64.exe) | 94 MB |
+| **🪟 Windows** | x86-64 (Zip) | [Player-1.0.0-x64.zip](https://github.com/${OWNER}/${REPO}/releases/download/v1.0.0/Player-1.0.0-x64.zip) | 138 MB |
+| **🐧 Linux** | x86-64 (AppImage) | *Build from source — \`bun run build:linux\`* | — |
+| **🍎 macOS** | x64 + arm64 (DMG) | *Build from source — \`bun run build:mac\`* (unsigned) | — |
+| **🤖 Android** | APK | *Build with Capacitor — see \`Code/mobile/BUILD.md\`* | — |
+| **🍎 iOS** | IPA | *Build with Xcode — see \`Code/mobile/BUILD.md\`* | — |
+| **📦 Source** | (zip) | [Player-1.0.0-source.zip](https://github.com/${OWNER}/${REPO}/releases/download/v1.0.0/Player-1.0.0-source.zip) | 86 MB |
+| **📦 Source** | (tar.gz) | [Player-1.0.0-source.tar.gz](https://github.com/${OWNER}/${REPO}/releases/download/v1.0.0/Player-1.0.0-source.tar.gz) | 84 MB |
 
-> **macOS / Linux / Android / iOS**: Build from source on a Mac (Xcode 15+) or Linux machine. See README → "Kaynak Koddan Derleme". Linux AppImage is also available in the [v1.0.0 release](https://github.com/${OWNER}/${REPO}/releases/tag/v1.0.0).
+> **Windows kullanıcıları**: \`Player-1.0.0-setup-x64.exe\` önerilir — sisteminize kurar, Başlat menüsü kısayolu oluşturur. Tek dosyada taşımak isterseniz \`Player-1.0.0-portable-x64.exe\` kullanın.
+>
+> **macOS / Linux / Android / iOS**: GitHub Actions cross-platform build'leri v1.0.0 için stabil değil. Source bundle'ı indirip kendi makinenizde derleyebilirsiniz. Talimatlar: \`Code/mobile/BUILD.md\` ve README → "Kaynak Koddan Derleme".
 
 ## ✨ What's New in v1.0.0
 

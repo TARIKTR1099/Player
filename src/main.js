@@ -674,7 +674,7 @@ function createWindow() {
     minHeight: WINDOW_LAYOUTS.normal.minHeight,
     fullscreenable: false,
     transparent: false,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#0a0a0f',
     icon: getAppIcon(),
     webPreferences: {
       nodeIntegration: true,
