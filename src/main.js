@@ -79,6 +79,55 @@ function cleanTempMusic(maxAgeMs = TEMP_MUSIC_MAX_AGE) {
   } catch { return 0; }
 }
 
+// ============================================================
+//  File-based logging (Electron on Windows is a GUI app — stdout
+//  is buffered, so we mirror console.* into userData/logs/main.log).
+//  Helps diagnose black-screen / mount failures.
+// ============================================================
+let logFilePath = null;
+function setupFileLogging() {
+  try {
+    const logDir = path.join(app.getPath('userData'), 'logs');
+    fs.mkdirSync(logDir, { recursive: true });
+    // Keep only the last 5 log files (delete older ones)
+    try {
+      const all = fs.readdirSync(logDir)
+        .filter(f => f.startsWith('main-') && f.endsWith('.log'))
+        .map(f => ({ f, mtime: fs.statSync(path.join(logDir, f)).mtimeMs }))
+        .sort((a, b) => b.mtime - a.mtime);
+      all.slice(5).forEach(({ f }) => {
+        try { fs.unlinkSync(path.join(logDir, f)); } catch {}
+      });
+    } catch {}
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    logFilePath = path.join(logDir, `main-${stamp}.log`);
+    const orig = {
+      log: console.log,
+      warn: console.warn,
+      error: console.error,
+    };
+    const write = (level, args) => {
+      try {
+        const line = `[${new Date().toISOString()}] [${level}] ` +
+          args.map(a => (typeof a === 'string' ? a : (() => { try { return JSON.stringify(a); } catch { return String(a); } })())).join(' ') + '\n';
+        if (logFilePath) fs.appendFileSync(logFilePath, line);
+        orig[level]?.apply(console, args);
+      } catch {}
+    };
+    console.log = (...a) => write('log', a);
+    console.warn = (...a) => write('warn', a);
+    console.error = (...a) => write('error', a);
+  } catch (e) {
+    // Fallback: just use console normally
+  }
+}
+setupFileLogging();
+console.log('[main] === Player starting ===');
+console.log('[main] executable:', process.execPath);
+console.log('[main] userData:', app.getPath('userData'));
+console.log('[main] platform:', process.platform, 'arch:', process.arch);
+console.log('[main] electron:', process.versions.electron, 'chrome:', process.versions.chrome);
+
 // Force release any stale lock before requesting new one
 // This handles cases where app was killed without proper cleanup
 try {
@@ -86,18 +135,47 @@ try {
   if (fs.existsSync(lockPath)) {
     // Try to remove stale lock file
     fs.unlinkSync(lockPath);
+    console.log('[main] stale SingletonLock removed:', lockPath);
   }
 } catch (e) {
-  // Ignore errors - lock might be held by running instance
+  console.warn('[main] lock release failed:', e.message);
 }
 
-// Single instance lock - check early before any window creation
-const gotTheLock = app.requestSingleInstanceLock();
+// Single instance lock - skip in dev mode (multiple dev sessions often wanted)
+// and in packaged mode guard against stale Windows named pipes by retrying
+// once after 500ms.
+function requestLockWithRetry() {
+  let lock = app.requestSingleInstanceLock();
+  if (lock) return true;
+  // Quick check: if a real instance is alive, no point retrying. Look for
+  // an electron.exe belonging to our userData path.
+  try {
+    const { execSync } = require('child_process');
+    const out = execSync('tasklist /FI "IMAGENAME eq electron.exe" /FO CSV /NH', { stdio: 'pipe' }).toString();
+    const ourPids = out.split(/\r?\n/).filter(l => l.toLowerCase().includes('electron.exe'));
+    if (ourPids.length === 0) {
+      console.log('[main] no live electron.exe found — lock appears stale, retrying in 1.2s');
+      // Wait briefly so the named pipe is released by Windows
+      const until = Date.now() + 1200;
+      while (Date.now() < until) { /* spin briefly */ }
+      lock = app.requestSingleInstanceLock();
+    }
+  } catch {}
+  return lock;
+}
+const gotTheLock = app.isPackaged ? requestLockWithRetry() : true;
+console.log('[main] gotTheLock =', gotTheLock, '(packaged=' + app.isPackaged + ')');
 if (!gotTheLock) {
   // Another instance is already running, quit immediately
+  console.log('[main] ANOTHER INSTANCE RUNNING — quitting');
   app.quit();
   process.exit(0);
 }
+console.log('[main] registering app.whenReady().then(...)...');
+
+app.whenReady().then(() => {
+  console.log('[main] app READY (whenReady fired) — proceeding to createWindow');
+}).catch((e) => console.error('[main] whenReady rejected:', e));
 
 // Handle second instance attempt (Windows "Open with" file association)
 app.on('second-instance', (event, commandLine) => {
@@ -688,8 +766,37 @@ function createWindow() {
   if (settings.maximized) mainWindow.maximize();
 
   mainWindow.loadFile(path.join(__dirname, '..', 'dist-web', 'index.html'));
+  console.log('[main] BrowserWindow created, loadFile called:', path.join(__dirname, '..', 'dist-web', 'index.html'));
+
+  // ============================================================
+  //  DEBUG: Forward renderer logs to main stdout for black-screen
+  //  diagnostics. Captures all console.log/info/warn/error and
+  //  uncaught errors, page-load failures, and renderer crashes.
+  // ============================================================
+  mainWindow.webContents.on('console-message', (event, level, message, line, source) => {
+    const tag = ['DEBUG', 'INFO', 'WARN', 'ERROR'][level] || 'LOG';
+    console.log(`[renderer:${tag}] ${message}  (${source}:${line})`);
+    // Also append raw to log file in case the global console override misses anything
+    try { if (logFilePath) fs.appendFileSync(logFilePath, `[renderer:${tag}] ${message}  (${source}:${line})\n`); } catch {}
+  });
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+    console.error(`[main] did-fail-load: code=${errorCode} desc=${errorDescription} url=${validatedURL} mainFrame=${isMainFrame}`);
+  });
+  mainWindow.webContents.on('render-process-gone', (event, details) => {
+    console.error('[main] render-process-gone:', details);
+  });
+  mainWindow.webContents.on('did-finish-load', () => {
+    console.log('[main] did-finish-load (page fully loaded)');
+  });
+  mainWindow.webContents.on('dom-ready', () => {
+    console.log('[main] dom-ready (DOM available)');
+  });
+  mainWindow.webContents.on('preload-error', (event, preloadPath, error) => {
+    console.error('[main] preload-error:', preloadPath, error);
+  });
 
   mainWindow.once('ready-to-show', () => {
+    console.log('[main] ready-to-show fired, showing window');
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.show();
       mainWindow.focus();

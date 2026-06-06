@@ -12,8 +12,7 @@
     <meta name="application-name" content="Player" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="apple-touch-icon" href="./icons/icon-192x192.png" sizes="192x192" type="image/png" />
-    <link rel="icon" href="./icons/icon-192x192.png" sizes="192x192" type="image/png" />
-    <link rel="modulepreload" href="./src/index.jsx" />
+    <link rel="icon" href="./icons/icon.svg" sizes="any" type="image/svg+xml" />
     <title>Player</title>
     <style>
       /* ⚡ Critical: prevent white flash before splash renders */
@@ -44,23 +43,24 @@
         pointer-events: none;
       }
       .splash-logo {
-        width: 120px;
-        height: 120px;
-        border-radius: 28px;
-        background: transparent;
+        width: 144px;
+        height: 144px;
+        border-radius: 32px;
+        background: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.08) 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 28px;
+        margin-bottom: 32px;
         animation: splash-pulse 2.4s ease-in-out infinite;
         overflow: hidden;
-        box-shadow: 0 16px 48px rgba(99, 102, 241, 0.35);
+        box-shadow: 0 20px 60px rgba(99, 102, 241, 0.45);
+        border: 1px solid rgba(167, 139, 250, 0.18);
       }
-      .splash-logo img {
-        width: 120px;
-        height: 120px;
+      .splash-logo img,
+      .splash-logo svg {
+        width: 112px;
+        height: 112px;
         display: block;
-        border-radius: 28px;
       }
       .splash-title {
         font-size: 32px;
@@ -114,7 +114,7 @@
         splash.id = 'splash-screen';
         // Use real app icon PNG (PWA-generated, 192x192)
         splash.innerHTML = [
-          '<div class="splash-logo"><img src="./icons/icon-192x192.png" alt="Player" width="120" height="120" /></div>',
+          '<div class="splash-logo"><img src="./icons/icon.svg" alt="Player" width="112" height="112" onerror="this.onerror=null;this.src=\'./icons/icon-192x192.png\'" /></div>',
           '<div class="splash-title">Player</div>',
           '<div class="splash-subtitle">Y\xfckleniyor\xe6\x9f</div>',
           '<div class="splash-spinner"></div>',

@@ -25,6 +25,20 @@ const Visualizer3DSphere = React.lazy(() => import('./components/Visualizer'));
 const LyricsPanel = React.lazy(() => import('./components/LyricsPanel'));
 const VideoPlayer = React.lazy(() => import('./components/VideoPlayer'));
 
+// ============================================================
+//  Global error handlers — log uncaught errors to console so
+//  the main process can mirror them to userData/logs/main.log
+// ============================================================
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (e) => {
+    console.error('[uncaught]', e?.message, e?.filename ? `(${e.filename}:${e.lineno})` : '', e?.error?.stack || '');
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    console.error('[unhandledrejection]', e?.reason?.message || e?.reason, e?.reason?.stack || '');
+  });
+  console.log('[renderer] App.jsx module loaded');
+}
+
 const App = () => {
   const { 
     theme, isPlaying, togglePlay, currentTrack, tracks, 
@@ -42,6 +56,7 @@ const App = () => {
     sleepTimer, sleepTimerEnd, setSleepTimer, volumeBoost, setVolumeBoost,
     crossfadeDuration, setCrossfadeDuration,
     favorites, toggleFavorite,
+    addLog,
     syncedLyricsCues, syncedLyricsLoading, setSyncedLyrics, setSyncedLyricsLoading, clearSyncedLyrics, lastLyricsQuery, setLastLyricsQuery
   } = useStore();
   

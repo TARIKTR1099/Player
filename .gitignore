@@ -50,5 +50,6 @@ mobile/ios/App/App.xcworkspace/xcuserdata/
 secrets.json
 credentials.json
 
-# Artifacts
-$null
+# Artifacts (one-off builds / test bundles)
+artifact-*.zip
+artifact-*.tar.gz
