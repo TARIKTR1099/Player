@@ -9,6 +9,37 @@ const database = require('./database');
 const { PLATFORM, getWindowFrame, getAppIcon, getDefaultWindowSize, getIconPath } = require('./platform');
 const { buildAppMenu } = require('./platform/menu');
 
+// ============================================================
+//  Portable Mode Detection
+//  If a `portable.flag` file exists in the directory containing
+//  the launcher EXE, the app runs in portable mode:
+//  - All user data (settings, library, logs) is stored next to
+//    the EXE instead of in %APPDATA% / ~/.config
+//  - No registry writes, no auto-updates
+//  Detected BEFORE app.setPath / app.getPath calls.
+// ============================================================
+function detectPortableMode() {
+  try {
+    if (!app.isPackaged) return false; // dev mode always uses default userData
+    const exeDir = path.dirname(process.execPath);
+    const flagPath = path.join(exeDir, 'portable.flag');
+    if (fs.existsSync(flagPath)) {
+      // Override userData path to be next to the EXE
+      const portableData = path.join(exeDir, 'userdata');
+      fs.mkdirSync(portableData, { recursive: true });
+      app.setPath('userData', portableData);
+      return true;
+    }
+  } catch (e) {
+    console.warn('[portable] detection failed:', e.message);
+  }
+  return false;
+}
+const IS_PORTABLE = detectPortableMode();
+if (IS_PORTABLE) {
+  console.log('[portable] mode ACTIVE — userData =', app.getPath('userData'));
+}
+
 let mainWindow = null;
 let tray = null;
 let isQuitting = false;

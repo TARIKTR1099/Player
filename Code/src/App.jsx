@@ -56,13 +56,23 @@ const App = () => {
   const [sortBy, setSortBy] = useState('name');
   const [sortDir, setSortDir] = useState('asc');
 
-  // ⚡ Hide branded splash screen once React mounts
+  // ⚡ Hide branded splash screen once React has rendered meaningful content
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.__hideSplash) {
-      // Small delay to let the first paint of App settle
-      const t = setTimeout(() => window.__hideSplash(), 120);
-      return () => clearTimeout(t);
-    }
+    if (typeof window === 'undefined' || !window.__hideSplash) return;
+    // Wait for the next frame so React's first paint has flushed
+    let raf1, raf2, timeoutId;
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        // Double-RAF + small timeout guarantees the splash stays visible
+        // until the app's bg color (#0a0a0f) is painted behind it
+        timeoutId = setTimeout(() => window.__hideSplash(), 80);
+      });
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      clearTimeout(timeoutId);
+    };
   }, []);
   const [libraryLoaded, setLibraryLoaded] = useState(false);
   const [libraryReady, setLibraryReady] = useState(false);
