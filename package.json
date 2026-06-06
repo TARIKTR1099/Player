@@ -163,7 +163,7 @@
       "shortcutName": "Player",
       "uninstallDisplayName": "Player",
       "runAfterFinish": true,
-      "include": "build/installer.nsh"
+      "include": "Others/build/installer.nsh"
     },
     "mac": {
       "target": [
@@ -188,8 +188,8 @@
       "artifactName": "${productName}-${version}-mac-${arch}.${ext}",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist",
+      "entitlements": "Others/build/entitlements.mac.plist",
+      "entitlementsInherit": "Others/build/entitlements.mac.plist",
       "extendInfo": {
         "NSPrefersDisplaySafeAreaCompatibility": true,
         "NSHighResolutionCapable": true
@@ -318,7 +318,7 @@
       "synopsis": "Player Media Player",
       "category": "AudioVideo"
     },
-    "afterSign": "build/notarize.js",
+    "afterSign": "Others/build/notarize.js",
     "npmRebuild": true,
     "removePackageScripts": false
   },
