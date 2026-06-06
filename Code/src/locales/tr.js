@@ -33,6 +33,22 @@ export default {
   'player.unlike': 'Beğenmekten Vazgeç',
   'player.addToQueue': 'Sıraya Ekle',
 
+  // Context menu (right-click on tracks)
+  'ctx.group.playback': 'Oynatma',
+  'ctx.group.edit': 'Düzenle',
+  'ctx.group.tools': 'Araçlar',
+  'ctx.group.info': 'Bilgi',
+  'ctx.playNext': 'Sıradaki',
+  'ctx.rename': 'Adını Değiştir (F2)',
+  'ctx.copyName': 'Adı Kopyala',
+  'ctx.toggleFavorite': 'Favorilere Ekle/Çıkar',
+  'ctx.trim': 'Kırp / Düzenle',
+  'ctx.assignCategory': 'Kategori Ata',
+  'ctx.visualizer': 'Görselleştirici',
+  'ctx.waveform': 'Dalga Formu',
+  'ctx.fileLocation': 'Dosya Konumu',
+  'ctx.trackInfo': 'Şarkı Bilgisi',
+
   // Status bar
   'status.playing': 'Oynatılıyor',
   'status.paused': 'Duraklatıldı',

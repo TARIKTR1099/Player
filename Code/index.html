@@ -43,14 +43,14 @@
         pointer-events: none;
       }
       .splash-logo {
-        width: 144px;
-        height: 144px;
-        border-radius: 32px;
+        width: 192px;
+        height: 192px;
+        border-radius: 40px;
         background: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.08) 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 32px;
+        margin-bottom: 36px;
         animation: splash-pulse 2.4s ease-in-out infinite;
         overflow: hidden;
         box-shadow: 0 20px 60px rgba(99, 102, 241, 0.45);
@@ -58,12 +58,13 @@
       }
       .splash-logo img,
       .splash-logo svg {
-        width: 112px;
-        height: 112px;
+        width: 100%;
+        height: 100%;
         display: block;
+        object-fit: contain;
       }
       .splash-title {
-        font-size: 32px;
+        font-size: 36px;
         font-weight: 800;
         letter-spacing: -0.5px;
         margin-bottom: 8px;
@@ -73,10 +74,10 @@
         background-clip: text;
       }
       .splash-subtitle {
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 500;
         color: rgba(255,255,255,0.55);
-        margin-bottom: 36px;
+        margin-bottom: 40px;
         letter-spacing: 0.6px;
         text-transform: uppercase;
       }
@@ -114,15 +115,15 @@
         splash.id = 'splash-screen';
         // Use real app icon PNG (PWA-generated, 192x192)
         splash.innerHTML = [
-          '<div class="splash-logo"><img src="./icons/icon.svg" alt="Player" width="112" height="112" onerror="this.onerror=null;this.src=\'./icons/icon-192x192.png\'" /></div>',
+          '<div class="splash-logo"><img src="./icons/icon.svg" alt="Player" onerror="this.onerror=null;this.src=\'./icons/icon-192x192.png\'" /></div>',
           '<div class="splash-title">Player</div>',
-          '<div class="splash-subtitle">Y\xfckleniyor\xe6\x9f</div>',
+          '<div class="splash-subtitle">Y\u00fckleniyor\u2026</div>',
           '<div class="splash-spinner"></div>',
-          '<div class="splash-progress" id="splash-progress">v1.0.0</div>',
+          '<div class="splash-progress" id="splash-progress">v1.1.0</div>',
         ].join('');
         // Append as early as possible — documentElement (html) always exists
         (document.body || document.documentElement).appendChild(splash);
-        // Safety: if React never calls __hideSplash (mount failure), show error after 8s
+        // Safety: if React never calls __hideSplash (mount failure), show error after 15s
         let safetyTimer = setTimeout(function() {
           const root = document.getElementById('root');
           const isReactMounted = root && root.children.length > 0;
@@ -130,13 +131,13 @@
             var prog = document.getElementById('splash-progress');
             if (prog) {
               prog.style.color = '#fca5a5';
-              prog.textContent = '\u26a0 Uygulama y\xfcklenemedi. Konsolu kontrol edin.';
+              prog.textContent = '\u26a0 Uygulama y\u00fcklenemedi. Konsolu kontrol edin.';
             }
             // Keep splash visible, don't auto-hide
           } else {
             splash.classList.add('hide');
           }
-        }, 8000);
+        }, 15000);
         // Public API: React calls this when first content is rendered
         window.__hideSplash = function() {
           clearTimeout(safetyTimer);

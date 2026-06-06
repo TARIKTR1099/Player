@@ -1,6 +1,7 @@
 ﻿import React, { useState, useCallback } from 'react';
 import { Play, Music, ListMusic, Plus, Edit3, Copy, Scissors, Tag, Eye, Radio, FileAudio, Info, Trash2, Clock, Heart } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useTranslation } from '../i18n';
 
 /**
  * Highlight matching text within a string. Used for search highlighting.
@@ -94,7 +95,7 @@ export const CompactTrack = React.memo(({ track, index, onPlay, onCtx, formatTim
 ));
 
 export const ContextMenu = React.forwardRef(({ x, y, track, onClose, onPlay, onRename, onDelete, onShowInfo, onShowLocation, onToggleVisualizer, onToggleWaveform, categories, onAssignCategory, onAddToQueue, onPlayNext, playlists, onAddToPlaylist }, ref) => {
-  const [hoveredGroup, setHoveredGroup] = useState(null);
+  const { t } = useTranslation();
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showPlaylistPicker, setShowPlaylistPicker] = useState(false);
 
@@ -107,24 +108,30 @@ export const ContextMenu = React.forwardRef(({ x, y, track, onClose, onPlay, onR
     };
   }, []);
 
-  const mainStyle = { backgroundColor: 'var(--color-bg-secondary)', borderColor: 'var(--border-color)', minWidth: '180px', ...clampPos(x, y, 180, 300) };
+  const mainStyle = { backgroundColor: 'var(--color-bg-secondary)', borderColor: 'var(--border-color)', minWidth: '200px', ...clampPos(x, y, 200, 380) };
 
   const groups = [
-    { id: 'playback', label: 'Oynatma', items: [
-      { icon: <Play size={13}/>, label: 'Oynat', action: onPlay },
-      { icon: <ListMusic size={13}/>, label: 'Sıradaki', action: () => { onPlayNext(); onClose(); } },
-      { icon: <Plus size={13}/>, label: 'Sıraya Ekle', action: () => { onAddToQueue(); onClose(); } }
+    { id: 'playback', label: t('ctx.group.playback'), items: [
+      { icon: <Play size={13}/>, label: t('player.play'), action: onPlay },
+      { icon: <ListMusic size={13}/>, label: t('ctx.playNext'), action: () => { onPlayNext(); onClose(); } },
+      { icon: <Plus size={13}/>, label: t('player.addToQueue'), action: () => { onAddToQueue(); onClose(); } }
     ] },
-    { id: 'edit', label: 'Düzenle', items: [
-      { icon: <Edit3 size={13}/>, label: 'Adını Değiştir (F2)', action: onRename },
-      { icon: <Copy size={13}/>, label: 'Adı Kopyala', action: () => { if (track?.title) navigator.clipboard.writeText(track.title); onClose(); } },
-      { icon: <Heart size={13}/>, label: 'Favorilere Ekle/Çıkar', action: () => { onToggleFavorite && onToggleFavorite(); onClose(); } },
-      { icon: <Scissors size={13}/>, label: 'Kırp / Düzenle', action: () => { onToggleWaveform(); onClose(); setTimeout(() => { document.querySelector('.waveform-trim-btn')?.scrollIntoView({ behavior: 'smooth' }); }, 300); } },
-      { icon: <Tag size={13}/>, label: 'Kategori Ata', action: () => { setShowCategoryPicker(!showCategoryPicker); setShowPlaylistPicker(false); } },
-      { icon: <ListMusic size={13}/>, label: 'Çalma Listesine Ekle', action: () => { setShowPlaylistPicker(!showPlaylistPicker); setShowCategoryPicker(false); } }
+    { id: 'edit', label: t('ctx.group.edit'), items: [
+      { icon: <Edit3 size={13}/>, label: t('ctx.rename'), action: onRename },
+      { icon: <Copy size={13}/>, label: t('ctx.copyName'), action: () => { if (track?.title) navigator.clipboard.writeText(track.title); onClose(); } },
+      { icon: <Heart size={13}/>, label: t('ctx.toggleFavorite'), action: () => { onToggleFavorite && onToggleFavorite(); onClose(); } },
+      { icon: <Scissors size={13}/>, label: t('ctx.trim'), action: () => { onToggleWaveform(); onClose(); setTimeout(() => { document.querySelector('.waveform-trim-btn')?.scrollIntoView({ behavior: 'smooth' }); }, 300); } },
+      { icon: <Tag size={13}/>, label: t('ctx.assignCategory'), action: () => { setShowCategoryPicker(!showCategoryPicker); setShowPlaylistPicker(false); } },
+      { icon: <ListMusic size={13}/>, label: t('library.addToPlaylist'), action: () => { setShowPlaylistPicker(!showPlaylistPicker); setShowCategoryPicker(false); } }
     ] },
-    { id: 'tools', label: 'Araçlar', items: [{ icon: <Eye size={13}/>, label: 'Görselleştirici', action: onToggleVisualizer }, { icon: <Radio size={13}/>, label: 'Dalga Formu', action: onToggleWaveform }, { icon: <FileAudio size={13}/>, label: 'Dosya Konumu', action: onShowLocation }] },
-    { id: 'info', label: 'Bilgi', items: [{ icon: <Info size={13}/>, label: 'Şarkı Bilgisi', action: onShowInfo }] },
+    { id: 'tools', label: t('ctx.group.tools'), items: [
+      { icon: <Eye size={13}/>, label: t('ctx.visualizer'), action: onToggleVisualizer },
+      { icon: <Radio size={13}/>, label: t('ctx.waveform'), action: onToggleWaveform },
+      { icon: <FileAudio size={13}/>, label: t('ctx.fileLocation'), action: onShowLocation }
+    ] },
+    { id: 'info', label: t('ctx.group.info'), items: [
+      { icon: <Info size={13}/>, label: t('ctx.trackInfo'), action: onShowInfo }
+    ] },
   ];
 
   return (
@@ -133,18 +140,18 @@ export const ContextMenu = React.forwardRef(({ x, y, track, onClose, onPlay, onR
         {groups.map((group, idx) => (
           <div key={group.id}>
             {idx > 0 && <div className="h-px my-1" style={{backgroundColor:'var(--border-color)'}} />}
-            <div className="flex items-center justify-between px-4 py-2 cursor-pointer transition hover:bg-white/5" onMouseEnter={() => setHoveredGroup(group.id)} onClick={() => setHoveredGroup(hoveredGroup === group.id ? null : group.id)}>
-              <span className="text-[10px] font-bold uppercase tracking-wider" style={{color:'var(--text-secondary)'}}>{group.label}</span>
-              <span style={{color:'var(--text-secondary)', fontSize:'8px'}}>▶</span>
-            </div>
+            <div className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider" style={{color:'var(--text-secondary)'}}>{group.label}</div>
+            {group.items.map((item, i) => (
+              <CtxItem key={i} icon={item.icon} label={item.label} onClick={item.action} />
+            ))}
           </div>
         ))}
         <div className="h-px my-1" style={{backgroundColor:'var(--border-color)'}} />
-        <CtxItem icon={<Trash2 size={13}/>} label="Sil (Del)" onClick={onDelete} className="text-red-500" />
+        <CtxItem icon={<Trash2 size={13}/>} label={t('library.delete')} onClick={onDelete} className="text-red-500" />
 
         {showCategoryPicker && (
           <div className="absolute left-full ml-1 top-0 border rounded-xl py-1 shadow-2xl text-xs z-50" style={{backgroundColor:'var(--color-bg-secondary)', borderColor:'var(--border-color)', minWidth:'180px'}}>
-            <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider" style={{color:'var(--text-secondary)'}}>Kategori Ata</div>
+            <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider" style={{color:'var(--text-secondary)'}}>{t('ctx.assignCategory')}</div>
             <div className="h-px" style={{backgroundColor:'var(--border-color)'}} />
             {(categories || []).map(cat => (
               <MenuItem key={cat.id} icon={<Tag size={12}/>} label={cat.name} onClick={() => { onAssignCategory(cat.id, track?.id); onClose(); }} />
@@ -154,7 +161,7 @@ export const ContextMenu = React.forwardRef(({ x, y, track, onClose, onPlay, onR
 
         {showPlaylistPicker && (
           <div className="absolute left-full ml-1 top-0 border rounded-xl py-1 shadow-2xl text-xs z-50" style={{backgroundColor:'var(--color-bg-secondary)', borderColor:'var(--border-color)', minWidth:'180px'}}>
-            <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider" style={{color:'var(--text-secondary)'}}>Çalma Listesine Ekle</div>
+            <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider" style={{color:'var(--text-secondary)'}}>{t('library.addToPlaylist')}</div>
             <div className="h-px" style={{backgroundColor:'var(--border-color)'}} />
             {(playlists || []).map(pl => (
               <MenuItem key={pl.id} icon={<Clock size={12}/>} label={pl.name} onClick={() => { onAddToPlaylist(pl.id, track?.id); onClose(); }} />

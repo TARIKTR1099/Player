@@ -33,6 +33,22 @@ export default {
   'player.unlike': 'Unlike',
   'player.addToQueue': 'Add to Queue',
 
+  // Context menu (right-click on tracks)
+  'ctx.group.playback': 'Playback',
+  'ctx.group.edit': 'Edit',
+  'ctx.group.tools': 'Tools',
+  'ctx.group.info': 'Info',
+  'ctx.playNext': 'Play Next',
+  'ctx.rename': 'Rename (F2)',
+  'ctx.copyName': 'Copy Name',
+  'ctx.toggleFavorite': 'Toggle Favorite',
+  'ctx.trim': 'Trim / Edit',
+  'ctx.assignCategory': 'Assign Category',
+  'ctx.visualizer': 'Visualizer',
+  'ctx.waveform': 'Waveform',
+  'ctx.fileLocation': 'File Location',
+  'ctx.trackInfo': 'Track Info',
+
   // Status bar
   'status.playing': 'Playing',
   'status.paused': 'Paused',
