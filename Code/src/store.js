@@ -247,6 +247,9 @@ export const useStore = create(
       // Recently played history (max 20 entries: trackId + timestamp)
       playHistory: [],
 
+      // Favorites (array of track IDs)
+      favorites: [],
+
       // Volume Boost (1.0 = normal, 2.0 = max boost)
       volumeBoost: 1.0,
       
@@ -294,6 +297,15 @@ export const useStore = create(
         return { playHistory: [newEntry, ...filtered].slice(0, 20) };
       }),
       clearHistory: () => set({ playHistory: [] }),
+
+      // Favorites — set of track IDs
+      toggleFavorite: (trackId) => set((s) => {
+        const next = new Set(s.favorites);
+        if (next.has(trackId)) next.delete(trackId);
+        else next.add(trackId);
+        return { favorites: [...next] };
+      }),
+      isFavorite: (trackId) => get().favorites.includes(trackId),
       setVolumeBoost: (b) => set({ volumeBoost: Math.max(1.0, Math.min(2.0, b)) }),
       setCrossfadeDuration: (d) => set({ crossfadeDuration: Math.max(0, Math.min(10, d)) }),
       setEffectsBypass: (v) => set({ effectsBypass: v }),

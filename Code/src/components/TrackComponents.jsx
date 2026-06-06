@@ -1,5 +1,5 @@
 ﻿import React, { useState, useCallback } from 'react';
-import { Play, Music, ListMusic, Plus, Edit3, Copy, Scissors, Tag, Eye, Radio, FileAudio, Info, Trash2, Clock } from 'lucide-react';
+import { Play, Music, ListMusic, Plus, Edit3, Copy, Scissors, Tag, Eye, Radio, FileAudio, Info, Trash2, Clock, Heart } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 /**
@@ -118,6 +118,7 @@ export const ContextMenu = React.forwardRef(({ x, y, track, onClose, onPlay, onR
     { id: 'edit', label: 'Düzenle', items: [
       { icon: <Edit3 size={13}/>, label: 'Adını Değiştir (F2)', action: onRename },
       { icon: <Copy size={13}/>, label: 'Adı Kopyala', action: () => { if (track?.title) navigator.clipboard.writeText(track.title); onClose(); } },
+      { icon: <Heart size={13}/>, label: 'Favorilere Ekle/Çıkar', action: () => { onToggleFavorite && onToggleFavorite(); onClose(); } },
       { icon: <Scissors size={13}/>, label: 'Kırp / Düzenle', action: () => { onToggleWaveform(); onClose(); setTimeout(() => { document.querySelector('.waveform-trim-btn')?.scrollIntoView({ behavior: 'smooth' }); }, 300); } },
       { icon: <Tag size={13}/>, label: 'Kategori Ata', action: () => { setShowCategoryPicker(!showCategoryPicker); setShowPlaylistPicker(false); } },
       { icon: <ListMusic size={13}/>, label: 'Çalma Listesine Ekle', action: () => { setShowPlaylistPicker(!showPlaylistPicker); setShowCategoryPicker(false); } }

@@ -41,6 +41,7 @@ const App = () => {
     importM3U, exportPlaylistAsM3U, exportLibraryBackup, importLibraryBackup,
     sleepTimer, sleepTimerEnd, setSleepTimer, volumeBoost, setVolumeBoost,
     crossfadeDuration, setCrossfadeDuration,
+    favorites, toggleFavorite,
     syncedLyricsCues, syncedLyricsLoading, setSyncedLyrics, setSyncedLyricsLoading, clearSyncedLyrics, lastLyricsQuery, setLastLyricsQuery
   } = useStore();
   
@@ -1838,14 +1839,19 @@ const App = () => {
 
       {/* Context Menu */}
       {contextMenu && (
-        <ContextMenu 
+        <ContextMenu
           ref={ctxRef}
-          x={contextMenu.x} 
-          y={contextMenu.y} 
+          x={contextMenu.x}
+          y={contextMenu.y}
           track={contextMenu.track}
           onClose={() => setContextMenu(null)}
           onPlay={() => { playTrack(contextMenu.track); setContextMenu(null); }}
           onRename={() => handleRenameTrack(contextMenu.track)}
+          onToggleFavorite={() => {
+            const wasFav = favorites.includes(contextMenu.track.id);
+            toggleFavorite(contextMenu.track.id);
+            showToast(wasFav ? 'Favorilerden çıkarıldı' : 'Favorilere eklendi', 'success');
+          }}
           onDelete={() => handleDeleteTrack(contextMenu.track)}
           onShowInfo={() => { 
             const t = contextMenu.track;
