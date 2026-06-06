@@ -12,8 +12,8 @@ const { PLATFORM } = require('./index');
 function createTray(mainWindow) {
   let iconPath;
   const assetsPath = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '..', '..', 'assets');
+    ? path.join(process.resourcesPath, 'Assets')
+    : path.join(__dirname, '..', '..', 'Assets');
 
   if (PLATFORM.isMac) {
     // macOS: use template image (16x16 for status bar)

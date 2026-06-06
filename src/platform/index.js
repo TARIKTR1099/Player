@@ -30,8 +30,8 @@ function getIconPath(name) {
   const path = require('path');
   const { app } = require('electron');
   const base = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '..', '..', 'assets');
+    ? path.join(process.resourcesPath, 'Assets')
+    : path.join(__dirname, '..', '..', 'Assets');
   return path.join(base, name);
 }
 

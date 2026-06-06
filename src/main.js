@@ -475,7 +475,7 @@ ipcMain.handle('update-playback-state', (event, state) => {
 });
 
 function getThumbIcon(name) {
-  const p = path.join(getResourcesBasePath(), 'assets', name);
+  const p = path.join(getResourcesBasePath(), 'Assets', name);
   if (fs.existsSync(p)) return nativeImage.createFromPath(p).resize({ width: 16, height: 16 });
   return nativeImage.createEmpty();
 }
@@ -490,7 +490,7 @@ function updateThumbarButtons() {
 }
 
 function getTrayImage() {
-  const assetsPath = path.join(getResourcesBasePath(), 'assets');
+  const assetsPath = path.join(getResourcesBasePath(), 'Assets');
   const trayPath = path.join(assetsPath, 'tray-icon.png');
   
   if (!fs.existsSync(trayPath)) {

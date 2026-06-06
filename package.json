@@ -48,14 +48,14 @@
     ],
     "extraResources": [
       {
-        "from": "assets",
-        "to": "assets",
+        "from": "Assets",
+        "to": "Assets",
         "filter": [
           "**/*"
         ]
       },
       {
-        "from": "yt-dlp-bin",
+        "from": "Downloads/yt-dlp-bin",
         "to": "yt-dlp-bin",
         "filter": [
           "**/*"
@@ -88,7 +88,7 @@
           ]
         }
       ],
-      "icon": "assets/icon.ico",
+      "icon": "Assets/icon.ico",
       "publisherName": [
         "TARIK ELER"
       ],
@@ -155,9 +155,9 @@
       "allowToChangeInstallationDirectory": true,
       "allowElevation": true,
       "perMachine": false,
-      "installerIcon": "assets/icon.ico",
-      "uninstallerIcon": "assets/icon.ico",
-      "installerHeaderIcon": "assets/icon.ico",
+      "installerIcon": "Assets/icon.ico",
+      "uninstallerIcon": "Assets/icon.ico",
+      "installerHeaderIcon": "Assets/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Player",
@@ -183,7 +183,7 @@
         }
       ],
       "category": "public.app-category.music",
-      "icon": "assets/icon.icns",
+      "icon": "Assets/icon.icns",
       "darkModeSupport": true,
       "artifactName": "${productName}-${version}-mac-${arch}.${ext}",
       "hardenedRuntime": true,
@@ -219,7 +219,7 @@
       ]
     },
     "dmg": {
-      "icon": "assets/icon.icns",
+      "icon": "Assets/icon.icns",
       "iconSize": 128,
       "contents": [
         {
@@ -264,7 +264,7 @@
         }
       ],
       "category": "AudioVideo",
-      "icon": "assets/icon.png",
+      "icon": "Assets/icon.png",
       "artifactName": "${productName}-${version}-linux-${arch}.${ext}",
       "synopsis": "Cross-platform media player with AI & plugins",
       "description": "Modern media player with EQ, visualizer, plugin system, AI integration, and subtitle timeline.",
