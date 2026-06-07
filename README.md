@@ -67,7 +67,7 @@ Player **5 platformda** hazır paketlenmiş olarak indirilebilir. Her platform i
         </a>
       </td>
       <td><b>🤖 Android</b></td>
-      <td>ARM64 + ARMv7 (APK)</td>
+      <td>ARM64 + ARMv7 (APK) — 3.4 MB</td>
       <td><a href="https://github.com/TARIKTR1099/Player/releases/latest">Player-1.0.0.apk</a> • indirilebilir</td>
     </tr>
     <tr>
@@ -183,6 +183,18 @@ Player **5 platformda** hazır paketlenmiş olarak indirilebilir. Her platform i
 ## 🔧 Platformlar Arası Derleme
 
 Player **Windows**, **macOS**, **Linux**, **Android** ve **iOS** için derlenebilir.
+
+### 📦 Neden APK (3.4 MB) ile Windows EXE (84 MB) Arasında Büyük Fark Var?
+
+Bu **normaldir** ve endişelenecek bir durum değildir:
+
+| Platform | İçerik | Yaklaşık Boyut |
+|----------|--------|----------------|
+| **Windows / macOS / Linux (Electron)** | Chromium (~80 MB) + Node.js + uygulama kodu | 80–150 MB |
+| **Android (APK)** | Sadece Capacitor runtime + HTML/CSS/JS bundle. **WebView** ve medya codec'leri (ExoPlayer/MediaPlayer) işletim sisteminden gelir. | 3–5 MB |
+| **iOS** | Sadece Capacitor runtime + HTML/CSS/JS bundle. **WKWebView** ve AVFoundation işletim sisteminden gelir. | 3–5 MB |
+
+APK ve iOS paketleri **gerçek birer medya oynatıcıdır**; sadece görsel değildir. Tüm ses/video formatları (mp3, flac, mp4, mkv, vb.) işletim sisteminin **native codec'leri** ile çalınır. Sadece uygulama kabuğu (HTML/CSS/JS) pakete dahil edilir, çünkü WebView ve medya motoru zaten cihazda mevcuttur.
 
 ```bash
 # Bağımlılıkları yükle
