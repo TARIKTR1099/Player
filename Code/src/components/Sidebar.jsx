@@ -1,6 +1,7 @@
 ﻿import React, { useEffect } from 'react';
 import { Activity, ListMusic, Download, Settings } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { t } from '../i18n';
 import appIcon from '../assets/icon.png';
 
 const NavItem = ({ icon, label, active, onClick, sidebarMode }) => (
@@ -41,7 +42,7 @@ const Sidebar = ({ sidebarMode, setSidebarMode, activeTab, setActiveTab, sidebar
       <nav className={cn("flex-1 gap-1", sidebarMode === 'icons' ? 'px-2' : 'px-4')}>
         <NavItem active={activeTab === 'home'} onClick={() => setActiveTab('home')} icon={<Activity size={sidebarMode === 'icons' ? 24 : 20} />} label={sidebarMode === 'icons' ? '' : 'Ana Sayfa'} sidebarMode={sidebarMode} />
         <NavItem active={activeTab === 'library'} onClick={() => setActiveTab('library')} icon={<ListMusic size={sidebarMode === 'icons' ? 24 : 20} />} label={sidebarMode === 'icons' ? '' : 'Kütüphane'} sidebarMode={sidebarMode} />
-        <NavItem active={activeTab === 'search'} onClick={() => setActiveTab('search')} icon={<Download size={sidebarMode === 'icons' ? 24 : 20} />} label={sidebarMode === 'icons' ? '' : 'Müzik İndir'} sidebarMode={sidebarMode} />
+        <NavItem active={activeTab === 'search'} onClick={() => setActiveTab('search')} icon={<Download size={sidebarMode === 'icons' ? 24 : 20} />} label={sidebarMode === 'icons' ? '' : t('nav.download')} sidebarMode={sidebarMode} />
       </nav>
       <div className={cn("border-t whitespace-nowrap", sidebarMode === 'icons' ? 'px-2' : 'p-4')} style={{borderColor:'var(--border-color)'}}>
         <NavItem active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} icon={<Settings size={sidebarMode === 'icons' ? 24 : 20} />} label={sidebarMode === 'icons' ? '' : 'Ayarlar'} sidebarMode={sidebarMode} />

@@ -175,6 +175,14 @@ console.log('[main] registering app.whenReady().then(...)...');
 
 app.whenReady().then(() => {
   console.log('[main] app READY (whenReady fired) — proceeding to createWindow');
+  // Ensure app identity is exactly "Player" so Windows notifications / tray
+  // / taskbar show "Player" instead of the "electron.app.Player" legacy name.
+  try {
+    app.setName('Player');
+  } catch (_) { /* ignore on platforms that don't support it */ }
+  try {
+    app.setAppUserModelId('com.player.media');
+  } catch (_) { /* ignore */ }
 }).catch((e) => console.error('[main] whenReady rejected:', e));
 
 // Handle second instance attempt (Windows "Open with" file association)

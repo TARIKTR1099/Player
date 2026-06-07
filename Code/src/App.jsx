@@ -13,6 +13,7 @@ import { fetchSyncedLyrics, parseLRC } from './services/lrclib';
 import ToastContainer, { showToast } from './components/Toast';
 import ErrorBoundary from './components/ErrorBoundary';
 import ShortcutsHelp from './components/ShortcutsHelp';
+import { useTranslation } from './i18n';
 import RecentlyPlayed from './components/RecentlyPlayed';
 import BottomNav from './components/BottomNav';
 import ContentImporter from './components/ContentImporter';
@@ -41,6 +42,7 @@ if (typeof window !== 'undefined') {
 }
 
 const App = () => {
+  const { t: tr } = useTranslation();
   const { 
     theme, isPlaying, togglePlay, currentTrack, tracks, 
     refreshLibrary, progress, duration, playTrack,
@@ -1792,7 +1794,7 @@ const App = () => {
               )
             )}
 
-              {activeTab === 'search' && <Suspense fallback={<div className="p-4 text-center text-sm opacity-50">Yükleniyor...</div>}><Downloader /></Suspense>}
+              {activeTab === 'search' && <Suspense fallback={<div className="p-4 text-center text-sm opacity-50">{tr('app.loading')}</div>}><Downloader /></Suspense>}
 
 
               {activeTab === 'settings' && <Suspense fallback={<div className="p-4 text-center text-sm opacity-50">Yükleniyor...</div>}><SettingsPage /></Suspense>}
@@ -1914,7 +1916,7 @@ const App = () => {
               {[
                 { id: 'home', icon: Activity, label: 'Ana Sayfa' },
                 { id: 'library', icon: ListMusic, label: 'Kütüphane' },
-                { id: 'search', icon: Download, label: 'Müzik İndir' },
+                { id: 'search', icon: Download, label: tr('nav.download') },
                 { id: 'settings', icon: Settings, label: 'Ayarlar' },
               ].map(({ id, icon: Icon, label }) => (
                 <div

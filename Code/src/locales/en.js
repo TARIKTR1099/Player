@@ -3,12 +3,13 @@ export default {
   // Sidebar / navigation
   'nav.home': 'Home',
   'nav.library': 'Library',
-  'nav.download': 'Download Music',
+  'nav.download': 'Find Music',
   'nav.settings': 'Settings',
   'nav.plugins': 'Plugins',
   'nav.ai': 'AI',
   'nav.equalizer': 'Equalizer',
   'nav.effects': 'Effects',
+  'app.loading': 'Loading…',
   'nav.visualizer': 'Visualizer',
   'nav.favorites': 'Favorites',
 

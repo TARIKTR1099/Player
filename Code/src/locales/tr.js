@@ -3,12 +3,13 @@ export default {
   // Sidebar / navigation
   'nav.home': 'Ana Sayfa',
   'nav.library': 'Kütüphane',
-  'nav.download': 'Müzik İndir',
+  'nav.download': 'Müzik Bul',
   'nav.settings': 'Ayarlar',
   'nav.plugins': 'Eklentiler',
   'nav.ai': 'Yapay Zeka',
   'nav.equalizer': 'Ekolayzer',
   'nav.effects': 'Efektler',
+  'app.loading': 'Yükleniyor…',
   'nav.visualizer': 'Görselleştirici',
   'nav.favorites': 'Favoriler',
 
