@@ -15,7 +15,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Menu, FilePlus, FolderPlus, FileArchive, Link2, Youtube, X
+  Menu, FilePlus, FolderPlus, FileArchive, Link2, Play, X
 } from 'lucide-react';
 import { isElectron, isCapacitor, isAndroid, isIOS } from '../platform';
 import { parseSafeUrl, parseYouTubeUrl, getMediaType, escapeHtml } from '../lib/security';
@@ -245,7 +245,7 @@ export default function ContentImporter({ onAdded, onError, t }) {
             <Link2 size={14} /> URL / Bağlantı Ekle
           </button>
           <button onClick={() => { setOpen(false); setModal('youtube'); }} role="menuitem" className="w-full flex items-center gap-3 px-4 py-2.5 text-xs hover:bg-white/5 transition text-left" style={{color:'var(--text-primary)'}}>
-            <Youtube size={14} /> YouTube Linki Ekle
+            <Play size={14} /> YouTube Linki Ekle
           </button>
         </div>
       )}
@@ -264,7 +264,7 @@ export default function ContentImporter({ onAdded, onError, t }) {
           >
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-bold flex items-center gap-2" style={{color:'var(--text-primary)'}}>
-                {modal === 'youtube' ? <Youtube size={16} /> : <Link2 size={16} />}
+                {modal === 'youtube' ? <Play size={16} /> : <Link2 size={16} />}
                 {modal === 'youtube' ? 'YouTube Linki' : 'URL / Bağlantı'}
               </h3>
               <button onClick={() => setModal(null)} disabled={busy} className="p-1 rounded-lg hover:bg-white/10">

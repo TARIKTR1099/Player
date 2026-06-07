@@ -63,6 +63,27 @@ export function isMobile() {
   return cachedIsMobile;
 }
 
+/**
+ * True when running on Android (Capacitor).
+ */
+export function isAndroid() {
+  return getPlatform() === 'android';
+}
+
+/**
+ * True when running on iOS (Capacitor).
+ */
+export function isIOS() {
+  return getPlatform() === 'ios';
+}
+
+/**
+ * True when running in a native desktop context (Electron).
+ */
+export function isDesktop() {
+  return isElectron();
+}
+
 export function isMacOS() {
   if (isElectron()) {
     try {
