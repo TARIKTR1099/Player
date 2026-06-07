@@ -28,8 +28,16 @@ References/
 
 # User guides (local docs)
 UserGuides/
-Others/
 Downloads/
+
+# TarnakCode: Others/ is mostly build/runtime outputs (dist, packed, etc.)
+# but Others/build/ contains design-time scripts (notarize.js, installer.nsh,
+# entitlements.mac.plist) REQUIRED by electron-builder. Track those; ignore
+# the rest of Others/.
+Others/*
+Others/*/
+!Others/build/
+!Others/build/*
 
 # Electron cache
 electron-builder/
