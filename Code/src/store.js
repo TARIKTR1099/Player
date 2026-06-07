@@ -106,7 +106,7 @@ export const useStore = create(
       sidebarWidth: 256,
       keyboardShortcuts: {
         'play-pause': 'Space',
-        'prev': 'ShiftLeft+ArrowLeft',
+        'prev': 'ShiftRight+ArrowLeft',
         'next': 'ShiftRight+ArrowRight',
         'seek-back': 'ArrowLeft',
         'seek-fwd': 'ArrowRight',

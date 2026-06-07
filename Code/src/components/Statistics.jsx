@@ -22,11 +22,11 @@ const StatCard = ({ icon, label, value, color = 'var(--color-primary)' }) => (
     >
       <div style={{ color }}>{icon}</div>
     </div>
-    <div className="min-w-0 flex-1">
-      <div className="text-[10px] uppercase tracking-wider opacity-60" style={{ color: 'var(--text-secondary)' }}>
+    <div className="min-w-0 flex-1 overflow-hidden">
+      <div className="text-[10px] uppercase tracking-wider opacity-60 truncate" style={{ color: 'var(--text-secondary)' }} title={label}>
         {label}
       </div>
-      <div className="text-base font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+      <div className="text-base font-bold truncate" style={{ color: 'var(--text-primary)' }} title={String(value)}>
         {value}
       </div>
     </div>
@@ -62,8 +62,9 @@ export default function Statistics() {
     const topArtists = Object.entries(artistCounts)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 5);
+    const uniqueArtistCount = Object.keys(artistCounts).length;
 
-    return { totalTracks, totalPlays, totalDuration, topTracks, topArtists };
+    return { totalTracks, totalPlays, totalDuration, topTracks, topArtists, uniqueArtistCount };
   }, [tracks]);
 
   const avgPlays = stats.totalTracks > 0 ? (stats.totalPlays / stats.totalTracks).toFixed(1) : '0';
@@ -109,7 +110,7 @@ export default function Statistics() {
         <StatCard
           icon={<Headphones size={18} />}
           label="Sanatçı Sayısı"
-          value={Object.keys(stats.topArtists.reduce((acc, [a]) => { acc[a] = true; return acc; }, {})).length || Object.keys(stats.topArtists).length}
+          value={stats.uniqueArtistCount}
           color="#ec4899"
         />
       </div>

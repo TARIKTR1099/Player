@@ -1152,7 +1152,7 @@ const PersonalizationSettings = () => {
             </div>
             <div className="flex items-center gap-2 mt-2">
               <button 
-                onClick={() => { try { window.require('electron').shell.openExternal('https://github.com/TARIKTR1099/player-music/blob/main/locales'); } catch(ex) { window.open('https://github.com/TARIKTR1099/player-music/blob/main/locales', '_blank'); } }}
+                onClick={() => { try { window.require('electron').shell.openExternal('https://github.com/TARIKTR1099/Player/tree/main/Code/src/locales'); } catch(ex) { window.open('https://github.com/TARIKTR1099/Player/tree/main/Code/src/locales', '_blank'); } }}
                 className="flex flex-col px-3 py-2 rounded-lg text-xs flex items-center gap-2"
                 style={{backgroundColor:'rgba(255,255,255,0.05)', color:'var(--text-secondary)'}}
               >
@@ -1253,7 +1253,7 @@ const ShortcutsSettings = () => {
   const resetDefaults = () => {
     setKeyboardShortcuts({
       'play-pause': 'Space',
-      'prev': 'ShiftLeft+ArrowLeft',
+      'prev': 'ShiftRight+ArrowLeft',
       'next': 'ShiftRight+ArrowRight',
       'seek-back': 'ArrowLeft',
       'seek-fwd': 'ArrowRight',
@@ -1626,7 +1626,9 @@ const UpdatesSettings = () => {
               </div>
               {updateInfo.version && (
                 <div className="text-xs" style={{color:'var(--text-secondary)'}}>
-                  {updateInfo.available ? `Yeni sürüm: ${updateInfo.version}` : `Mevcut sürüm: ${updateInfo.version}`}
+                  {updateInfo.available
+                    ? `Yeni sürüm: v${updateInfo.version}`
+                    : `Mevcut sürüm: v${typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : (updateInfo.version || '1.0.0')}`}
                 </div>
               )}
               {updateInfo.error && (
@@ -1639,7 +1641,7 @@ const UpdatesSettings = () => {
 
       <SettingGroup title="Sürüm Bilgisi" description="Yüklü uygulama sürümü">
         <div className="text-sm" style={{color:'var(--text-secondary)'}}>
-          Player v1.0.0
+          Player v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.0.0'}
         </div>
       </SettingGroup>
     </div>

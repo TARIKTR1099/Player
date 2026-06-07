@@ -540,3 +540,21 @@ html, body, #root, .app-shell, [data-app-root] {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-bg-tertiary); border-radius: 0.25rem; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
+
+/* Select dropdown dark theme (combobox fix) */
+select,
+select option,
+select optgroup {
+  background-color: var(--color-bg-tertiary, #1a1a1f) !important;
+  color: var(--text-primary, #e5e7eb) !important;
+}
+select option:hover,
+select option:focus,
+select option:checked {
+  background: linear-gradient(0deg, var(--color-primary, #6366f1) 0%, var(--color-primary, #6366f1) 100%) !important;
+  background-color: var(--color-primary, #6366f1) !important;
+  color: #fff !important;
+}
+/* Webkit native dropdown arrow contrast */
+select { -webkit-appearance: none; appearance: none; }
+select::-ms-expand { background-color: var(--color-bg-tertiary, #1a1a1f); color: var(--text-primary, #e5e7eb); }

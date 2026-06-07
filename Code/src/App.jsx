@@ -1793,6 +1793,8 @@ const App = () => {
             )}
 
               {activeTab === 'search' && <Suspense fallback={<div className="p-4 text-center text-sm opacity-50">Yükleniyor...</div>}><Downloader /></Suspense>}
+
+
               {activeTab === 'settings' && <Suspense fallback={<div className="p-4 text-center text-sm opacity-50">Yükleniyor...</div>}><SettingsPage /></Suspense>}
             </main>
 
