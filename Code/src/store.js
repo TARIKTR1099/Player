@@ -256,6 +256,14 @@ export const useStore = create(
       // Crossfade (0=off, 1-10 seconds)
       crossfadeDuration: 3,
 
+      // Track-change notifications (off by default — user opts in)
+      notificationsEnabled: false,
+      // When true, system notification is also sent on track end
+      notifyOnTrackEnd: false,
+
+      // Custom user-installed locales (code → dictionary). Merged with built-ins.
+      customLocales: {},
+
       // Per-track playback positions (trackId → seconds) — resume where you left off
       playbackPositions: {},
       
@@ -321,6 +329,17 @@ export const useStore = create(
       isFavorite: (trackId) => get().favorites.includes(trackId),
       setVolumeBoost: (b) => set({ volumeBoost: Math.max(1.0, Math.min(2.0, b)) }),
       setCrossfadeDuration: (d) => set({ crossfadeDuration: Math.max(0, Math.min(10, d)) }),
+
+      setNotificationsEnabled: (v) => set({ notificationsEnabled: !!v }),
+      setNotifyOnTrackEnd: (v) => set({ notifyOnTrackEnd: !!v }),
+      addCustomLocale: (code, dict) => set((s) => ({
+        customLocales: { ...s.customLocales, [code]: { ...dict, __meta: { installedAt: Date.now() } } }
+      })),
+      removeCustomLocale: (code) => set((s) => {
+        const next = { ...s.customLocales };
+        delete next[code];
+        return { customLocales: next };
+      }),
       setEffectsBypass: (v) => set({ effectsBypass: v }),
       toggleMute: () => set((state) => {
         if (state.muted) {

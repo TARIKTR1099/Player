@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store';
-import { t } from '../i18n';
-import { Settings as SettingsIcon, Volume2, ListMusic, Download, Upload, Sliders, Info, RefreshCw, Wrench, FolderOpen, Tag, Brain, Plus, Trash2, Edit3, Save, X, Database, Copy, Check, Eye, EyeOff, User, Key, Link as LinkIcon, Puzzle, Palette, Eye as EyeIcon, Maximize, Keyboard, ChevronLeft, HardDrive, RotateCcw, Activity, Terminal, Speaker, AlertTriangle } from 'lucide-react';
+import { t, getInstalledLanguages } from '../i18n';
+import { Settings as SettingsIcon, Volume2, ListMusic, Download, Upload, Sliders, Info, RefreshCw, Wrench, FolderOpen, Tag, Brain, Plus, Trash2, Edit3, Save, X, Database, Copy, Check, Eye, EyeOff, User, Key, Link as LinkIcon, Puzzle, Palette, Eye as EyeIcon, Maximize, Keyboard, ChevronLeft, HardDrive, RotateCcw, Activity, Terminal, Speaker, AlertTriangle, Bell, Globe, FileText, Cloud } from 'lucide-react';
 import PluginSettings from './PluginSettings';
 import { showToast } from './Toast';
 import Statistics from './Statistics';
@@ -27,7 +27,9 @@ const Settings = () => {
     { id: 'library', label: 'Kütüphane', icon: <ListMusic size={16} />, keywords: 'kütüphane library müzik music yedek' },
     { id: 'categories', label: 'Kategoriler', icon: <Tag size={16} />, keywords: 'kategori tag category etiket' },
     { id: 'plugins', label: 'Eklentiler', icon: <Puzzle size={16} />, keywords: 'plugin eklenti uzantı' },
-    { id: 'personalization', label: 'Kişiselleştirme', icon: <Palette size={16} />, keywords: 'tema theme dil language renk color pencere window' },
+    { id: 'personalization', label: 'Kişiselleştirme', icon: <Palette size={16} />, keywords: 'tema theme renk color pencere window' },
+    { id: 'language', label: 'Dil', icon: <Globe size={16} />, keywords: 'dil language i18n çeviri translate yerelleştirme locale' },
+    { id: 'notifications', label: 'Bildirimler', icon: <Bell size={16} />, keywords: 'bildirim notification uyarı alert toast notify' },
     { id: 'shortcuts', label: 'Klavye Kısayolları', icon: <Keyboard size={16} />, keywords: 'kısayol shortcut tuş key' },
     { id: 'stats', label: 'İstatistikler', icon: <Activity size={16} />, keywords: 'istatistik stats sayı dinleme' },
     { id: 'ai', label: 'AI', icon: <Brain size={16} />, keywords: 'ai yapay zeka model api provider' },
@@ -128,6 +130,8 @@ const Settings = () => {
           {activeSection === 'categories' && <CategorySettings />}
           {activeSection === 'plugins' && <PluginSettings />}
           {activeSection === 'personalization' && <PersonalizationSettings />}
+          {activeSection === 'language' && <LanguageSettings />}
+          {activeSection === 'notifications' && <NotificationSettings />}
           {activeSection === 'shortcuts' && <ShortcutsSettings />}
           {activeSection === 'stats' && <Statistics />}
           {activeSection === 'ai' && <AISettings />}
@@ -2111,4 +2115,354 @@ const MinimizeToTrayToggle = () => {
     setLoading(false);
   };
   return <Toggle checked={minimizeToTray} onChange={handleToggle} disabled={loading} />;
+};
+
+// ============================================================
+// Bildirimler (Notifications) section
+// ============================================================
+const NotificationSettings = () => {
+  const notificationsEnabled = useStore((s) => s.notificationsEnabled);
+  const notifyOnTrackEnd = useStore((s) => s.notifyOnTrackEnd);
+  const setNotificationsEnabled = useStore((s) => s.setNotificationsEnabled);
+  const setNotifyOnTrackEnd = useStore((s) => s.setNotifyOnTrackEnd);
+
+  const testNotification = async () => {
+    try {
+      const { ipcRenderer } = window.require('electron');
+      await ipcRenderer.invoke('test-notification');
+    } catch (e) { console.error('Test notification failed:', e); }
+  };
+
+  return (
+    <SettingsPage title="Bildirimler" subtitle="Sistem bildirimlerini kontrol edin. Müzik değişim bildirimleri varsayılan olarak kapalıdır.">
+      <SettingGroup title="Genel" description="Masaüstü bildirim tercihleri">
+        <SettingRow label="Bildirimleri etkinleştir" description="Uygulama bildirim gönderme izni">
+          <Toggle checked={!!notificationsEnabled} onChange={(v) => setNotificationsEnabled(v)} />
+        </SettingRow>
+        <SettingRow label="Müzik değişiminde bildir" description="Yeni parça çalmaya başladığında bildirim göster">
+          <Toggle checked={!!notifyOnTrackEnd} onChange={(v) => setNotifyOnTrackEnd(v)} />
+        </SettingRow>
+        <SettingRow label="Test bildirimi gönder" description="Sistem bildiriminin çalıştığını doğrulayın">
+          <button
+            onClick={testNotification}
+            disabled={!notificationsEnabled}
+            className="px-3 py-1.5 rounded-lg text-xs font-bold transition disabled:opacity-40"
+            style={{backgroundColor:'var(--color-primary)', color:'white'}}
+          >
+            <Bell size={12} className="inline mr-1" /> Test Et
+          </button>
+        </SettingRow>
+      </SettingGroup>
+      <SettingGroup title="Önemli" description="Bazı platformlarda (macOS, bazı Linux dağıtımları) bildirimler için uygulama izinlerinin verilmiş olması gerekir.">
+        <div className="text-xs p-3 rounded-lg" style={{backgroundColor:'rgba(255,255,255,0.04)', color:'var(--text-secondary)'}}>
+          <AlertTriangle size={12} className="inline mr-1" />
+          Bildirimler yalnızca uygulama odağı kaybettiğinde veya tepsiye gizlendiğinde gösterilir.
+        </div>
+      </SettingGroup>
+    </SettingsPage>
+  );
+};
+
+// ============================================================
+// Dil (Language) section — built-in + custom drag-drop
+// ============================================================
+const LanguageSettings = () => {
+  const language = useStore((s) => s.language);
+  const setLanguage = useStore((s) => s.setLanguage);
+  const customLocales = useStore((s) => s.customLocales);
+  const addCustomLocale = useStore((s) => s.addCustomLocale);
+  const removeCustomLocale = useStore((s) => s.removeCustomLocale);
+  const [tab, setTab] = useState('built-in'); // 'built-in' | 'community'
+  const [githubUrl, setGithubUrl] = useState('');
+  const [githubLoading, setGithubLoading] = useState(false);
+  const [dropActive, setDropActive] = useState(false);
+  const [pendingName, setPendingName] = useState('');
+  const [pendingDict, setPendingDict] = useState(null);
+  const [pendingCode, setPendingCode] = useState('');
+  const fileInputRef = useRef(null);
+
+  const installed = getInstalledLanguages();
+  const builtIn = installed.filter((l) => l.kind === 'built-in');
+  const custom = installed.filter((l) => l.kind === 'custom');
+
+  const extractDictionary = (raw) => {
+    // Accept both ESM (`export default {...}`) and CommonJS (`module.exports = {...}`)
+    // shapes by stripping the wrapper and leaving a plain object.
+    if (!raw || typeof raw !== 'object') return null;
+    if (raw.__esModule && raw.default) return raw.default;
+    if (raw.default && typeof raw.default === 'object') return raw.default;
+    return raw;
+  };
+
+  const validateDictionary = (dict) => {
+    if (!dict || typeof dict !== 'object') return 'Dosya geçerli bir sözlük içermiyor.';
+    if (Array.isArray(dict)) return 'Sözlük bir object olmalı (dizi değil).';
+    const keys = Object.keys(dict);
+    if (keys.length < 3) return 'Çok az anahtar — geçerli bir dil dosyası olmayabilir.';
+    if (keys.some((k) => typeof dict[k] !== 'string' && typeof dict[k] !== 'number')) {
+      return 'Sözlük değerleri metin olmalı.';
+    }
+    return null;
+  };
+
+  const ingestDictionary = (dict, code, label) => {
+    if (!code || !/^[a-z]{2,3}(-[A-Z]{2,3})?$/.test(code)) {
+      code = (label || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 8) || 'lang';
+    }
+    const dictWithMeta = { ...dict, __meta: { label: label || code.toUpperCase(), installedAt: Date.now() } };
+    addCustomLocale(code, dictWithMeta);
+    return code;
+  };
+
+  const handleFile = async (file) => {
+    try {
+      const text = await file.text();
+      // Try to evaluate as a module. Strip "export default" wrappers.
+      const stripped = text
+        .replace(/^\s*export\s+default\s+/m, '')
+        .replace(/^\s*module\.exports\s*=\s*/m, '')
+        .replace(/;\s*$/, '');
+      // eslint-disable-next-line no-new-func
+      const raw = (new Function(`return (${stripped});`))();
+      const dict = extractDictionary(raw);
+      const err = validateDictionary(dict);
+      if (err) { showToast(err, 'error', 4000); return; }
+      // Guess the language code from the file name: e.g. "es.js" → "es"
+      const guess = (file.name.replace(/\.js$/i, '').match(/^([a-z]{2,3}(-[A-Z]{2,3})?)$/i) || [])[1];
+      setPendingCode((guess || '').toLowerCase());
+      setPendingName(guess ? guess.toUpperCase() : (file.name.replace(/\.js$/i, '') || ''));
+      setPendingDict(dict);
+      showToast('Dil dosyası yüklendi — kod ve isim girip kaydedin.', 'info', 3000);
+    } catch (e) {
+      showToast('Dosya okunamadı: ' + e.message, 'error', 4000);
+    }
+  };
+
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropActive(false);
+    const file = e.dataTransfer?.files?.[0];
+    if (file) await handleFile(file);
+  };
+
+  const handlePick = async (e) => {
+    const file = e.target.files?.[0];
+    if (file) await handleFile(file);
+    e.target.value = '';
+  };
+
+  const fetchFromGithub = async () => {
+    if (!githubUrl.trim()) {
+      showToast('Geçerli bir GitHub ham dosya URL\'si girin (raw.githubusercontent.com)', 'error', 4000);
+      return;
+    }
+    setGithubLoading(true);
+    try {
+      let url = githubUrl.trim();
+      // Convert github.com/blob/ to raw.githubusercontent.com
+      url = url.replace(/github\.com\/([^/]+)\/([^/]+)\/blob\//, 'raw.githubusercontent.com/$1/$2/');
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const text = await res.text();
+      const stripped = text
+        .replace(/^\s*export\s+default\s+/m, '')
+        .replace(/^\s*module\.exports\s*=\s*/m, '')
+        .replace(/;\s*$/, '');
+      // eslint-disable-next-line no-new-func
+      const raw = (new Function(`return (${stripped});`))();
+      const dict = extractDictionary(raw);
+      const err = validateDictionary(dict);
+      if (err) { showToast(err, 'error', 4000); setGithubLoading(false); return; }
+      // Guess code from URL: .../locales/xx.js or .../xx.js
+      const m = (url.match(/locales\/([^/.]+)\.js/) || url.match(/\/([^/.]+)\.js(\?|$)/) || []);
+      const guess = (m[1] || '').toLowerCase();
+      setPendingCode(guess);
+      setPendingName(guess ? guess.toUpperCase() : '');
+      setPendingDict(dict);
+      showToast('Dil dosyası indirildi — kodu ve ismi onaylayıp kaydedin.', 'info', 3000);
+    } catch (e) {
+      showToast('İndirilemedi: ' + e.message, 'error', 4000);
+    }
+    setGithubLoading(false);
+  };
+
+  const commitPending = () => {
+    if (!pendingDict) return;
+    const code = pendingCode.trim();
+    const label = pendingName.trim();
+    if (!code) { showToast('Dil kodu gerekli (örn. de, fr, es)', 'error', 3000); return; }
+    const final = ingestDictionary(pendingDict, code, label);
+    setLanguage(final);
+    setPendingDict(null);
+    setPendingCode('');
+    setPendingName('');
+    setTab('community');
+    showToast(`"${label || code.toUpperCase()}" dili yüklendi ve uygulandı.`, 'success', 3500);
+  };
+
+  return (
+    <SettingsPage title="Dil" subtitle="Arayüz dili. Yerleşik diller veya GitHub'dan sürükleyip bırakabileceğiniz topluluk dilleri.">
+      <SettingGroup title="Aktif dil" description="Tüm arayüz bu dilde görüntülenir">
+        <div className="flex flex-wrap gap-2">
+          {builtIn.map((l) => (
+            <button
+              key={l.code}
+              onClick={() => setLanguage(l.code)}
+              className="px-3 py-1.5 rounded-lg text-xs font-bold transition"
+              style={language === l.code
+                ? {backgroundColor:'var(--color-primary)', color:'white'}
+                : {backgroundColor:'rgba(255,255,255,0.05)', color:'var(--text-primary)'}}
+            >
+              {l.label}
+              <span className="ml-1 opacity-50 text-[10px]">({l.code})</span>
+            </button>
+          ))}
+          {custom.map((l) => (
+            <div key={l.code} className="flex items-center gap-1">
+              <button
+                onClick={() => setLanguage(l.code)}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold transition"
+                style={language === l.code
+                  ? {backgroundColor:'var(--color-primary)', color:'white'}
+                  : {backgroundColor:'rgba(255,255,255,0.05)', color:'var(--text-primary)'}}
+              >
+                {l.label}
+                <span className="ml-1 opacity-50 text-[10px]">({l.code})</span>
+              </button>
+              <button
+                onClick={() => { removeCustomLocale(l.code); if (language === l.code) setLanguage('tr'); }}
+                className="p-1 rounded hover:bg-red-500/20"
+                title="Kaldır"
+              >
+                <X size={11} className="text-red-400" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </SettingGroup>
+
+      <div className="flex gap-1 p-1 rounded-xl" style={{backgroundColor:'rgba(255,255,255,0.05)'}}>
+        <button
+          onClick={() => setTab('built-in')}
+          className="flex-1 px-3 py-2 rounded-lg text-xs font-bold transition"
+          style={tab === 'built-in'
+            ? {backgroundColor:'var(--color-primary)', color:'white'}
+            : {color:'var(--text-secondary)'}}
+        >
+          <FileText size={12} className="inline mr-1" /> Yerleşik
+        </button>
+        <button
+          onClick={() => setTab('community')}
+          className="flex-1 px-3 py-2 rounded-lg text-xs font-bold transition"
+          style={tab === 'community'
+            ? {backgroundColor:'var(--color-primary)', color:'white'}
+            : {color:'var(--text-secondary)'}}
+        >
+          <Cloud size={12} className="inline mr-1" /> Hazır Olanlar (GitHub)
+        </button>
+      </div>
+
+      {tab === 'built-in' && (
+        <SettingGroup title="Yerleşik diller" description="Uygulama ile birlikte gelen çeviriler">
+          <div className="text-xs" style={{color:'var(--text-secondary)'}}>
+            Türkçe (varsayılan) ve İngilizce. Yeni dil eklemek için "Hazır Olanlar" sekmesine geçin.
+          </div>
+        </SettingGroup>
+      )}
+
+      {tab === 'community' && (
+        <>
+          <SettingGroup title="GitHub'dan indir" description="Bir dil dosyasının ham URL'ini yapıştırın (raw.githubusercontent.com/.../locales/xx.js)">
+            <div className="flex gap-2">
+              <input
+                value={githubUrl}
+                onChange={(e) => setGithubUrl(e.target.value)}
+                placeholder="https://raw.githubusercontent.com/.../locales/de.js"
+                className="flex-1 px-3 py-2 rounded-lg text-xs border"
+                style={{backgroundColor:'rgba(255,255,255,0.05)', borderColor:'var(--border-color)', color:'var(--text-primary)'}}
+              />
+              <button
+                onClick={fetchFromGithub}
+                disabled={githubLoading}
+                className="px-3 py-2 rounded-lg text-xs font-bold transition disabled:opacity-40"
+                style={{backgroundColor:'var(--color-primary)', color:'white'}}
+              >
+                {githubLoading ? 'İndiriliyor...' : 'İndir'}
+              </button>
+            </div>
+            <div className="text-[11px] mt-1" style={{color:'var(--text-secondary)'}}>
+              Topluluk dil dosyaları: github.com/TARIKTR1099/Player → <code>Code/src/locales/</code> klasörü
+            </div>
+          </SettingGroup>
+
+          <SettingGroup title="Sürükle-bırak" description="Bir .js dil dosyasını buraya bırakın">
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDropActive(true); }}
+              onDragLeave={() => setDropActive(false)}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition"
+              style={{
+                borderColor: dropActive ? 'var(--color-primary)' : 'var(--border-color)',
+                backgroundColor: dropActive ? 'rgba(37,99,235,0.1)' : 'rgba(255,255,255,0.02)',
+                color:'var(--text-secondary)'
+              }}
+            >
+              <Upload size={24} className="mx-auto mb-2 opacity-50" />
+              <div className="text-xs">Dil dosyasını (.js) buraya bırakın veya seçmek için tıklayın</div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".js,application/javascript,text/javascript"
+                onChange={handlePick}
+                className="hidden"
+              />
+            </div>
+          </SettingGroup>
+
+          {pendingDict && (
+            <SettingGroup title="Yüklenen dosyayı kaydet" description="Dil kodunu ve görünür ismi onaylayın">
+              <SettingRow label="Dil kodu" description="ISO kodu: tr, en, de, fr, es, ar, ja, ko, ru, zh ...">
+                <input
+                  value={pendingCode}
+                  onChange={(e) => setPendingCode(e.target.value.toLowerCase().replace(/[^a-z-]/g, ''))}
+                  placeholder="örn. de"
+                  maxLength={8}
+                  className="w-24 px-3 py-1.5 rounded-lg text-xs border"
+                  style={{backgroundColor:'rgba(255,255,255,0.05)', borderColor:'var(--border-color)', color:'var(--text-primary)'}}
+                />
+              </SettingRow>
+              <SettingRow label="Görünür isim" description="Ayarlarda ve dil seçicide görünecek ad">
+                <input
+                  value={pendingName}
+                  onChange={(e) => setPendingName(e.target.value)}
+                  placeholder="Deutsch"
+                  maxLength={32}
+                  className="w-48 px-3 py-1.5 rounded-lg text-xs border"
+                  style={{backgroundColor:'rgba(255,255,255,0.05)', borderColor:'var(--border-color)', color:'var(--text-primary)'}}
+                />
+              </SettingRow>
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={commitPending}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold transition"
+                  style={{backgroundColor:'var(--color-primary)', color:'white'}}
+                >
+                  <Save size={12} className="inline mr-1" /> Kaydet ve uygula
+                </button>
+                <button
+                  onClick={() => { setPendingDict(null); setPendingCode(''); setPendingName(''); }}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold transition"
+                  style={{backgroundColor:'rgba(255,255,255,0.05)', color:'var(--text-secondary)'}}
+                >
+                  İptal
+                </button>
+              </div>
+            </SettingGroup>
+          )}
+        </>
+      )}
+    </SettingsPage>
+  );
 };

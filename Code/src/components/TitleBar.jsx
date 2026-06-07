@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { Menu, Minus, Square, Copy, X } from 'lucide-react';
+import { Menu, Minus, Square, Copy, X, EyeOff } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { isElectron, isMacOS } from '../platform';
 
@@ -44,6 +44,13 @@ function TitleBar({ sidebarMode, setSidebarMode, sidebarToggleBehavior, isMobile
             title="Simge Durumuna Küçült"
           >
             <Minus size={16} />
+          </button>
+          <button
+            onClick={() => window.require('electron').ipcRenderer.invoke('window-close-to-tray')}
+            className="hover:bg-white/15 text-white/70 hover:text-white w-10 h-9 flex items-center justify-center rounded-lg transition-all active:scale-95"
+            title="Tepsiye Gizle (arka planda çalmaya devam eder)"
+          >
+            <EyeOff size={15} />
           </button>
           <button
             onClick={() => window.require('electron').ipcRenderer.invoke('window-maximize')}

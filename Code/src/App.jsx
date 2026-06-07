@@ -263,10 +263,13 @@ const App = () => {
     });
   }, [currentTrack?.id, isPlaying]);
 
-  // Desktop notification when track changes (Electron only)
+  // Desktop notification when track changes (Electron only, opt-in via Settings → Bildirimler)
   useEffect(() => {
     if (!currentTrack || !isPlaying) return;
     try {
+      const state = useStore.getState();
+      // Off by default — user opts in from Settings > Bildirimler.
+      if (!state.notificationsEnabled || !state.notifyOnTrackEnd) return;
       const { ipcRenderer } = window.require('electron');
       const body = [currentTrack.artist, currentTrack.album].filter(Boolean).join(' — ');
       ipcRenderer.invoke('show-notification', {
@@ -1033,9 +1036,9 @@ const App = () => {
         <ErrorBoundary>
         <div className="h-full w-full flex flex-col items-center justify-center bg-black text-white/40" onDoubleClick={fsExit}>
           <Music size={80} className="opacity-20 mb-4" />
-          <p className="text-sm">Oynatılacak müzik seçilmedi</p>
+          <p className="text-sm">{tr('home.notSelected')}</p>
           <button onClick={fsExit} className="mt-6 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white/60 text-sm transition">
-            Tam Ekrandan Çık
+            {tr('common.exitFullscreen')}
           </button>
         </div>
     </ErrorBoundary>
@@ -1290,12 +1293,14 @@ const App = () => {
 
                 {activeTab === 'library' && (
                   !libraryReady ? (
+                    <ErrorBoundary>
                     <div className="w-full h-[60vh] flex items-center justify-center">
                       <div className="text-center">
                         <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-3" style={{borderColor: 'var(--color-primary) transparent transparent transparent'}} />
-                        <span className="text-xs font-bold" style={{color:'var(--text-secondary)'}}>Kütüphane Yükleniyor...</span>
+                        <span className="text-xs font-bold" style={{color:'var(--text-secondary)'}}>{tr('home.libraryLoading')}</span>
                       </div>
                     </div>
+                    </ErrorBoundary>
                   ) : (
                     <div className="flex gap-4 animate-fade-in">
                     {/* Playlist Sidebar */}
@@ -1330,7 +1335,7 @@ const App = () => {
                           }}
                         >
                           <ListMusic size={14} />
-                          <span>Tüm Müzikler</span>
+                          <span>{tr('home.allMusic')}</span>
                           <span className="ml-auto opacity-50">{safeTracks.length}</span>
                         </div>
                         {playlists.map(pl => (
@@ -1435,7 +1440,7 @@ const App = () => {
                             }`}
                             style={{backgroundColor:'var(--color-bg-tertiary)', color:'var(--text-primary)', border:'1px solid var(--border-color)'}}
                           >
-                            <option value="all">Tüm Kategoriler</option>
+                            <option value="all">{tr('home.allCategories')}</option>
                             {categories.map(cat => (
                               <option key={cat.id} value={cat.name}>{cat.name}</option>
                             ))}
@@ -1484,15 +1489,15 @@ const App = () => {
                         {/* Sort Options */}
                         <div className="flex items-center rounded-xl overflow-hidden border" style={{borderColor:'var(--border-color)'}}>
                           <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="text-xs px-2.5 py-1.5 focus:outline-none" style={{backgroundColor:'var(--color-bg-tertiary)', color:'var(--text-primary)', border:'none'}}>
-                            <option value="name">İsme Göre</option>
-                            <option value="artist">Sanatçıya Göre</option>
-                            <option value="category">Kategoriye Göre</option>
-                            <option value="date">Tarihe Göre</option>
-                            <option value="duration">Süreye Göre</option>
-                            <option value="playcount">En Çok Dinlenen</option>
-                            <option value="lastplayed">Son Dinlenen</option>
+                            <option value="name">{tr('home.sortByName')}</option>
+                            <option value="artist">{tr('home.sortByArtist')}</option>
+                            <option value="category">{tr('home.sortByCategory')}</option>
+                            <option value="date">{tr('home.sortByDate')}</option>
+                            <option value="duration">{tr('home.sortByDuration')}</option>
+                            <option value="playcount">{tr('home.mostPlayed')}</option>
+                            <option value="lastplayed">{tr('home.recentlyPlayed')}</option>
                           </select>
-                          <button onClick={() => setSortDir(sortDir === 'asc' ? 'desc' : 'asc')} className="p-1.5 hover:bg-white/10 transition" style={{color:'var(--text-secondary)'}} title={sortDir === 'asc' ? 'Artan' : 'Azalan'}>
+                          <button onClick={() => setSortDir(sortDir === 'asc' ? 'desc' : 'asc')} className="p-1.5 hover:bg-white/10 transition" style={{color:'var(--text-secondary)'}} title={sortDir === 'asc' ? tr('common.ascending') : tr('common.descending')}>
                             {sortDir === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
                           </button>
                         </div>

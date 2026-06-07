@@ -976,6 +976,22 @@ app.on('will-quit', () => {
 // === Desktop Notification ===
 let lastNotifiedTrackId = null;
 
+ipcMain.handle('test-notification', () => {
+  try {
+    const notification = new Notification({
+      title: 'Player',
+      body: 'Bildirimler çalışıyor! 🎵',
+      icon: getAppIcon(),
+      silent: false,
+    });
+    notification.show();
+    return true;
+  } catch (e) {
+    console.error('test-notification failed:', e);
+    return false;
+  }
+});
+
 ipcMain.handle('show-notification', (event, { title, body, icon, trackId }) => {
   try {
     // Don't show duplicate notifications for the same track

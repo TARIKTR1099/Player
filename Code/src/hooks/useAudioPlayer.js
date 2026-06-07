@@ -455,6 +455,22 @@ export const useAudioPlayer = () => {
     const audio = audioRef.current;
     const onTimeUpdate = () => {
       setProgress(audio.currentTime);
+      // Auto-advance watchdog: some streams (YouTube, network, big files)
+      // never fire the `ended` event reliably, so manually trigger it when
+      // we're within 250ms of the reported duration.
+      if (
+        audio.duration &&
+        isFinite(audio.duration) &&
+        audio.currentTime >= audio.duration - 0.25 &&
+        !audio.paused &&
+        !crossfadeStateRef.current.active
+      ) {
+        try { audio.pause(); } catch {}
+        const state = useStore.getState();
+        const dur = state.crossfadeDuration || 0;
+        if (dur > 0) startCrossfadeOut(dur);
+        state.nextTrack();
+      }
       if (currentTrack && Date.now() - lastSaveRef.current > 5000) {
         lastSaveRef.current = Date.now();
         setLastPlayedTrack(currentTrack, audio.currentTime);
