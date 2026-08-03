@@ -8,11 +8,11 @@
 
 ## ⬇️ Download Page
 
-[![Release](https://img.shields.io/github/v/release/TARIKTR1099/Player?include_prereleases&style=flat-square)](https://github.com/TARIKTR1099/Player/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/TARIKTR1099/Player/total?style=flat-square)](https://github.com/TARIKTR1099/Player/releases)
+[![Release](https://img.shields.io/github/v/release/TARIKELER-TARNAK/Player?include_prereleases&style=flat-square)](https://github.com/TARIKELER-TARNAK/Player/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/TARIKELER-TARNAK/Player/total?style=flat-square)](https://github.com/TARIKELER-TARNAK/Player/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android%20%7C%20iOS-blue?style=flat-square)]()
 
-### [👉 Son sürümü indir (v1.0.0)](https://github.com/TARIKTR1099/Player/releases/latest)
+### [👉 Son sürümü indir (v1.0.0)](https://github.com/TARIKELER-TARNAK/Player/releases/latest)
 
 ---
 
@@ -32,58 +32,58 @@ Player **5 platformda** hazır paketlenmiş olarak indirilebilir. Her platform i
   <tbody>
     <tr>
       <td align="center">
-        <a href="https://github.com/TARIKTR1099/Player/releases/latest">
+        <a href="https://github.com/TARIKELER-TARNAK/Player/releases/latest">
           <img width="64" height="64" src="https://img.icons8.com/?size=100&id=tpIcYSg4KMn0&format=png&color=000000" alt="Windows"/>
         </a>
       </td>
       <td><b>🪟 Windows</b></td>
       <td>x86-64 (Setup installer)</td>
-      <td><a href="https://github.com/TARIKTR1099/Player/releases/download/v1.0.0/Player-1.0.0-setup-x64.exe">Player-1.0.0-setup-x64.exe</a> • 106 MB</td>
+      <td><a href="https://github.com/TARIKELER-TARNAK/Player/releases/download/v1.0.0/Player-1.0.0-setup-x64.exe">Player-1.0.0-setup-x64.exe</a> • 106 MB</td>
     </tr>
     <tr>
       <td align="center">
-        <a href="https://github.com/TARIKTR1099/Player/releases/latest">
+        <a href="https://github.com/TARIKELER-TARNAK/Player/releases/latest">
           <img width="64" height="64" src="https://img.icons8.com/?size=100&id=w8oAyE4-S89_&format=png&color=000000" alt="macOS"/>
         </a>
       </td>
       <td><b>🍎 macOS</b></td>
       <td>Intel (x64) + Apple Silicon (arm64) DMG</td>
-      <td><a href="https://github.com/TARIKTR1099/Player/releases/latest">Player-1.0.0.dmg</a> • indirilebilir</td>
+      <td><a href="https://github.com/TARIKELER-TARNAK/Player/releases/latest">Player-1.0.0.dmg</a> • indirilebilir</td>
     </tr>
     <tr>
       <td align="center">
-        <a href="https://github.com/TARIKTR1099/Player/releases/latest">
+        <a href="https://github.com/TARIKELER-TARNAK/Player/releases/latest">
           <img width="64" height="64" src="https://img.icons8.com/?size=100&id=38796&format=png&color=000000" alt="Linux"/>
         </a>
       </td>
       <td><b>🐧 Linux</b></td>
       <td>x86-64 (AppImage / deb / rpm)</td>
-      <td><a href="https://github.com/TARIKTR1099/Player/releases/latest">Player-1.0.0.AppImage</a> • indirilebilir</td>
+      <td><a href="https://github.com/TARIKELER-TARNAK/Player/releases/latest">Player-1.0.0.AppImage</a> • indirilebilir</td>
     </tr>
     <tr>
       <td align="center">
-        <a href="https://github.com/TARIKTR1099/Player/releases/latest">
+        <a href="https://github.com/TARIKELER-TARNAK/Player/releases/latest">
           <img width="64" height="64" src="https://img.icons8.com/?size=100&id=xYzLkOHZVwS8&format=png&color=000000" alt="Android"/>
         </a>
       </td>
       <td><b>🤖 Android</b></td>
       <td>ARM64 + ARMv7 (APK) — 3.4 MB</td>
-      <td><a href="https://github.com/TARIKTR1099/Player/releases/latest">Player-1.0.0.apk</a> • indirilebilir</td>
+      <td><a href="https://github.com/TARIKELER-TARNAK/Player/releases/latest">Player-1.0.0.apk</a> • indirilebilir</td>
     </tr>
     <tr>
       <td align="center">
-        <a href="https://github.com/TARIKTR1099/Player/releases/latest">
+        <a href="https://github.com/TARIKELER-TARNAK/Player/releases/latest">
           <img width="64" height="64" src="https://img.icons8.com/?size=100&id=20828&format=png&color=000000" alt="iOS"/>
         </a>
       </td>
       <td><b>🍎 iOS</b></td>
       <td>ARM64 (IPA)</td>
-      <td><a href="https://github.com/TARIKTR1099/Player/releases/latest">Player-1.0.0.ipa</a> • indirilebilir</td>
+      <td><a href="https://github.com/TARIKELER-TARNAK/Player/releases/latest">Player-1.0.0.ipa</a> • indirilebilir</td>
     </tr>
   </tbody>
 </table>
 
-> ℹ️ Tüm platformlar için derlenmiş binary'ler [Releases](https://github.com/TARIKTR1099/Player/releases/latest) sayfasında. Windows için **Setup installer** (NSIS) önerilir.
+> ℹ️ Tüm platformlar için derlenmiş binary'ler [Releases](https://github.com/TARIKELER-TARNAK/Player/releases/latest) sayfasında. Windows için **Setup installer** (NSIS) önerilir.
 
 ---
 
@@ -93,15 +93,15 @@ Player **5 platformda** hazır paketlenmiş olarak indirilebilir. Her platform i
 
 | İşletim Sistemi | Tip | Dosya | Boyut |
 |-----------------|-----|-------|-------|
-| 🪟 **Windows** | x86-64 (Setup) | [Player-1.0.0-setup-x64.exe](https://github.com/TARIKTR1099/Player/releases/download/v1.0.0/Player-1.0.0-setup-x64.exe) | 106 MB |
-| 🪟 **Windows** | x86-64 (Portable) | [Player-1.0.0-portable-x64.exe](https://github.com/TARIKTR1099/Player/releases/download/v1.0.0/Player-1.0.0-portable-x64.exe) | 94 MB |
-| 🐧 **Linux** | x86-64 (AppImage) | [Player-1.0.0-linux-x86_64.AppImage](https://github.com/TARIKTR1099/Player/releases/download/v1.0.0/Player-1.0.0-linux-x86_64.AppImage) | indirilebilir |
-| 🐧 **Linux** | x86-64 (deb) | [Player-1.0.0-linux-amd64.deb](https://github.com/TARIKTR1099/Player/releases/download/v1.0.0/Player-1.0.0-linux-amd64.deb) | indirilebilir |
-| 🐧 **Linux** | x86-64 (rpm) | [Player-1.0.0-linux-x86_64.rpm](https://github.com/TARIKTR1099/Player/releases/download/v1.0.0/Player-1.0.0-linux-x86_64.rpm) | indirilebilir |
-| 🍎 **macOS** | x64 + arm64 (DMG) | [Player-1.0.0.dmg](https://github.com/TARIKTR1099/Player/releases/download/v1.0.0/Player-1.0.0.dmg) | indirilebilir |
-| 🤖 **Android** | ARM (APK) | [Player-1.0.0.apk](https://github.com/TARIKTR1099/Player/releases/download/v1.0.0/Player-1.0.0.apk) | indirilebilir |
-| 🍎 **iOS** | ARM64 (IPA) | [Player-1.0.0.ipa](https://github.com/TARIKTR1099/Player/releases/download/v1.0.0/Player-1.0.0.ipa) | indirilebilir |
-| 📦 **Source** | zip / tar.gz | [Player-1.0.0-source.zip](https://github.com/TARIKTR1099/Player/releases/download/v1.0.0/Player-1.0.0-source.zip) | 86 MB |
+| 🪟 **Windows** | x86-64 (Setup) | [Player-1.0.0-setup-x64.exe](https://github.com/TARIKELER-TARNAK/Player/releases/download/v1.0.0/Player-1.0.0-setup-x64.exe) | 106 MB |
+| 🪟 **Windows** | x86-64 (Portable) | [Player-1.0.0-portable-x64.exe](https://github.com/TARIKELER-TARNAK/Player/releases/download/v1.0.0/Player-1.0.0-portable-x64.exe) | 94 MB |
+| 🐧 **Linux** | x86-64 (AppImage) | [Player-1.0.0-linux-x86_64.AppImage](https://github.com/TARIKELER-TARNAK/Player/releases/download/v1.0.0/Player-1.0.0-linux-x86_64.AppImage) | indirilebilir |
+| 🐧 **Linux** | x86-64 (deb) | [Player-1.0.0-linux-amd64.deb](https://github.com/TARIKELER-TARNAK/Player/releases/download/v1.0.0/Player-1.0.0-linux-amd64.deb) | indirilebilir |
+| 🐧 **Linux** | x86-64 (rpm) | [Player-1.0.0-linux-x86_64.rpm](https://github.com/TARIKELER-TARNAK/Player/releases/download/v1.0.0/Player-1.0.0-linux-x86_64.rpm) | indirilebilir |
+| 🍎 **macOS** | x64 + arm64 (DMG) | [Player-1.0.0.dmg](https://github.com/TARIKELER-TARNAK/Player/releases/download/v1.0.0/Player-1.0.0.dmg) | indirilebilir |
+| 🤖 **Android** | ARM (APK) | [Player-1.0.0.apk](https://github.com/TARIKELER-TARNAK/Player/releases/download/v1.0.0/Player-1.0.0.apk) | indirilebilir |
+| 🍎 **iOS** | ARM64 (IPA) | [Player-1.0.0.ipa](https://github.com/TARIKELER-TARNAK/Player/releases/download/v1.0.0/Player-1.0.0.ipa) | indirilebilir |
+| 📦 **Source** | zip / tar.gz | [Player-1.0.0-source.zip](https://github.com/TARIKELER-TARNAK/Player/releases/download/v1.0.0/Player-1.0.0-source.zip) | 86 MB |
 
 > 💡 **Tüm platformlar için binary hazır** — kullanıcının kendi derlemesine gerek yok. macOS / iOS sertifikalı değildir; ilk açılışta "Geliştirici onaylanmamış" uyarısı çıkabilir (sistem ayarlarından izin verilebilir).
 
